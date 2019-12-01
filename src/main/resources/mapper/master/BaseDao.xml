@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="easyJava.dao.master.BaseDao">
+
+	<!--根据主键查询 -->
+	<select id="selectBaseByPrimaryKey"
+		resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select
+		*
+		from ${tableName}
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<select id="selectBaseShowTableColumns"
+		resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		show full columns from
+		${map.tableName}
+	</select>
+	<select id="selectBaseTableName" resultType="java.util.HashMap">
+		select table_name from information_schema.tables where
+		table_schema='easyJava'
+	</select>
+	<!--根据实体参数查询 -->
+	<select id="selectBaseList" resultType="java.util.HashMap">
+		select
+		*
+		from ${map.tableName}
+		where 1=1
+		<foreach collection="map" index="key" item="value">
+			<if
+				test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
+				and `${key}` = #{value}
+			</if>
+		</foreach>
+		limit #{baseModel.fromRec},#{baseModel.pageSize}
+	</select>
+
+	<!--根据实体参数查询个数 -->
+	<select id="selectBaseCount" resultType="java.lang.Integer">
+		select
+		count(1)
+		from ${map.tableName}
+		where 1=1
+		<foreach collection="map" index="key" item="value">
+			<if
+				test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
+				and `${key}` = #{value}
+			</if>
+		</foreach>
+	</select>
+
+
+	<insert id="insertBase" parameterType="java.util.HashMap">
+		insert into ${map.tableName}
+		(
+		<foreach collection="map" index="key" item="value"
+			separator=",">
+			<if test="key != 'tableName' ">
+				`${key}`
+			</if>
+		</foreach>
+		)
+		values (
+		<foreach collection="map" index="key" item="value"
+			separator=",">
+			<if test="key != 'tableName' ">
+				#{value}
+			</if>
+		</foreach>
+		)
+	</insert>
+	<update id="updateBaseByPrimaryKey">
+		update ${map.tableName}
+		<set>
+			<foreach collection="map" index="key" item="value"
+				separator=",">
+				<if test="key != 'tableName' ">
+					`${key}`= #{value}
+				</if>
+			</foreach>
+		</set>
+		where id = #{map.id}
+	</update>
+</mapper>
