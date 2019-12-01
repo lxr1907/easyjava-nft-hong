@@ -17,7 +17,6 @@ public class KryoRedisSerializer<T> implements RedisSerializer<T> {
 	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
 	private static final ThreadLocal<Kryo> kryos = ThreadLocal.withInitial(Kryo::new);
-
 	private Class<T> clazz;
 
 	public KryoRedisSerializer(Class<T> clazz) {
@@ -32,6 +31,7 @@ public class KryoRedisSerializer<T> implements RedisSerializer<T> {
 		}
 
 		Kryo kryo = kryos.get();
+		kryo.register(java.util.HashMap.class);
 		kryo.setReferences(false);
 		kryo.register(clazz);
 
@@ -53,6 +53,7 @@ public class KryoRedisSerializer<T> implements RedisSerializer<T> {
 		}
 
 		Kryo kryo = kryos.get();
+		kryo.register(java.util.HashMap.class);
 		kryo.setReferences(false);
 		kryo.register(clazz);
 
