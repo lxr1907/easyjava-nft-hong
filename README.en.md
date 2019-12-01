@@ -1,7 +1,8 @@
-# easyJava-eth-nft
+# easyJava
 
 #### Description
-{**When you're done, you can delete the content in this README and update the file with details for others getting started with your repository**}
+任意库表的增删改查接口，可以传入表名称，灵活传入字段，Map接收任意类型，list<Map>返回任意类型
+mybatis+springboot2.2+java13
 
 #### Software Architecture
 Software architecture description
