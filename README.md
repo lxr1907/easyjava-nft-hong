@@ -16,7 +16,8 @@ mybatis+springboot2.2+java13
 
 #### 使用说明
 
-1.  xxxx
+1.  查询库中所有表名，需要配置替换BaseDao内的库名'easyJava'
+http://localhost:8080/easyJava/getBaseTableName
 2.  xxxx
 3.  xxxx
 
