@@ -26,7 +26,7 @@ public class MasterDataSourceConfig {
     @Primary //配置一个主连接
     @Bean(name = "masterDataSource")
     @Qualifier("masterDataSource")
-    @ConfigurationProperties(prefix="pudong.spring.datasource")
+    @ConfigurationProperties(prefix="lxrtalk.spring.datasource")
     public DataSource pudongDataSource() {
         return DataSourceBuilder.create().build();
     }

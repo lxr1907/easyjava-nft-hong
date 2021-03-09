@@ -86,10 +86,16 @@
 			<artifactId>javamelody-core</artifactId>
 			<version>1.80.0</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.4-1201-jdbc41</version>
+		</dependency>
 	</dependencies>
 
 	<properties>
-		<java.version>13</java.version>
+		<java.version>11</java.version>
 	</properties>
 	<build>
         <finalName>easyJava</finalName>

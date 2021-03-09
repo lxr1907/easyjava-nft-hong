@@ -26,7 +26,7 @@ public class SecondDataSourceConfig {
 	 */
 	@Bean(name = "secondDataSource")
 	@Qualifier("secondDataSource")
-	@ConfigurationProperties(prefix = "oracle.spring.datasource")
+	@ConfigurationProperties(prefix = "lxrtalk2.spring.datasource")
 	public DataSource oracleDataSource() {
 		return DataSourceBuilder.create().build();
 	}
