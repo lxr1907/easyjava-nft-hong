@@ -86,19 +86,21 @@
 			<artifactId>javamelody-core</artifactId>
 			<version>1.80.0</version>
 		</dependency>
-		
+
+		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4-1201-jdbc41</version>
+			<version>42.2.19</version>
 		</dependency>
+
 	</dependencies>
 
 	<properties>
 		<java.version>11</java.version>
 	</properties>
 	<build>
-        <finalName>easyJava</finalName>
+		<finalName>easyJava</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

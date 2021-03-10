@@ -4,6 +4,6 @@
 	<!-- -->
 	<select id="getHello"
 		resultType="easyJava.entity.HelloEntity">
-		select * from hello
+		select id from users limit 1
 	</select>
 </mapper>

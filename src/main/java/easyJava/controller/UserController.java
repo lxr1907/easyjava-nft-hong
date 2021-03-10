@@ -37,7 +37,7 @@ public class UserController {
 		BaseModel baseModel = new BaseModel();
 		baseModel.setPageSize(1);
 		baseModel.setPageNo(1);
-		map.put("tableName", "user");
+		map.put("tableName", "users");
 		map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
 		List<Map> list = baseDao.selectBaseList(map, baseModel);
 		if (list == null || list.size() == 0) {

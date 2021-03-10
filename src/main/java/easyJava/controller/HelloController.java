@@ -23,7 +23,7 @@ public class HelloController {
 	@RequestMapping({"/hello","/hell"})
 	@Cacheable(value = "hello", key = "1")
 	public ResponseEntity<?> hello() {
-		var ret = helloDao.getHello().get(0).getHello();
+		var ret = helloDao.getHello();
 		return new ResponseEntity(ret);
 	}
 
