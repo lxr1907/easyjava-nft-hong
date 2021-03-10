@@ -47,7 +47,7 @@ public class UserController {
 		list.get(0).remove("password");
 		list.get(0).put("token", token);
 		// token有效期1小时，存入redis
-		redisTemplate.opsForValue().set(token, list.get(0), 1, TimeUnit.HOURS);
+		redisTemplate.opsForValue().set(token, list.get(0), 365, TimeUnit.DAYS);
 		return new ResponseEntity(list.get(0));
 	}
 
