@@ -3,9 +3,7 @@ package easyJava.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
-import easyJava.utils.TokenProccessor;
+import easyJava.utils.GenerateUtils;
 
 @RestController
 public class CoinManageController {
@@ -23,7 +21,9 @@ public class CoinManageController {
 	BaseDao baseDao;
 	@Autowired
 	UserController userController;
-	
+	@Autowired
+	GenerateUtils generateUtils;
+
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 	public static final String COIN_MANAGE = "coin_manage";
@@ -47,7 +47,7 @@ public class CoinManageController {
 		return new ResponseEntity(retmap, count, baseModel);
 	}
 
-	@RequestMapping("/updateCoin")
+	@RequestMapping("/insertCoin")
 	public ResponseEntity insertBase(@RequestParam Map<String, Object> map) {
 		if (map.get("token") == null || map.get("token").toString().length() == 0) {
 			return new ResponseEntity(400, "token不能为空！");
@@ -57,7 +57,25 @@ public class CoinManageController {
 		}
 		map.remove("token");
 		map.put("tableName", COIN_MANAGE);
+		map.put("id", generateUtils.getUniqueId(COIN_MANAGE));
 		int count = baseDao.insertBase(map);
+		return new ResponseEntity(count);
+	}
+
+	@RequestMapping("/updateCoinByPrimaryKey")
+	public ResponseEntity updateBaseByPrimaryKey(@RequestParam Map<String, Object> map) {
+		if (map.get("id") == null || map.get("id").toString().trim().length() == 0) {
+			return new ResponseEntity(400, "id不能为空！");
+		}
+		if (map.get("token") == null || map.get("token").toString().length() == 0) {
+			return new ResponseEntity(400, "token不能为空！");
+		}
+		if (!userController.checkToken(map.get("token").toString())) {
+			return new ResponseEntity(400, "token已经失效！");
+		}
+		map.remove("token");
+		map.put("tableName", COIN_MANAGE);
+		int count = baseDao.updateBaseByPrimaryKey(map);
 		return new ResponseEntity(count);
 	}
 
