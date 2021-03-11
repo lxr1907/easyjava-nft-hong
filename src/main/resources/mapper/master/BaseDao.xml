@@ -28,10 +28,10 @@
 		<foreach collection="map" index="key" item="value">
 			<if
 				test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-				and `${key}` = #{value}
+				and  ${key} =#{value}
 			</if>
 		</foreach>
-		limit #{baseModel.fromRec},#{baseModel.pageSize}
+		limit #{baseModel.pageSize}  OFFSET #{baseModel.fromRec}
 	</select>
 
 	<!--根据实体参数查询个数 -->
@@ -43,7 +43,7 @@
 		<foreach collection="map" index="key" item="value">
 			<if
 				test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-				and `${key}` = #{value}
+				and ${key} = #{value}
 			</if>
 		</foreach>
 	</select>
@@ -55,7 +55,7 @@
 		<foreach collection="map" index="key" item="value"
 			separator=",">
 			<if test="key != 'tableName' ">
-				`${key}`
+				${key}
 			</if>
 		</foreach>
 		)
@@ -74,7 +74,7 @@
 			<foreach collection="map" index="key" item="value"
 				separator=",">
 				<if test="key != 'tableName' ">
-					`${key}`= #{value}
+					${key}= #{value}
 				</if>
 			</foreach>
 		</set>
