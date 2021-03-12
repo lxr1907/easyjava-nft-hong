@@ -24,9 +24,9 @@ public class KlineController {
 			return new ResponseEntity(400, "symbol不能为空！");
 		}
 
-		HuobiKlineEntity entity = (HuobiKlineEntity) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
+		ResponseEntity<?> ret = (ResponseEntity<?>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
 				map.get("symbol"));
-		return new ResponseEntity(entity);
+		return ret;
 	}
 
 	public Map getUserByToken(String token) {

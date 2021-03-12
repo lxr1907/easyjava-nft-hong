@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 
 import easyJava.entity.HuobiKlineEntity;
+import easyJava.entity.ResponseEntity;
 import easyJava.utils.HttpsUtils;
 
 @Component
@@ -53,7 +54,8 @@ public class HuobiDataSync {
 							System.out.println(result);
 							if (result != null) {
 								HuobiKlineEntity entity = JSON.parseObject(result, HuobiKlineEntity.class);
-								redisTemplate.opsForHash().put(MARKET_KLINE, symbol, entity);
+								redisTemplate.opsForHash().put(MARKET_KLINE, symbol,
+										new ResponseEntity<HuobiKlineEntity>(entity));
 							}
 						}
 					} catch (Exception e) {
@@ -80,6 +82,5 @@ public class HuobiDataSync {
 		String result = HttpsUtils.Get(HUOBI_API_URL_PRE + MARKET_KLINE, headers, params);
 		System.out.println(result);
 	}
-
 
 }
