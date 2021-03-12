@@ -1,6 +1,8 @@
 package easyJava.entity;
 
-public  class OneKlineEntity {
+import java.io.Serializable;
+
+public  class OneKlineEntity  implements Serializable {
 	private String id;
 	private String open;
 	private String close;
