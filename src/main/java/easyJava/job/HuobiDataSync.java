@@ -2,7 +2,6 @@ package easyJava.job;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 
-import easyJava.utils.HttpUtil;
+import easyJava.entity.HuobiKlineEntity;
 import easyJava.utils.HttpsUtils;
 
 @Component
@@ -82,93 +81,5 @@ public class HuobiDataSync {
 		System.out.println(result);
 	}
 
-	public HuobiDataSync() {
-	}
 
-	public class HuobiKlineEntity {
-		private String ch;
-		private String status;
-		private String ts;
-		private List<OneKlineEntity> data;
-
-		public String getCh() {
-			return ch;
-		}
-
-		public void setCh(String ch) {
-			this.ch = ch;
-		}
-
-		public String getStatus() {
-			return status;
-		}
-
-		public void setStatus(String status) {
-			this.status = status;
-		}
-
-		public String getTs() {
-			return ts;
-		}
-
-		public void setTs(String ts) {
-			this.ts = ts;
-		}
-
-		public List<OneKlineEntity> getData() {
-			return data;
-		}
-
-		public void setData(List<OneKlineEntity> data) {
-			this.data = data;
-		}
-	}
-
-	public class OneKlineEntity {
-		private String id;
-		private String open;
-		private String close;
-		private String low;
-		private String high;
-
-		public String getId() {
-			return id;
-		}
-
-		public void setId(String id) {
-			this.id = id;
-		}
-
-		public String getOpen() {
-			return open;
-		}
-
-		public void setOpen(String open) {
-			this.open = open;
-		}
-
-		public String getClose() {
-			return close;
-		}
-
-		public void setClose(String close) {
-			this.close = close;
-		}
-
-		public String getLow() {
-			return low;
-		}
-
-		public void setLow(String low) {
-			this.low = low;
-		}
-
-		public String getHigh() {
-			return high;
-		}
-
-		public void setHigh(String high) {
-			this.high = high;
-		}
-	}
 }
