@@ -14,13 +14,13 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{HOST}}/easyJava/getCoinList?pageSize=10&pageNo=1",
+							"raw": "{{HOST}}/easyJava/getSysNoticeList?pageSize=10&pageNo=1",
 							"host": [
 								"{{HOST}}"
 							],
 							"path": [
 								"easyJava",
-								"getCoinList"
+								"getSysNoticeList"
 							],
 							"query": [
 								{
@@ -204,6 +204,131 @@
 			]
 		},
 		{
+			"name": "直连火币api",
+			"item": [
+				{
+					"name": "支持币种",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HUOBI}}/v1/common/currencys",
+							"host": [
+								"{{HUOBI}}"
+							],
+							"path": [
+								"v1",
+								"common",
+								"currencys"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "支持交易对",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HUOBI}}/v1/common/symbols",
+							"host": [
+								"{{HUOBI}}"
+							],
+							"path": [
+								"v1",
+								"common",
+								"symbols"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "K线",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HUOBI}}/market/history/kline?symbol=btcusdt&period=1day&size=1",
+							"host": [
+								"{{HUOBI}}"
+							],
+							"path": [
+								"market",
+								"history",
+								"kline"
+							],
+							"query": [
+								{
+									"key": "symbol",
+									"value": "btcusdt"
+								},
+								{
+									"key": "period",
+									"value": "1day"
+								},
+								{
+									"key": "size",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "币种行情",
+			"item": [
+				{
+					"name": "kline查询",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/getKline?symbol=btcusdt",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"getKline"
+							],
+							"query": [
+								{
+									"key": "symbol",
+									"value": "btcusdt"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "getAttachment",
 			"protocolProfileBehavior": {
 				"disabledSystemHeaders": {
@@ -306,6 +431,24 @@
 							"key": "password",
 							"value": "srh;MG%23sV3S;M9!"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "hello",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{HOST}}/easyJava/helloRedis",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"easyJava",
+						"helloRedis"
 					]
 				}
 			},
