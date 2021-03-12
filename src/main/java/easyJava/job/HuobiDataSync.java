@@ -51,11 +51,9 @@ public class HuobiDataSync {
 							params.put("period", "1day");
 							params.put("size", "1");
 							String result = HttpsUtils.Get(HUOBI_API_URL_PRE + MARKET_KLINE, headers, params);
-							System.out.println(result);
 							if (result != null) {
-								HuobiKlineEntity entity = JSON.parseObject(result, HuobiKlineEntity.class);
 								redisTemplate.opsForHash().put(MARKET_KLINE, symbol,
-										new ResponseEntity<HuobiKlineEntity>(entity));
+										new ResponseEntity<>(result));
 							}
 						}
 					} catch (Exception e) {
