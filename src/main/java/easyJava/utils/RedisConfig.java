@@ -12,6 +12,8 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.alibaba.fastjson.parser.ParserConfig;
+
 import easyJava.entity.ResponseEntity;
 
 @Configuration
@@ -30,14 +32,16 @@ public class RedisConfig extends CachingConfigurerSupport {
 		// 配置连接工厂
 		template.setConnectionFactory(factory);
 		var kryoSeial = new KryoRedisSerializer<ResponseEntity>(ResponseEntity.class);
+		FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
+		ParserConfig.getGlobalInstance().setAutoTypeSupport(true);
 		// 值采用kryo序列化
-		template.setValueSerializer(kryoSeial);
+		template.setValueSerializer(fastJsonRedisSerializer);
 		// 使用StringRedisSerializer来序列化和反序列化redis的key值
 		template.setKeySerializer(new StringRedisSerializer());
 
 		// 设置hash key 和value序列化模式
 		template.setHashKeySerializer(new StringRedisSerializer());
-		template.setHashValueSerializer(kryoSeial);
+		template.setHashValueSerializer(fastJsonRedisSerializer);
 		template.setDefaultSerializer(kryoSeial);
 		template.afterPropertiesSet();
 		return template;
