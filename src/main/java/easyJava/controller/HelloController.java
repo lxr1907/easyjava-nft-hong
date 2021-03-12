@@ -30,7 +30,7 @@ public class HelloController {
 	@RequestMapping("/hello2")
 	@Cacheable(value = "hello2", key = "2")
 	public ResponseEntity<?> hello2() {
-		var ret2 = helloDao2.getHello().get(0).getHello();
+		var ret2 = helloDao2.getHello();
 		return new ResponseEntity(ret2);
 	}
 	@RequestMapping("/helloRedis")
@@ -38,7 +38,7 @@ public class HelloController {
 		var key = "helloRedis";
 		ResponseEntity<?> ret = (ResponseEntity<?>) redisTemplate.opsForValue().get(key);
 		if (ret == null) {
-			var str = helloDao.getHello().get(0).getHello();
+			var str = helloDao.getHello();
 			ret = new ResponseEntity(str);
 			redisTemplate.opsForValue().set(key, ret, 10, TimeUnit.DAYS);
 		}
