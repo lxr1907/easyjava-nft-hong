@@ -1,0 +1,339 @@
+{
+	"info": {
+		"_postman_id": "d7d57279-dd13-402a-a435-6363daa8256b",
+		"name": "signal",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "系统公告",
+			"item": [
+				{
+					"name": "系统公告查询",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/getCoinList?pageSize=10&pageNo=1",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"getCoinList"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "pageNo",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "系统公告新增",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/insertSysNotice?notice=新年快乐&token=qNNOddvCfVLWKi9LIEz9PA==&status=1&create_time=2020-01-02 00:00:00",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"insertSysNotice"
+							],
+							"query": [
+								{
+									"key": "notice",
+									"value": "新年快乐"
+								},
+								{
+									"key": "token",
+									"value": "qNNOddvCfVLWKi9LIEz9PA=="
+								},
+								{
+									"key": "status",
+									"value": "1"
+								},
+								{
+									"key": "create_time",
+									"value": "2020-01-02 00:00:00"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "系统公告更新",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/updateSysNoticeByPrimaryKey?id=1&notice=中秋快乐&token=qNNOddvCfVLWKi9LIEz9PA==&status=1",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"updateSysNoticeByPrimaryKey"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								},
+								{
+									"key": "notice",
+									"value": "中秋快乐"
+								},
+								{
+									"key": "token",
+									"value": "qNNOddvCfVLWKi9LIEz9PA=="
+								},
+								{
+									"key": "status",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "币种管理",
+			"item": [
+				{
+					"name": "coin查询",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/getCoinList?pageSize=10&pageNo=1",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"getCoinList"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "pageNo",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "coin插入",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/insertCoin?coin_name=ETH&token=Ixpc9nCHgwV82GuV0MUzGg==",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"insertCoin"
+							],
+							"query": [
+								{
+									"key": "coin_name",
+									"value": "ETH"
+								},
+								{
+									"key": "token",
+									"value": "Ixpc9nCHgwV82GuV0MUzGg=="
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "coin更新",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/updateCoinByPrimaryKey?id=11615473079748&coin_name=ZEC&token=Ixpc9nCHgwV82GuV0MUzGg==",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"updateCoinByPrimaryKey"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "11615473079748"
+								},
+								{
+									"key": "coin_name",
+									"value": "ZEC"
+								},
+								{
+									"key": "token",
+									"value": "Ixpc9nCHgwV82GuV0MUzGg=="
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "getAttachment",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true,
+					"accept": true,
+					"user-agent": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/octet-stream",
+						"type": "text"
+					},
+					{
+						"key": "x-amz-date",
+						"value": "20210306T055918Z",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "AWS4-HMAC-SHA256 Credential=AKIAUHWNR6PWT6ZAPWV6/20210306/ap-northeast-1/s3/aws4_request,SignedHeaders=content-type;host;x-amz-date;x-amz-target,Signature=b73672783bb33225cb18d9b95d599225484796081f1e6ad1f002c4e3af3d059c",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "x-amz-content-sha256",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://signallxrtalk.s3.ap-northeast-1.amazonaws.com/6730113429384350585?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20210307T085522Z&X-Amz-SignedHeaders=content-type%3Bhost&X-Amz-Expires=3599&X-Amz-Credential=AKIAUHWNR6PWT6ZAPWV6%2F20210307%2Fap-northeast-1%2Fs3%2Faws4_request&X-Amz-Signature=350f20261114e412e6d66db456d0a2ccc8dbfc1ea6f6f506cee26a38622ccfdd\n",
+					"protocol": "https",
+					"host": [
+						"signallxrtalk",
+						"s3",
+						"ap-northeast-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"6730113429384350585"
+					],
+					"query": [
+						{
+							"key": "X-Amz-Algorithm",
+							"value": "AWS4-HMAC-SHA256"
+						},
+						{
+							"key": "X-Amz-Date",
+							"value": "20210307T085522Z"
+						},
+						{
+							"key": "X-Amz-SignedHeaders",
+							"value": "content-type%3Bhost"
+						},
+						{
+							"key": "X-Amz-Expires",
+							"value": "3599"
+						},
+						{
+							"key": "X-Amz-Credential",
+							"value": "AKIAUHWNR6PWT6ZAPWV6%2F20210307%2Fap-northeast-1%2Fs3%2Faws4_request"
+						},
+						{
+							"key": "X-Amz-Signature",
+							"value": "350f20261114e412e6d66db456d0a2ccc8dbfc1ea6f6f506cee26a38622ccfdd\n"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "登录",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{HOST}}/easyJava/login?account=lxrtalkAdmin&password=srh;MG%23sV3S;M9!",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"easyJava",
+						"login"
+					],
+					"query": [
+						{
+							"key": "account",
+							"value": "lxrtalkAdmin"
+						},
+						{
+							"key": "password",
+							"value": "srh;MG%23sV3S;M9!"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "userCoin查询",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{HOST}}/easyJava/getUserCoin?uuid=eb127f3f-265d-4089-8162-65280238c6cc",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"easyJava",
+						"getUserCoin"
+					],
+					"query": [
+						{
+							"key": "uuid",
+							"value": "eb127f3f-265d-4089-8162-65280238c6cc"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
