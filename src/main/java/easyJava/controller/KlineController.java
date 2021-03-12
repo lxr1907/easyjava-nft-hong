@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import easyJava.entity.HuobiKlineEntity;
 import easyJava.entity.ResponseEntity;
 import easyJava.job.HuobiDataSync;
-import easyJava.job.HuobiDataSync.HuobiKlineEntity;
 
 @RestController
 public class KlineController {
