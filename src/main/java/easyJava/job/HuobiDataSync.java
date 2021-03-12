@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 
 import easyJava.utils.HttpUtil;
+import easyJava.utils.HttpsUtils;
 
 @Component
 public class HuobiDataSync {
@@ -42,17 +43,20 @@ public class HuobiDataSync {
 			@Override
 			public void run() {
 				while (true) {
-					try {
-						Thread.sleep(10 * 1000);
-						for (String symbol : symbolSet) {
-							Map<String, String> params = new HashMap<String, String>();
-							params.put("symbol", symbol);
-							params.put("period", "1day");
-							params.put("size", "1");
-							String result = HttpUtil.get(HUOBI_API_URL_PRE + MARKET_KLINE, params);
+					for (String symbol : symbolSet) {
+						Map<String, String> headers = new HashMap<String, String>();
+						Map<String, String> params = new HashMap<String, String>();
+						params.put("symbol", symbol);
+						params.put("period", "1day");
+						params.put("size", "1");
+						String result = HttpsUtils.Get(HUOBI_API_URL_PRE + MARKET_KLINE, headers, params);
+						if (result != null) {
 							HuobiKlineEntity entity = JSON.parseObject(result, HuobiKlineEntity.class);
 							redisTemplate.opsForHash().put(MARKET_KLINE, symbol, entity);
 						}
+					}
+					try {
+						Thread.sleep(10 * 1000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -60,6 +64,16 @@ public class HuobiDataSync {
 				}
 			}
 		});
+	}
+
+	public static void main(String[] args) {
+		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("symbol", "btcusdt");
+		params.put("period", "1day");
+		params.put("size", "1");
+		String result = HttpsUtils.Get(HUOBI_API_URL_PRE + MARKET_KLINE, headers, params);
+		System.out.println(result);
 	}
 
 	public HuobiDataSync() {

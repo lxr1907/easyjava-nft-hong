@@ -34,8 +34,8 @@ public class HttpUtil {
 
 			URL urlGet = new URL(url);
 			HttpsURLConnection http = (HttpsURLConnection) urlGet.openConnection();// 连接超时
-			http.setConnectTimeout(25000);// 读取超时 --服务器响应比较慢，增大时间
-			http.setReadTimeout(25000);
+			http.setConnectTimeout(60 * 1000);// 读取超时 --服务器响应比较慢，增大时间
+			http.setReadTimeout(60 * 1000);
 			http.setRequestMethod("GET");
 			http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			http.setSSLSocketFactory(ssf);
