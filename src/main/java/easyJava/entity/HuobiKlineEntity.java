@@ -1,8 +1,9 @@
 package easyJava.entity;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class HuobiKlineEntity {
+public class HuobiKlineEntity  implements Serializable  {
 	private String ch;
 	private String status;
 	private String ts;
