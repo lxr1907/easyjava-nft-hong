@@ -78,11 +78,4 @@ public class SysQuestionAnswerController {
 		return new ResponseEntity(count);
 	}
 
-	public Map getUserByToken(String token) {
-		return (Map) redisTemplate.opsForValue().get(token);
-	}
-
-	public boolean checkToken(String token) {
-		return redisTemplate.hasKey(token);
-	}
 }
