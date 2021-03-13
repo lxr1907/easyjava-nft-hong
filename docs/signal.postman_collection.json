@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d7d57279-dd13-402a-a435-6363daa8256b",
+		"_postman_id": "a7246afd-35b8-4d6f-b66c-87e083414bcf",
 		"name": "signal",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -320,6 +320,115 @@
 								{
 									"key": "symbol",
 									"value": "btcusdt"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "问答",
+			"item": [
+				{
+					"name": "问答查询",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/getQuestionAnswerList?pageSize=10&pageNo=1&question=1",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"getQuestionAnswerList"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "pageNo",
+									"value": "1"
+								},
+								{
+									"key": "question",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "问答更新",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/updateQuestionAnswerByPrimaryKey?id=1&notice=中秋快乐&token=qNNOddvCfVLWKi9LIEz9PA==&status=1",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"updateQuestionAnswerByPrimaryKey"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								},
+								{
+									"key": "notice",
+									"value": "中秋快乐"
+								},
+								{
+									"key": "token",
+									"value": "qNNOddvCfVLWKi9LIEz9PA=="
+								},
+								{
+									"key": "status",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "问答新增",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}/easyJava/insertQuestionAnswer?id=1&token=OhRdsGhnz5gCk/RbO6189g==&question=1&answer=目前支持btc，eth，ltc",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"easyJava",
+								"insertQuestionAnswer"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								},
+								{
+									"key": "token",
+									"value": "OhRdsGhnz5gCk/RbO6189g=="
+								},
+								{
+									"key": "question",
+									"value": "1"
+								},
+								{
+									"key": "answer",
+									"value": "目前支持btc，eth，ltc"
 								}
 							]
 						}
