@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import easyJava.entity.HuobiKlineEntity;
 import easyJava.entity.ResponseEntity;
 import easyJava.job.HuobiDataSync;
 
@@ -25,7 +24,7 @@ public class KlineController {
 		}
 
 		ResponseEntity<?> ret = (ResponseEntity<?>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
-				map.get("symbol"));
+				map.get("symbol")+"_"+map.get("period"));
 		return ret;
 	}
 

@@ -19,7 +19,7 @@ public class BtcpayController {
 	public static final String BTCPAY_URL="https://btcpay.lxrtalk.com";
 	public static final String GET_STORE="/api/v1/stores";
 	public static final String TOKEN="Authorization";
-	public static final String TOKEN_VALUE="Basic UUVJTEd5VWRsN3ZvaVpWTUJvbkUwMXZSR2l5V2w3TFFVMFdRN1o3UGRaRQ==";
+	public static final String TOKEN_VALUE="token a56fb37c559c6c0d45b31e79ebf11100792f56ea";
 
 	@RequestMapping("/btcpay/api/v1/stores")
 	public ResponseEntity<?> stores() {

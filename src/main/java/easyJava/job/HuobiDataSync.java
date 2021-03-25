@@ -19,6 +19,12 @@ import easyJava.entity.HuobiKlineEntity;
 import easyJava.entity.ResponseEntity;
 import easyJava.utils.HttpsUtils;
 
+/**
+ * https://huobiapi.github.io/docs/spot/v1/cn/#c1ae0a8486
+ * 
+ * @author lxr
+ *
+ */
 @Component
 public class HuobiDataSync {
 
@@ -37,6 +43,20 @@ public class HuobiDataSync {
 		Set<String> symbolSet = new HashSet<String>();
 		symbolSet.add("btcusdt");
 		symbolSet.add("ethusdt");
+		symbolSet.add("dashusdt");
+		symbolSet.add("ltcusdt");
+//1min, 5min, 15min, 30min, 60min, 4hour, 1day, 1mon, 1week, 1year
+		Set<String> periodSet = new HashSet<String>();
+		periodSet.add("1min");
+		periodSet.add("5min");
+		periodSet.add("15min");
+		periodSet.add("30min");
+		periodSet.add("60min");
+		periodSet.add("4hour");
+		periodSet.add("1day");
+		periodSet.add("1mon");
+		periodSet.add("1week");
+		periodSet.add("1year");
 
 		singleThreadPool.submit(new Runnable() {
 
@@ -45,26 +65,28 @@ public class HuobiDataSync {
 				while (true) {
 					try {
 						for (String symbol : symbolSet) {
-							Map<String, String> headers = new HashMap<String, String>();
-							Map<String, String> params = new HashMap<String, String>();
-							params.put("symbol", symbol);
-							params.put("period", "1day");
-							params.put("size", "1");
-							String result = HttpsUtils.Get(HUOBI_API_URL_PRE + MARKET_KLINE, headers, params);
-							if (result != null) {
-								HuobiKlineEntity entity = JSON.parseObject(result, HuobiKlineEntity.class);
-								redisTemplate.opsForHash().put(MARKET_KLINE, symbol, new ResponseEntity(entity));
+							for (String period : periodSet) {
+								Map<String, String> headers = new HashMap<String, String>();
+								Map<String, String> params = new HashMap<String, String>();
+								params.put("symbol", symbol);
+								params.put("period", period);
+								params.put("size", "150");
+								String result = HttpsUtils.Get(HUOBI_API_URL_PRE + MARKET_KLINE, headers, params);
+								if (result != null) {
+									HuobiKlineEntity entity = JSON.parseObject(result, HuobiKlineEntity.class);
+									redisTemplate.opsForHash().put(MARKET_KLINE, symbol+"_"+period, new ResponseEntity(entity));
+								}
+								try {
+									Thread.sleep(2 * 1000);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
 							}
 						}
 					} catch (Exception e) {
 						System.out.println(e.getMessage());
 					}
-					try {
-						Thread.sleep(10 * 1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					
 				}
 			}
 		});
