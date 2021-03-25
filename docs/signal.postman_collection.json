@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a7246afd-35b8-4d6f-b66c-87e083414bcf",
+		"_postman_id": "d7d57279-dd13-402a-a435-6363daa8256b",
 		"name": "signal",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -308,7 +308,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{HOST}}/easyJava/getKline?symbol=btcusdt",
+							"raw": "{{HOST}}/easyJava/getKline?symbol=ltcusdt&period=1min",
 							"host": [
 								"{{HOST}}"
 							],
@@ -319,7 +319,11 @@
 							"query": [
 								{
 									"key": "symbol",
-									"value": "btcusdt"
+									"value": "ltcusdt"
+								},
+								{
+									"key": "period",
+									"value": "1min"
 								}
 							]
 						}
@@ -329,107 +333,371 @@
 			]
 		},
 		{
-			"name": "问答",
+			"name": "btcpay",
 			"item": [
 				{
-					"name": "问答查询",
+					"name": "获取stores",
 					"request": {
-						"method": "POST",
-						"header": [],
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{HOST}}/easyJava/getQuestionAnswerList?pageSize=10&pageNo=1&question=1",
+							"raw": "https://btcpay.lxrtalk.com/api/v1/stores",
+							"protocol": "https",
 							"host": [
-								"{{HOST}}"
+								"btcpay",
+								"lxrtalk",
+								"com"
 							],
 							"path": [
-								"easyJava",
-								"getQuestionAnswerList"
-							],
-							"query": [
-								{
-									"key": "pageSize",
-									"value": "10"
-								},
-								{
-									"key": "pageNo",
-									"value": "1"
-								},
-								{
-									"key": "question",
-									"value": "1"
-								}
+								"api",
+								"v1",
+								"stores"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "问答更新",
+					"name": "获取invoice",
 					"request": {
-						"method": "POST",
-						"header": [],
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{HOST}}/easyJava/updateQuestionAnswerByPrimaryKey?id=1&notice=中秋快乐&token=qNNOddvCfVLWKi9LIEz9PA==&status=1",
+							"raw": "https://btcpay.lxrtalk.com/api/v1/stores/i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG/invoices/XqTWhvh62g1tSD3xZ223wr",
+							"protocol": "https",
 							"host": [
-								"{{HOST}}"
+								"btcpay",
+								"lxrtalk",
+								"com"
 							],
 							"path": [
-								"easyJava",
-								"updateQuestionAnswerByPrimaryKey"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "1"
-								},
-								{
-									"key": "notice",
-									"value": "中秋快乐"
-								},
-								{
-									"key": "token",
-									"value": "qNNOddvCfVLWKi9LIEz9PA=="
-								},
-								{
-									"key": "status",
-									"value": "1"
-								}
+								"api",
+								"v1",
+								"stores",
+								"i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG",
+								"invoices",
+								"XqTWhvh62g1tSD3xZ223wr"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "问答新增",
+					"name": "获取invoice payAddress",
 					"request": {
-						"method": "POST",
-						"header": [],
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea"
+							}
+						],
 						"url": {
-							"raw": "{{HOST}}/easyJava/insertQuestionAnswer?id=1&token=OhRdsGhnz5gCk/RbO6189g==&question=1&answer=目前支持btc，eth，ltc",
+							"raw": "https://btcpay.lxrtalk.com/api/v1/stores/i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG/invoices/XqTWhvh62g1tSD3xZ223wr/payment-methods",
+							"protocol": "https",
 							"host": [
-								"{{HOST}}"
+								"btcpay",
+								"lxrtalk",
+								"com"
 							],
 							"path": [
-								"easyJava",
-								"insertQuestionAnswer"
+								"api",
+								"v1",
+								"stores",
+								"i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG",
+								"invoices",
+								"XqTWhvh62g1tSD3xZ223wr",
+								"payment-methods"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建invoices",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":0.1,\"currency\":\"btc\",\"metadata\":{\"orderId\":100},\"checkout\":{ \"paymentMethods\": [\r\n            \"BTC\"\r\n        ]}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://btcpay.lxrtalk.com/api/v1/stores/i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG/invoices",
+							"protocol": "https",
+							"host": [
+								"btcpay",
+								"lxrtalk",
+								"com"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stores",
+								"i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG",
+								"invoices"
 							],
 							"query": [
 								{
-									"key": "id",
-									"value": "1"
+									"key": "amount",
+									"value": "0.1",
+									"disabled": true
 								},
 								{
-									"key": "token",
-									"value": "OhRdsGhnz5gCk/RbO6189g=="
-								},
-								{
-									"key": "question",
-									"value": "1"
-								},
-								{
-									"key": "answer",
-									"value": "目前支持btc，eth，ltc"
+									"key": "currency",
+									"value": "btc",
+									"disabled": true
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "btcpay转发",
+			"item": [
+				{
+					"name": "获取invoice payAddress",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea"
+							}
+						],
+						"url": {
+							"raw": "https://signal.lxrtalk.com/v1/btcpay/stores/i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG/invoices/XqTWhvh62g1tSD3xZ223wr/payment-methods",
+							"protocol": "https",
+							"host": [
+								"signal",
+								"lxrtalk",
+								"com"
+							],
+							"path": [
+								"v1",
+								"btcpay",
+								"stores",
+								"i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG",
+								"invoices",
+								"XqTWhvh62g1tSD3xZ223wr",
+								"payment-methods"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建invoices",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":0.1,\"currency\":\"btc\",\"metadata\":{\"orderId\":123}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://signal.lxrtalk.com/v1/btcpay/stores/i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG/invoices",
+							"protocol": "https",
+							"host": [
+								"signal",
+								"lxrtalk",
+								"com"
+							],
+							"path": [
+								"v1",
+								"btcpay",
+								"stores",
+								"i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG",
+								"invoices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取stores",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea"
+							}
+						],
+						"url": {
+							"raw": "https://signal.lxrtalk.com/v1/btcpay/stores",
+							"protocol": "https",
+							"host": [
+								"signal",
+								"lxrtalk",
+								"com"
+							],
+							"path": [
+								"v1",
+								"btcpay",
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取invoice",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea"
+							}
+						],
+						"url": {
+							"raw": "https://signal.lxrtalk.com/v1/btcpay/stores/i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG/invoices/XqTWhvh62g1tSD3xZ223wr",
+							"protocol": "https",
+							"host": [
+								"signal",
+								"lxrtalk",
+								"com"
+							],
+							"path": [
+								"v1",
+								"btcpay",
+								"stores",
+								"i3eqHLH3AWsLtSR5X2ndRqywRv3C82csxWrbpLkVBwG",
+								"invoices",
+								"XqTWhvh62g1tSD3xZ223wr"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "个人coin界面",
+			"item": [
+				{
+					"name": "账户coin查询",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea"
+							}
+						],
+						"url": {
+							"raw": "https://signal.lxrtalk.com/v1/coin/1",
+							"protocol": "https",
+							"host": [
+								"signal",
+								"lxrtalk",
+								"com"
+							],
+							"path": [
+								"v1",
+								"coin",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "账户coin支持种类查询",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "token a56fb37c559c6c0d45b31e79ebf11100792f56ea"
+							}
+						],
+						"url": {
+							"raw": "https://signal.lxrtalk.com/v1/coin/coinList",
+							"protocol": "https",
+							"host": [
+								"signal",
+								"lxrtalk",
+								"com"
+							],
+							"path": [
+								"v1",
+								"coin",
+								"coinList"
 							]
 						}
 					},
