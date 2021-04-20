@@ -32,6 +32,10 @@ public class Web3jController {
         Map map = new HashMap();
         String walletFileName = "";//文件名
         String walletFilePath = "/home/ubuntu/eth_wallets/" + uuid;
+        File dir = new File(walletFilePath);
+        if (!dir.exists()) {// 判断目录是否存在
+            dir.mkdir();
+        }
         String pwd = "123456";
         //钱包文件保持路径，请替换位自己的某文件夹路径
         walletFileName = WalletUtils.generateNewWalletFile(pwd, new File(walletFilePath), false);
