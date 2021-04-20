@@ -8,7 +8,6 @@ import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 
-import javax.websocket.server.PathParam;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -28,10 +27,10 @@ public class Web3jController {
     }
 
     /*************创建一个钱包文件**************/
-    private Map createAccount(String uuid) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CipherException, IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CipherException, IOException {
+    private Map createAccount(String uuid) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CipherException, IOException {
         Map map = new HashMap();
         String walletFileName = "";//文件名
-        String walletFilePath = "/home/ubuntu/eth_wallets/" + uuid + "/";
+        String walletFilePath = "/home/ubuntu/eth_wallets/uid_" + uuid + "/";
         File dir = new File(walletFilePath);
         dir.mkdirs();
         String pwd = "123456";
