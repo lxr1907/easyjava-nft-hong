@@ -1,6 +1,9 @@
 package easyJava.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import easyJava.entity.ResponseEntity;
+import easyJava.utils.HttpsUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +13,7 @@ import org.web3j.crypto.WalletUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -58,7 +62,21 @@ public class Web3jController {
         return map;
     }
 
+    /*************创建一个钱包文件**************/
+    private static Map createAccountRemote(String uuid) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String urlString = "https://signal.lxrtalk.com/easyJava/v1/web3j/createWallet?uuid=" + uuid;
+        String response = HttpsUtils.Post(urlString, "text/json", null);
+        ResponseEntity responseEntity = objectMapper.readValue(response, ResponseEntity.class);
+        Map<String, Object> dataMap = responseEntity.getData();
+        Map<String, Object> walletMap = (Map<String, Object>) dataMap.get("data");
+        return walletMap;
+    }
+
     public static void main(String[] args) throws CipherException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, IOException {
-        createAccount("1");
+        Map<String, Object> map = createAccountRemote("2");
+        for (Map.Entry<String, Object> e : map.entrySet()) {
+            System.out.println(e.getKey() + ":" + e.getValue());
+        }
     }
 }
