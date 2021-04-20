@@ -31,7 +31,7 @@ public class Web3jController {
     private Map createAccount(String uuid) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CipherException, IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CipherException, IOException {
         Map map = new HashMap();
         String walletFileName = "";//文件名
-        String walletFilePath = "/home/ubuntu/eth_wallets/" + uuid;
+        String walletFilePath = "/home/ubuntu/eth_wallets/" + uuid + "/";
         File dir = new File(walletFilePath);
         if (!dir.exists()) {// 判断目录是否存在
             dir.mkdir();
