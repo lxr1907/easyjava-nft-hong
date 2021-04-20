@@ -37,7 +37,7 @@ public class Web3jController {
         dir.mkdirs();
         String pwd = "123456";
         //钱包文件保持路径，请替换位自己的某文件夹路径
-        walletFileName = WalletUtils.generateNewWalletFile(pwd, new File(walletFilePath), false);
+        walletFileName = WalletUtils.generateNewWalletFile(pwd, dir, false);
         Credentials credentials = WalletUtils.loadCredentials(pwd, walletFilePath + walletFileName);
         //钱包地址 ：
         String address = credentials.getAddress();
