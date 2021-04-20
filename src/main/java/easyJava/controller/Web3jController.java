@@ -2,6 +2,7 @@ package easyJava.controller;
 
 import easyJava.entity.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
@@ -18,8 +19,8 @@ import java.util.Map;
 
 @RestController
 public class Web3jController {
-    @PostMapping("/v1/web3j/createWallet/{uuid}")
-    public ResponseEntity createWallet(@PathParam("uuid") String uuid) throws CipherException, InvalidAlgorithmParameterException,
+    @PostMapping("/v1/web3j/createWallet")
+    public ResponseEntity createWallet(@RequestParam("uuid") String uuid) throws CipherException, InvalidAlgorithmParameterException,
             NoSuchAlgorithmException, NoSuchProviderException, IOException {
         Integer.parseInt(uuid);
         Map map = createAccount(uuid);
