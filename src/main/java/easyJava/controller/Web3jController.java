@@ -27,16 +27,18 @@ public class Web3jController {
     }
 
     /*************创建一个钱包文件**************/
-    private Map createAccount(String uuid) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CipherException, IOException {
+    private static Map createAccount(String uuid) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CipherException, IOException {
         Map map = new HashMap();
         String walletFileName = "";//文件名
-        String walletFilePath = "/home/ubuntu/eth_wallets/uid_" + uuid + "/";
+        String walletFilePath = "./eth_wallets/uid_" + uuid + "/";
+        //String walletFilePath = "D:/eth/uid_" + uuid + "/";
         File dir = new File(walletFilePath);
+        dir.setWritable(true, false);
         dir.mkdirs();
         String pwd = "123456";
         //钱包文件保持路径，请替换位自己的某文件夹路径
         walletFileName = WalletUtils.generateNewWalletFile(pwd, new File(walletFilePath), false);
-        Credentials credentials = WalletUtils.loadCredentials(pwd, walletFilePath);
+        Credentials credentials = WalletUtils.loadCredentials(pwd, walletFilePath + walletFileName);
         //钱包地址 ：
         String address = credentials.getAddress();
         // 公钥16进制字符串表示：
@@ -54,5 +56,9 @@ public class Web3jController {
         map.put("privateKey", privateKey);
         map.put("walletFileName", walletFileName);
         return map;
+    }
+
+    public static void main(String[] args) throws CipherException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, IOException {
+        createAccount("1");
     }
 }
