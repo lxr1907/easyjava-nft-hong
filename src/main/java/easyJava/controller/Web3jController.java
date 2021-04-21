@@ -25,7 +25,6 @@ public class Web3jController {
     @PostMapping("/v1/web3j/createWallet")
     public ResponseEntity createWallet(@RequestParam("uuid") String uuid) throws CipherException, InvalidAlgorithmParameterException,
             NoSuchAlgorithmException, NoSuchProviderException, IOException {
-        Integer.parseInt(uuid);
         Map map = createAccount(uuid);
         return new ResponseEntity(map);
     }
