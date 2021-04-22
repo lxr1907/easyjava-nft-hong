@@ -4,15 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import easyJava.entity.ResponseEntity;
 import easyJava.utils.HttpsUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -22,6 +31,8 @@ import java.util.Map;
 
 @RestController
 public class Web3jController {
+    public static final String ETH_NODE_URL = "http://btcpay.lxrtalk.com:8545";
+
     @PostMapping("/v1/web3j/createWallet")
     public ResponseEntity createWallet(@RequestParam("uuid") String uuid) throws CipherException, InvalidAlgorithmParameterException,
             NoSuchAlgorithmException, NoSuchProviderException, IOException {
@@ -77,5 +88,24 @@ public class Web3jController {
         for (Map.Entry<String, Object> e : map.entrySet()) {
             System.out.println(e.getKey() + ":" + e.getValue());
         }
+    }
+
+
+    @PostMapping("/v1/web3j/transfer")
+    public ResponseEntity transfer(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress) throws Exception {
+        Web3j web3 = Web3j.build(new HttpService(ETH_NODE_URL));  // defaults to http://localhost:8545/
+        Credentials credentials = WalletUtils.loadCredentials("123456", "/path/to/walletfile");
+        TransactionReceipt transactionReceipt = Transfer.sendFunds(
+                web3, credentials, toAddress,
+                BigDecimal.valueOf(0.1), Convert.Unit.ETHER)
+                .send();
+        return new ResponseEntity(transactionReceipt);
+    }
+
+    @GetMapping("/v1/web3j/balance")
+    public ResponseEntity balance(@RequestParam("address") String address) throws Exception {
+        Web3j web3 = Web3j.build(new HttpService(ETH_NODE_URL));  // defaults to http://localhost:8545/
+        web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest"));
+        return new ResponseEntity();
     }
 }
