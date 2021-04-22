@@ -35,7 +35,7 @@ import java.util.Map;
 
 @RestController
 public class Web3jController {
-    public static final String ETH_NODE_URL = "127.0.0.1:8546";
+    public static final String ETH_NODE_URL = "ws://127.0.0.1:8546";
     static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
 
     static {
