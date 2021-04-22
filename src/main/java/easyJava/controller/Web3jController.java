@@ -17,6 +17,7 @@ import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
@@ -147,4 +148,11 @@ public class Web3jController {
         return new ResponseEntity(ret);
     }
 
+
+    @GetMapping("/v1/web3j/getTX")
+    public ResponseEntity getTX(@RequestParam("transactionHash") String transactionHash) throws Exception {
+        Web3j web3 = Web3j.build(ws);
+        EthTransaction ret = web3.ethGetTransactionByHash(transactionHash).send();
+        return new ResponseEntity(ret);
+    }
 }
