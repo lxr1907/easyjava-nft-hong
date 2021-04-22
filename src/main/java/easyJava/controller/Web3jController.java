@@ -1,5 +1,6 @@
 package easyJava.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import easyJava.entity.ResponseEntity;
@@ -14,6 +15,7 @@ import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
@@ -35,7 +37,8 @@ import java.util.Map;
 
 @RestController
 public class Web3jController {
-    public static final String ETH_NODE_URL = "ws://127.0.0.1:8546";
+    public static final String ETH_NODE_URL = "ws://btcpay.lxrtalk.com:8546";
+    public static final String pwd = "123456";
     static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
 
     static {
@@ -57,12 +60,10 @@ public class Web3jController {
     private static Map createAccount(String uuid) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CipherException, IOException {
         Map map = new HashMap();
         String walletFileName = "";//文件名
-        String walletFilePath = "./eth_wallets/uid_" + uuid + "/";
-        //String walletFilePath = "D:/eth/uid_" + uuid + "/";
+        String walletFilePath = getWalletFilePath(uuid);
         File dir = new File(walletFilePath);
         dir.setWritable(true, false);
         dir.mkdirs();
-        String pwd = "123456";
         //钱包文件保持路径，请替换位自己的某文件夹路径
         walletFileName = WalletUtils.generateNewWalletFile(pwd, dir, false);
         Credentials credentials = WalletUtils.loadCredentials(pwd, walletFilePath + walletFileName);
@@ -72,17 +73,28 @@ public class Web3jController {
         String publicKey = credentials.getEcKeyPair().getPublicKey().toString(16);
         //私钥16进制字符串表示：
         String privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
-        System.out.println("createAccount uuid:" + uuid);
-        System.out.println("createAccount address:" + address);
-        System.out.println("createAccount publicKey:" + publicKey);
-        System.out.println("createAccount privateKey:" + privateKey);
-        System.out.println("createAccount walletFileName:" + walletFileName);
         map.put("uuid", uuid);
         map.put("address", address);
         map.put("publicKey", publicKey);
         map.put("privateKey", privateKey);
         map.put("walletFileName", walletFileName);
         return map;
+    }
+
+    private static String getWalletFilePath(String uuid) {
+        String walletFilePath = "./eth_wallets/uid_" + uuid + "/";
+        return walletFilePath;
+    }
+
+    private static String getWalletFilePathName(String uuid) {
+        String walletFilePath = "./eth_wallets/uid_" + uuid + "/";
+        File dir = new File(walletFilePath);
+        dir.setWritable(true, false);
+        String[] files = dir.list();
+        if (files != null && files.length != 0) {
+            return walletFilePath + files[0];
+        }
+        return null;
     }
 
     /*************创建一个钱包文件**************/
@@ -103,17 +115,19 @@ public class Web3jController {
 //        }
 
         Web3j web3 = Web3j.build(ws);  // defaults to http://localhost:8545/
-        EthGetBalance ret = web3.ethGetBalance("0x92f3fb8a28c18c23ce6854013be569103f257bd6", DefaultBlockParameter.valueOf("latest")).send();
+        EthGetBalance ret = web3.ethGetBalance("0x9e772e6c0918ac3995863027c0c7c880ec8abc95", DefaultBlockParameter.valueOf("latest")).send();
+        System.out.println(JSON.toJSON(ret));
     }
 
 
     @PostMapping("/v1/web3j/transfer")
-    public ResponseEntity transfer(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress) throws Exception {
-        Web3j web3 = Web3j.build(new HttpService(ETH_NODE_URL));  // defaults to http://localhost:8545/
-        Credentials credentials = WalletUtils.loadCredentials("123456", "/path/to/walletfile");
+    public ResponseEntity transfer(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress
+            , @RequestParam("balance") double balance) throws Exception {
+        Web3j web3 = Web3j.build(ws);  // defaults to http://localhost:8545/
+        Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
         TransactionReceipt transactionReceipt = Transfer.sendFunds(
                 web3, credentials, toAddress,
-                BigDecimal.valueOf(0.1), Convert.Unit.ETHER)
+                BigDecimal.valueOf(balance), Convert.Unit.ETHER)
                 .send();
         return new ResponseEntity(transactionReceipt);
     }
@@ -122,6 +136,14 @@ public class Web3jController {
     public ResponseEntity balance(@RequestParam("address") String address) throws Exception {
         Web3j web3 = Web3j.build(ws);  // defaults to http://localhost:8545/
         EthGetBalance ret = web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send();
+        return new ResponseEntity(ret);
+    }
+
+
+    @GetMapping("/v1/web3j/feeRate")
+    public ResponseEntity feeRate() throws Exception {
+        Web3j web3 = Web3j.build(ws);
+        EthGasPrice ret = web3.ethGasPrice().send();
         return new ResponseEntity(ret);
     }
 
