@@ -18,6 +18,7 @@ import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.protocol.websocket.WebSocketService;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
@@ -33,7 +34,7 @@ import java.util.Map;
 
 @RestController
 public class Web3jController {
-    public static final String ETH_NODE_URL = "http://btcpay.lxrtalk.com:8545";
+    public static final String ETH_NODE_URL = "http://btcpay.lxrtalk.com:8546";
 
     @PostMapping("/v1/web3j/createWallet")
     public ResponseEntity createWallet(@RequestParam("uuid") String uuid) throws CipherException, InvalidAlgorithmParameterException,
@@ -106,7 +107,7 @@ public class Web3jController {
 
     @GetMapping("/v1/web3j/balance")
     public ResponseEntity balance(@RequestParam("address") String address) throws Exception {
-        Web3j web3 = Web3j.build(new HttpService(ETH_NODE_URL));  // defaults to http://localhost:8545/
+        Web3j web3 = Web3j.build(new WebSocketService(ETH_NODE_URL,false));  // defaults to http://localhost:8545/
         EthGetBalance ret= web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send();
         return new ResponseEntity(ret);
     }
