@@ -107,7 +107,7 @@ public class Web3jController {
     @GetMapping("/v1/web3j/balance")
     public ResponseEntity balance(@RequestParam("address") String address) throws Exception {
         Web3j web3 = Web3j.build(new HttpService(ETH_NODE_URL));  // defaults to http://localhost:8545/
-        Request<?, EthGetBalance> ret= web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest"));
+        EthGetBalance ret= web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send();
         return new ResponseEntity(ret);
     }
 }
