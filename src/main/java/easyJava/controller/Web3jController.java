@@ -15,10 +15,7 @@ import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.methods.response.EthGasPrice;
-import org.web3j.protocol.core.methods.response.EthGetBalance;
-import org.web3j.protocol.core.methods.response.EthTransaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketService;
@@ -28,6 +25,7 @@ import org.web3j.utils.Convert;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -109,17 +107,20 @@ public class Web3jController {
         return walletMap;
     }
 
-    public static void main(String[] args) throws CipherException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, IOException {
+    public static void main(String[] args) throws Exception {
 //        Map<String, Object> map = createAccountRemote("2");
 //        for (Map.Entry<String, Object> e : map.entrySet()) {
 //            System.out.println(e.getKey() + ":" + e.getValue());
 //        }
-
+        String to = "0x4eece1847ad0bd4ad47456c6d8f5952f3affd2e9";
         Web3j web3 = Web3j.build(ws);  // defaults to http://localhost:8545/
-        EthGetBalance ret = web3.ethGetBalance("0x9e772e6c0918ac3995863027c0c7c880ec8abc95", DefaultBlockParameter.valueOf("latest")).send();
+        Credentials credentials = WalletUtils.loadCredentials(pwd, "D://eth//1.json");
+        var tx = new org.web3j.protocol.core.methods.request.Transaction(credentials.getAddress(),
+                BigInteger.valueOf(1), BigInteger.valueOf(21000), BigInteger.valueOf(41000)
+                , to, BigInteger.valueOf(Long.parseLong("100000000000000000")), "");
+        EthSendTransaction ret = web3.ethSendTransaction(tx).send();
         System.out.println(JSON.toJSON(ret));
     }
-
 
     @PostMapping("/v1/web3j/transfer")
     public ResponseEntity transfer(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress
