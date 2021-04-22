@@ -25,6 +25,7 @@ import org.web3j.utils.Convert;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -35,6 +36,15 @@ import java.util.Map;
 @RestController
 public class Web3jController {
     public static final String ETH_NODE_URL = "http://btcpay.lxrtalk.com:8546";
+    static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
+
+    static {
+        try {
+            ws.connect();
+        } catch (ConnectException e) {
+            e.printStackTrace();
+        }
+    }
 
     @PostMapping("/v1/web3j/createWallet")
     public ResponseEntity createWallet(@RequestParam("uuid") String uuid) throws CipherException, InvalidAlgorithmParameterException,
@@ -107,8 +117,8 @@ public class Web3jController {
 
     @GetMapping("/v1/web3j/balance")
     public ResponseEntity balance(@RequestParam("address") String address) throws Exception {
-        Web3j web3 = Web3j.build(new WebSocketService(ETH_NODE_URL,false));  // defaults to http://localhost:8545/
-        EthGetBalance ret= web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send();
+        Web3j web3 = Web3j.build(ws);  // defaults to http://localhost:8545/
+        EthGetBalance ret = web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send();
         return new ResponseEntity(ret);
     }
 }
