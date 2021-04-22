@@ -13,6 +13,8 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
@@ -105,7 +107,7 @@ public class Web3jController {
     @GetMapping("/v1/web3j/balance")
     public ResponseEntity balance(@RequestParam("address") String address) throws Exception {
         Web3j web3 = Web3j.build(new HttpService(ETH_NODE_URL));  // defaults to http://localhost:8545/
-        web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest"));
-        return new ResponseEntity();
+        Request<?, EthGetBalance> ret= web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest"));
+        return new ResponseEntity(ret);
     }
 }
