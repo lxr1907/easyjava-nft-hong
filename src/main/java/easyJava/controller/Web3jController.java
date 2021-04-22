@@ -35,7 +35,7 @@ import java.util.Map;
 
 @RestController
 public class Web3jController {
-    public static final String ETH_NODE_URL = "http://btcpay.lxrtalk.com:8546";
+    public static final String ETH_NODE_URL = "btcpay.lxrtalk.com:8546";
     static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
 
     static {
@@ -97,10 +97,13 @@ public class Web3jController {
     }
 
     public static void main(String[] args) throws CipherException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, IOException {
-        Map<String, Object> map = createAccountRemote("2");
-        for (Map.Entry<String, Object> e : map.entrySet()) {
-            System.out.println(e.getKey() + ":" + e.getValue());
-        }
+//        Map<String, Object> map = createAccountRemote("2");
+//        for (Map.Entry<String, Object> e : map.entrySet()) {
+//            System.out.println(e.getKey() + ":" + e.getValue());
+//        }
+
+        Web3j web3 = Web3j.build(ws);  // defaults to http://localhost:8545/
+        EthGetBalance ret = web3.ethGetBalance("0x92f3fb8a28c18c23ce6854013be569103f257bd6", DefaultBlockParameter.valueOf("latest")).send();
     }
 
 
@@ -121,4 +124,5 @@ public class Web3jController {
         EthGetBalance ret = web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send();
         return new ResponseEntity(ret);
     }
+
 }
