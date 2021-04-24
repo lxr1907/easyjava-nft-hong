@@ -5,20 +5,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import easyJava.entity.ResponseEntity;
 import easyJava.utils.HttpsUtils;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.admin.Admin;
 import org.web3j.protocol.core.DefaultBlockParameter;
-import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.*;
-import org.web3j.protocol.exceptions.TransactionException;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketService;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.ConnectException;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -40,6 +39,17 @@ public class Web3jController {
     public static final String ETH_NODE_URL = "ws://btcpay.lxrtalk.com:8546";
     public static final String pwd = "123456";
     static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
+
+    private static void initWsToEthNode() {
+        try {
+            ws.close();
+        } catch (Exception e) {
+        }
+        try {
+            ws = new WebSocketService(ETH_NODE_URL, false);
+        } catch (Exception e) {
+        }
+    }
 
     static {
         try {
@@ -108,21 +118,6 @@ public class Web3jController {
         return walletMap;
     }
 
-    public static void main(String[] args) throws Exception {
-//        Map<String, Object> map = createAccountRemote("2");
-//        for (Map.Entry<String, Object> e : map.entrySet()) {
-//            System.out.println(e.getKey() + ":" + e.getValue());
-//        }
-        String to = "0x4eece1847ad0bd4ad47456c6d8f5952f3affd2e9";
-        Admin web3 = Admin.build(ws);  // defaults to http://localhost:8545/
-        Credentials credentials = WalletUtils.loadCredentials(pwd, "D://eth//1.json");
-        var tx = new org.web3j.protocol.core.methods.request.Transaction(credentials.getAddress(),
-                BigInteger.valueOf(1), BigInteger.valueOf(21000), BigInteger.valueOf(41000)
-                , to, BigInteger.valueOf(Long.parseLong("100000000000000000")), "");
-        EthSendTransaction ret = web3.ethSendTransaction(tx).send();
-        System.out.println(JSON.toJSON(ret));
-    }
-
     @PostMapping("/v1/web3j/transfer")
     public ResponseEntity transfer(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress
             , @RequestParam("balance") double balance) throws Exception {
@@ -132,14 +127,20 @@ public class Web3jController {
                 web3, credentials, toAddress,
                 BigDecimal.valueOf(balance), Convert.Unit.ETHER)
                 .send();
+        transactionReceipt.setLogsBloom("");
         return new ResponseEntity(transactionReceipt);
     }
 
     @GetMapping("/v1/web3j/balance")
     public ResponseEntity balance(@RequestParam("address") String address) throws Exception {
         Web3j web3 = Web3j.build(ws);  // defaults to http://localhost:8545/
-        EthGetBalance ret = web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send();
-        return new ResponseEntity(ret);
+        try {
+            EthGetBalance ret = web3.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send();
+            return new ResponseEntity(ret);
+        } catch (WebsocketNotConnectedException e) {
+            initWsToEthNode();
+        }
+        return new ResponseEntity(400,"查询失败。");
     }
 
 
@@ -157,4 +158,32 @@ public class Web3jController {
         EthTransaction ret = web3.ethGetTransactionByHash(transactionHash).send();
         return new ResponseEntity(ret);
     }
+
+
+    public static void main(String[] args) throws Exception {
+//        Map<String, Object> map = createAccountRemote("2");
+//        for (Map.Entry<String, Object> e : map.entrySet()) {
+//            System.out.println(e.getKey() + ":" + e.getValue());
+//        }
+        //加载钱包
+        Credentials credentials = WalletUtils.loadCredentials(pwd, "D://eth//1.json");
+        String form = credentials.getAddress();
+        System.out.println("from:" + form);
+        String to = "0x4eece1847ad0bd4ad47456c6d8f5952f3affd2e9";
+        //初始web3j
+        BigInteger gasLimit = Transfer.GAS_LIMIT;
+        BigInteger gasPremium = new BigInteger("42000");
+        BigInteger feeCap = new BigInteger("64000");
+        Admin web3j = Admin.build(ws);  // defaults to http://localhost:8545/
+        web3j.ethChainId().setId(4);
+        TransactionReceipt transactionReceipt = Transfer.sendFunds(
+                web3j, credentials, to,
+                BigDecimal.valueOf(0.1), Convert.Unit.ETHER).send();
+//        TransactionReceipt transactionReceipt = Transfer.sendFundsEIP1559(
+//                web3j, credentials, to,
+//                BigDecimal.valueOf(0.1), Convert.Unit.ETHER, gasLimit, gasPremium, feeCap).send();
+        transactionReceipt.setLogsBloom("");
+        System.out.println(JSON.toJSON(transactionReceipt));
+    }
+
 }
