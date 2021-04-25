@@ -8,18 +8,22 @@ import org.apache.ibatis.annotations.Param;
 import easyJava.entity.BaseModel;
 
 public interface BaseDao {
-	int insertBase(@Param("map") Map map);
+    int insertBase(@Param("map") Map map);
 
-	Map selectBaseByPrimaryKey(Long id);
+    Map selectBaseByPrimaryKey(Long id);
 
-	int updateBaseByPrimaryKey(@Param("map") Map map);
+    int updateBaseByPrimaryKey(@Param("map") Map map);
 
-	List<Map> selectBaseList(@Param("map") Map map, @Param("baseModel") BaseModel baseModel);
+    List<Map> selectBaseList(@Param("map") Map map, @Param("baseModel") BaseModel baseModel);
 
-	int selectBaseCount(@Param("map") Map map);
+    int selectBaseCount(@Param("map") Map map);
 
-	List<Map> selectBaseShowTableColumns(@Param("map") Map map);
+    List<Map> selectBaseListOr(@Param("map") Map map, @Param("baseModel") BaseModel baseModel);
 
-	List<Map> selectBaseTableName();
+    int selectBaseCountOr(@Param("map") Map map);
+
+    List<Map> selectBaseShowTableColumns(@Param("map") Map map);
+
+    List<Map> selectBaseTableName();
 
 }

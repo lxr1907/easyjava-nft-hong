@@ -3,21 +3,21 @@ package easyJava.controller;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import easyJava.dao.master.BaseDao;
+import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.utils.HttpsUtils;
+import easyJava.utils.MapBeanUtil;
+import io.reactivex.functions.Consumer;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.admin.Admin;
 import org.web3j.protocol.core.DefaultBlockParameter;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.websocket.WebSocketService;
 import org.web3j.tx.Transfer;
@@ -32,31 +32,71 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 public class Web3jController {
+    @Autowired
+    BaseDao baseDao;
     public static final String ETH_NODE_URL = "ws://btcpay.lxrtalk.com:8546";
+    public static final String TRANSACTION_RECEIPT_TABLE_NAME = "accounts_coin_transaction_receipts";
+    public static final String TRANSACTION_TABLE_NAME = "accounts_coin_transactions";
     public static final String pwd = "123456";
     static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
 
-    private static void initWsToEthNode() {
+    private void initWsToEthNode() {
         try {
             ws.close();
         } catch (Exception e) {
         }
         try {
             ws = new WebSocketService(ETH_NODE_URL, false);
+            subscribeTransactions(ws);
         } catch (Exception e) {
         }
     }
 
-    static {
+    public Web3jController() {
         try {
             ws.connect();
+            subscribeTransactions(ws);
         } catch (ConnectException e) {
             e.printStackTrace();
         }
+    }
+
+    private void subscribeTransactions(WebSocketService ws) {
+        Web3j web3 = Web3j.build(ws);
+        web3.transactionFlowable().subscribe(new Consumer<Transaction>() {
+            @Override
+            public void accept(Transaction transaction) throws Exception {
+                try {
+                    Map<String, Object> queryMap = new HashMap<>();
+                    queryMap.put("coin_name", "ETH");
+                    queryMap.put("recharge_address", transaction.getFrom());
+                    int outCount = baseDao.selectBaseCount(queryMap);
+                    if (outCount != 0) {
+                        insertTransaction(transaction);
+                        return;
+                    }
+                    queryMap.put("recharge_address", transaction.getTo());
+                    int inCount = baseDao.selectBaseCount(queryMap);
+                    if (inCount != 0) {
+                        insertTransaction(transaction);
+                        return;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void insertTransaction(Transaction transaction) {
+        Map map = MapBeanUtil.object2Map(transaction);
+        map.put("tableName", TRANSACTION_TABLE_NAME);
+        baseDao.insertBase(map);
     }
 
     @PostMapping("/v1/web3j/createWallet")
@@ -128,7 +168,24 @@ public class Web3jController {
                 BigDecimal.valueOf(balance), Convert.Unit.ETHER)
                 .send();
         transactionReceipt.setLogsBloom("");
+        Map map = MapBeanUtil.object2Map(transactionReceipt);
+        map.remove("logs");
+        map.remove("logsBloom");
+        map.put("tableName", TRANSACTION_RECEIPT_TABLE_NAME);
+        baseDao.insertBase(map);
         return new ResponseEntity(transactionReceipt);
+    }
+
+    @PostMapping("/v1/web3j/transfer/history")
+    public ResponseEntity history(@RequestParam("uuid") String uuid, @RequestBody BaseModel baseModel) throws IOException, CipherException {
+        Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
+        Map map = new HashMap();
+        map.put("to", credentials.getAddress());
+        map.put("from", credentials.getAddress());
+        map.put("tableName", TRANSACTION_TABLE_NAME);
+        int count = baseDao.selectBaseCountOr(map);
+        List<Map> list = baseDao.selectBaseListOr(map, baseModel);
+        return new ResponseEntity(list, count, baseModel.getPageNo(), baseModel.getPageSize());
     }
 
     @GetMapping("/v1/web3j/balance")
@@ -140,7 +197,7 @@ public class Web3jController {
         } catch (WebsocketNotConnectedException e) {
             initWsToEthNode();
         }
-        return new ResponseEntity(400,"查询失败。");
+        return new ResponseEntity(400, "查询失败。");
     }
 
 
