@@ -75,6 +75,7 @@ public class Web3jController {
                     Map<String, Object> queryMap = new HashMap<>();
                     queryMap.put("coin_name", "ETH");
                     queryMap.put("recharge_address", transaction.getFrom());
+                    queryMap.put("tableName", TRANSACTION_TABLE_NAME);
                     int outCount = baseDao.selectBaseCount(queryMap);
                     if (outCount != 0) {
                         insertTransaction(transaction);
