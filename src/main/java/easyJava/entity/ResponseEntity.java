@@ -32,7 +32,7 @@ public class ResponseEntity<T> implements Serializable {
 	}
 
 	public ResponseEntity(List<T> list, int count, int pageNo, int pageSize) {
-		this.data.put("list", list);
+		setList(list);
 		this.count = count;
 		this.pageNo = pageNo;
 		this.pageSize = pageSize;
