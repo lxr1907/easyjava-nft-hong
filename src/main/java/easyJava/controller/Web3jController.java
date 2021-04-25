@@ -42,6 +42,7 @@ public class Web3jController {
     public static final String ETH_NODE_URL = "ws://btcpay.lxrtalk.com:8546";
     public static final String TRANSACTION_RECEIPT_TABLE_NAME = "accounts_coin_transaction_receipts";
     public static final String TRANSACTION_TABLE_NAME = "accounts_coin_transactions";
+    public static final String ACCOUNT_TABLE_NAME = "accounts_coin_balance";
     public static final String pwd = "123456";
     static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
 
@@ -75,7 +76,7 @@ public class Web3jController {
                     Map<String, Object> queryMap = new HashMap<>();
                     queryMap.put("coin_name", "ETH");
                     queryMap.put("recharge_address", transaction.getFrom());
-                    queryMap.put("tableName", TRANSACTION_TABLE_NAME);
+                    queryMap.put("tableName", ACCOUNT_TABLE_NAME);
                     int outCount = baseDao.selectBaseCount(queryMap);
                     if (outCount != 0) {
                         insertTransaction(transaction);
