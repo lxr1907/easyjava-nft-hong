@@ -96,8 +96,10 @@ public class Web3jController {
     }
 
     private void insertTransaction(Transaction transaction) {
+        System.out.println(JSON.toJSON(transaction));
         Map map = MapBeanUtil.object2Map(transaction);
         map.put("tableName", TRANSACTION_TABLE_NAME);
+        System.out.println(JSON.toJSON(map));
         baseDao.insertBase(map);
     }
 
