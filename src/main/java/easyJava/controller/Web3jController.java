@@ -179,8 +179,11 @@ public class Web3jController {
         return new ResponseEntity(transactionReceipt);
     }
 
-    @PostMapping("/v1/web3j/transfer/history")
-    public ResponseEntity history(@RequestParam("uuid") String uuid, @RequestBody BaseModel baseModel) throws IOException, CipherException {
+    @GetMapping("/v1/web3j/transfer/history")
+    public ResponseEntity history(@RequestParam("uuid") String uuid, @RequestParam("pageNo") int pageNo, @RequestParam("pageSize") int pageSize) throws IOException, CipherException {
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(pageNo);
+        baseModel.setPageSize(pageSize);
         Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
         Map map = new HashMap();
         map.put("to", credentials.getAddress());
