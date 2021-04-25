@@ -28,7 +28,7 @@
 		<foreach collection="map" index="key" item="value">
 			<if
 				test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-				and  ${key} =#{value}
+				and  "${key}" =#{value}
 			</if>
 		</foreach>
 		limit #{baseModel.pageSize}  OFFSET #{baseModel.fromRec}
@@ -43,7 +43,7 @@
 		<foreach collection="map" index="key" item="value">
 			<if
 				test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-				and ${key} = #{value}
+				and "${key}" = #{value}
 			</if>
 		</foreach>
 	</select>
@@ -55,7 +55,7 @@
 		<foreach collection="map" index="key" item="value">
 			<if
 					test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-				or  ${key} =#{value}
+				or  "${key}" =#{value}
 			</if>
 		</foreach>
 		limit #{baseModel.pageSize}  OFFSET #{baseModel.fromRec}
@@ -70,7 +70,7 @@
 		<foreach collection="map" index="key" item="value">
 			<if
 					test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-				or ${key} = #{value}
+				or "${key}" = #{value}
 			</if>
 		</foreach>
 	</select>
@@ -80,8 +80,8 @@
 		(
 		<foreach collection="map" index="key" item="value"
 			separator=",">
-			<if test="key != 'tableName' ">
-				${key}
+			<if test="key != 'tableName' " >
+				"${key}"
 			</if>
 		</foreach>
 		)
@@ -100,7 +100,7 @@
 			<foreach collection="map" index="key" item="value"
 				separator=",">
 				<if test="key != 'tableName' ">
-					${key}= #{value}
+					"${key}"= #{value}
 				</if>
 			</foreach>
 		</set>
