@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
+import easyJava.utils.DateUtils;
 import easyJava.utils.HttpsUtils;
 import easyJava.utils.MapBeanUtil;
 import io.reactivex.functions.Consumer;
@@ -31,6 +32,7 @@ import java.net.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,7 @@ public class Web3jController {
                     Map<String, Object> queryMap = new HashMap<>();
                     queryMap.put("coin_name", "ETH");
                     queryMap.put("recharge_address", transaction.getFrom());
+                    queryMap.put("time", DateUtils.getDatePastStr(new Date(), 0));
                     queryMap.put("tableName", ACCOUNT_TABLE_NAME);
                     int outCount = baseDao.selectBaseCount(queryMap);
                     if (outCount != 0) {
