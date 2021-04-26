@@ -119,7 +119,7 @@ public class Web3jController {
         Map map = JSON.parseObject(JSON.toJSON(transaction).toString(), Map.class);
         map.put("tableName", tableName);
         System.out.println(JSON.toJSON(map));
-        baseDao.insertBase(map);
+        baseDao.insertUpdateBase(map);
     }
 
     @PostMapping("/v1/web3j/createWallet")
