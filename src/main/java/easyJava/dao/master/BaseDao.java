@@ -10,6 +10,8 @@ import easyJava.entity.BaseModel;
 public interface BaseDao {
     int insertBase(@Param("map") Map map);
 
+    int insertUpdateBase(@Param("map") Map map);
+
     Map selectBaseByPrimaryKey(Long id);
 
     int updateBaseByPrimaryKey(@Param("map") Map map);

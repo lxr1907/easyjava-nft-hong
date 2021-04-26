@@ -5,6 +5,15 @@ import org.web3j.protocol.core.methods.response.Transaction;
 public class TransactionMy extends Transaction {
     private String time;
     private String transferType;
+    private String pending;
+
+    public String getPending() {
+        return pending;
+    }
+
+    public void setPending(String pending) {
+        this.pending = pending;
+    }
 
     public String getTransferType() {
         return transferType;

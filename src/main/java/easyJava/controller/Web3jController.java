@@ -72,40 +72,52 @@ public class Web3jController {
 
     private void subscribeTransactions(WebSocketService ws) {
         Web3j web3 = Web3j.build(ws);
-        web3.transactionFlowable().subscribe(new Consumer<Transaction>() {
-            @Override
-            public void accept(Transaction transaction) throws Exception {
-                try {
-                    String tStr = JSON.toJSONString(transaction);
-                    TransactionMy t = JSON.parseObject(tStr, TransactionMy.class);
-                    t.setTime(DateUtils.getDatePastStr(new Date(), 0));
-                    Map<String, Object> queryMap = new HashMap<>();
-                    queryMap.put("coin_name", "ETH");
-                    queryMap.put("recharge_address", transaction.getFrom());
-                    queryMap.put("tableName", ACCOUNT_TABLE_NAME);
-                    int outCount = baseDao.selectBaseCount(queryMap);
-                    if (outCount != 0) {
-                        t.setTransferType("2");
-                        insertTransaction(t);
-                        return;
-                    }
-                    queryMap.put("recharge_address", transaction.getTo());
-                    int inCount = baseDao.selectBaseCount(queryMap);
-                    if (inCount != 0) {
-                        t.setTransferType("1");
-                        insertTransaction(t);
-                        return;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        web3.transactionFlowable().subscribe(new TransactionConsumer("finish") {
+        });
+        web3.pendingTransactionFlowable().subscribe(new TransactionConsumer("pending") {
         });
     }
 
-    private void insertTransaction(TransactionMy transaction) {
+    public class TransactionConsumer implements Consumer<Transaction> {
+        private String pending = "";
+
+        public TransactionConsumer(String pending) {
+            this.pending = pending;
+        }
+
+        @Override
+        public void accept(Transaction transaction) throws Exception {
+            try {
+                String tStr = JSON.toJSONString(transaction);
+                TransactionMy t = JSON.parseObject(tStr, TransactionMy.class);
+                t.setTime(DateUtils.getDatePastStr(new Date(), 0));
+                t.setPending(pending);
+                Map<String, Object> queryMap = new HashMap<>();
+                queryMap.put("coin_name", "ETH");
+                queryMap.put("recharge_address", transaction.getFrom());
+                queryMap.put("tableName", ACCOUNT_TABLE_NAME);
+                int outCount = baseDao.selectBaseCount(queryMap);
+                if (outCount != 0) {
+                    t.setTransferType("2");
+                    insertTransaction(t, TRANSACTION_TABLE_NAME);
+                    return;
+                }
+                queryMap.put("recharge_address", transaction.getTo());
+                int inCount = baseDao.selectBaseCount(queryMap);
+                if (inCount != 0) {
+                    t.setTransferType("1");
+                    insertTransaction(t, TRANSACTION_TABLE_NAME);
+                    return;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void insertTransaction(TransactionMy transaction, String tableName) {
         Map map = JSON.parseObject(JSON.toJSON(transaction).toString(), Map.class);
-        map.put("tableName", TRANSACTION_TABLE_NAME);
+        map.put("tableName", tableName);
         System.out.println(JSON.toJSON(map));
         baseDao.insertBase(map);
     }

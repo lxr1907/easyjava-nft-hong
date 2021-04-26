@@ -94,6 +94,26 @@
 		</foreach>
 		)
 	</insert>
+	<insert id="insertUpdateBase" parameterType="java.util.HashMap">
+		insert into ${map.tableName}
+		(
+		<foreach collection="map" index="key" item="value"
+				 separator=",">
+			<if test="key != 'tableName' " >
+				"${key}"
+			</if>
+		</foreach>
+		)
+		values (
+		<foreach collection="map" index="key" item="value"
+				 separator=",">
+			<if test="key != 'tableName' ">
+				#{value}
+			</if>
+		</foreach>
+		)
+		on conflict do update
+	</insert>
 	<update id="updateBaseByPrimaryKey">
 		update ${map.tableName}
 		<set>
