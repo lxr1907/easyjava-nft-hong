@@ -88,6 +88,7 @@ public class Web3jController {
         @Override
         public void accept(Transaction transaction) throws Exception {
             try {
+                dealWithPendingTransaction(transaction);
                 String tStr = JSON.toJSONString(transaction);
                 TransactionMy t = JSON.parseObject(tStr, TransactionMy.class);
                 t.setTime(DateUtils.getDatePastStr(new Date(), 0));
@@ -112,6 +113,27 @@ public class Web3jController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void dealWithPendingTransaction(Transaction t) {
+        if (t.getNonceRaw() == null || t.getNonceRaw().length() == 0) {
+            t.setNonce("0x");
+        }
+        if (t.getBlockNumberRaw() == null || t.getBlockNumberRaw().length() == 0) {
+            t.setBlockNumber("0x");
+        }
+        if (t.getTransactionIndexRaw() == null || t.getTransactionIndexRaw().length() == 0) {
+            t.setTransactionIndex("0x");
+        }
+        if (t.getGasPriceRaw() == null || t.getGasPriceRaw().length() == 0) {
+            t.setGasPrice("0x");
+        }
+        if (t.getGasRaw() == null || t.getGasRaw().length() == 0) {
+            t.setGas("0x");
+        }
+        if (t.getValueRaw() == null || t.getValueRaw().length() == 0) {
+            t.setValue("0x");
         }
     }
 
