@@ -76,7 +76,8 @@ public class Web3jController {
             @Override
             public void accept(Transaction transaction) throws Exception {
                 try {
-                    TransactionMy t = (TransactionMy) transaction;
+                    String tStr = JSON.toJSONString(transaction);
+                    TransactionMy t = JSON.parseObject(tStr, TransactionMy.class);
                     t.setTime(DateUtils.getDatePastStr(new Date(), 0));
                     Map<String, Object> queryMap = new HashMap<>();
                     queryMap.put("coin_name", "ETH");
