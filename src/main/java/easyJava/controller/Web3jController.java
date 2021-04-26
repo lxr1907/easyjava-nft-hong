@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
+import easyJava.entity.TransactionMy;
 import easyJava.utils.DateUtils;
 import easyJava.utils.HttpsUtils;
 import easyJava.utils.MapBeanUtil;
@@ -75,20 +76,23 @@ public class Web3jController {
             @Override
             public void accept(Transaction transaction) throws Exception {
                 try {
+                    TransactionMy t = (TransactionMy) transaction;
+                    t.setTime(DateUtils.getDatePastStr(new Date(), 0));
                     Map<String, Object> queryMap = new HashMap<>();
                     queryMap.put("coin_name", "ETH");
                     queryMap.put("recharge_address", transaction.getFrom());
-                    queryMap.put("time", DateUtils.getDatePastStr(new Date(), 0));
                     queryMap.put("tableName", ACCOUNT_TABLE_NAME);
                     int outCount = baseDao.selectBaseCount(queryMap);
                     if (outCount != 0) {
-                        insertTransaction(transaction);
+                        t.setTransferType("2");
+                        insertTransaction(t);
                         return;
                     }
                     queryMap.put("recharge_address", transaction.getTo());
                     int inCount = baseDao.selectBaseCount(queryMap);
                     if (inCount != 0) {
-                        insertTransaction(transaction);
+                        t.setTransferType("1");
+                        insertTransaction(t);
                         return;
                     }
                 } catch (Exception e) {
@@ -98,7 +102,7 @@ public class Web3jController {
         });
     }
 
-    private void insertTransaction(Transaction transaction) {
+    private void insertTransaction(TransactionMy transaction) {
         Map map = JSON.parseObject(JSON.toJSON(transaction).toString(), Map.class);
         map.put("tableName", TRANSACTION_TABLE_NAME);
         System.out.println(JSON.toJSON(map));
