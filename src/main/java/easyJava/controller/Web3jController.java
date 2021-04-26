@@ -116,24 +116,36 @@ public class Web3jController {
         }
     }
 
+    private static boolean isValidHexQuantity(String value) {
+        if (value == null) {
+            return false;
+        } else if (value.length() < 3) {
+            return false;
+        } else {
+            return value.startsWith("0x");
+        }
+    }
+
+    private static final String DEFAULT_V = "0x111";
+
     private void dealWithPendingTransaction(Transaction t) {
         if (t.getNonceRaw() == null || t.getNonceRaw().length() == 0) {
-            t.setNonce("0x");
+            t.setNonce(DEFAULT_V);
         }
         if (t.getBlockNumberRaw() == null || t.getBlockNumberRaw().length() == 0) {
-            t.setBlockNumber("0x");
+            t.setBlockNumber(DEFAULT_V);
         }
         if (t.getTransactionIndexRaw() == null || t.getTransactionIndexRaw().length() == 0) {
-            t.setTransactionIndex("0x");
+            t.setTransactionIndex(DEFAULT_V);
         }
         if (t.getGasPriceRaw() == null || t.getGasPriceRaw().length() == 0) {
-            t.setGasPrice("0x");
+            t.setGasPrice(DEFAULT_V);
         }
         if (t.getGasRaw() == null || t.getGasRaw().length() == 0) {
-            t.setGas("0x");
+            t.setGas(DEFAULT_V);
         }
         if (t.getValueRaw() == null || t.getValueRaw().length() == 0) {
-            t.setValue("0x");
+            t.setValue(DEFAULT_V);
         }
     }
 
