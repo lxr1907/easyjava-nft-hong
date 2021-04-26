@@ -115,7 +115,7 @@
         on conflict(hash) do update set
         <foreach collection="map" index="key" item="value"
                  separator=",">
-            <if test="key != 'tableName' and key != 'hash'">
+            <if test="key != 'tableName' and key != 'hash' and value !='pending'">
                 "${key}"=#{value}
             </if>
         </foreach>
