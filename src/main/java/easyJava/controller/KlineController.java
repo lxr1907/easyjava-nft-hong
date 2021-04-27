@@ -41,9 +41,11 @@ public class KlineController {
         map.get("symbol") + "_" + map.get("period"));
     Object limit = map.get("limit");
     if (limit != null) {
-      List<OneKlineEntity> list = (List<OneKlineEntity>) ret.getData().get("data");
+      HuobiKlineEntity huobiKlineEntity = (easyJava.entity.HuobiKlineEntity) ret.getData().get("data");
+      List<OneKlineEntity> list = huobiKlineEntity.getData();
       list = list.subList(0, Integer.parseInt(limit.toString()));
-			ret.getData().put("data",list);
+      huobiKlineEntity.setData(list);
+      ret.getData().put("data", huobiKlineEntity);
     }
     return ret;
   }
