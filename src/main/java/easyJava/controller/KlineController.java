@@ -39,14 +39,11 @@ public class KlineController {
 
         ResponseEntity<HuobiKlineEntity> ret = (ResponseEntity<HuobiKlineEntity>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
                 map.get("symbol") + "_" + map.get("period"));
-        Object limit = map.get("limit");
-        if (limit != null) {
-            HuobiKlineEntity huobiKlineEntity = (easyJava.entity.HuobiKlineEntity) ret.getData().get("data");
-            List<OneKlineEntity> list = huobiKlineEntity.getData();
-            if (list != null && list.size() != 0) {
-                OneKlineEntity one = list.get(0);
-                return new ResponseEntity(one);
-            }
+        HuobiKlineEntity huobiKlineEntity = (easyJava.entity.HuobiKlineEntity) ret.getData().get("data");
+        List<OneKlineEntity> list = huobiKlineEntity.getData();
+        if (list != null && list.size() != 0) {
+            OneKlineEntity one = list.get(0);
+            return new ResponseEntity(one);
         }
         return new ResponseEntity();
     }
