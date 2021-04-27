@@ -17,44 +17,45 @@ import easyJava.job.HuobiDataSync;
 @RestController
 public class KlineController {
 
-  @Autowired
-  private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
-  @RequestMapping("/getKline")
-  public ResponseEntity getKline(@RequestParam Map<String, Object> map) {
-    if (map.get("symbol") == null || map.get("symbol").toString().length() == 0) {
-      return new ResponseEntity(400, "symbol不能为空！");
+    @RequestMapping("/getKline")
+    public ResponseEntity getKline(@RequestParam Map<String, Object> map) {
+        if (map.get("symbol") == null || map.get("symbol").toString().length() == 0) {
+            return new ResponseEntity(400, "symbol不能为空！");
+        }
+
+        ResponseEntity<?> ret = (ResponseEntity<?>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
+                map.get("symbol") + "_" + map.get("period"));
+        return ret;
     }
 
-    ResponseEntity<?> ret = (ResponseEntity<?>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
-        map.get("symbol") + "_" + map.get("period"));
-    return ret;
-  }
+    @RequestMapping("/getKlinePrice")
+    public ResponseEntity getKlinePrice(@RequestParam Map<String, Object> map) {
+        if (map.get("symbol") == null || map.get("symbol").toString().length() == 0) {
+            return new ResponseEntity(400, "symbol不能为空！");
+        }
 
-  @RequestMapping("/getKlinePage")
-  public ResponseEntity getKlinePage(@RequestParam Map<String, Object> map) {
-    if (map.get("symbol") == null || map.get("symbol").toString().length() == 0) {
-      return new ResponseEntity(400, "symbol不能为空！");
+        ResponseEntity<HuobiKlineEntity> ret = (ResponseEntity<HuobiKlineEntity>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
+                map.get("symbol") + "_" + map.get("period"));
+        Object limit = map.get("limit");
+        if (limit != null) {
+            HuobiKlineEntity huobiKlineEntity = (easyJava.entity.HuobiKlineEntity) ret.getData().get("data");
+            List<OneKlineEntity> list = huobiKlineEntity.getData();
+            if (list != null && list.size() != 0) {
+                OneKlineEntity one = list.get(0);
+                return new ResponseEntity(one);
+            }
+        }
+        return new ResponseEntity();
     }
 
-    ResponseEntity<HuobiKlineEntity> ret = (ResponseEntity<HuobiKlineEntity>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
-        map.get("symbol") + "_" + map.get("period"));
-    Object limit = map.get("limit");
-    if (limit != null) {
-      HuobiKlineEntity huobiKlineEntity = (easyJava.entity.HuobiKlineEntity) ret.getData().get("data");
-      List<OneKlineEntity> list = huobiKlineEntity.getData();
-      list = list.subList(0, Integer.parseInt(limit.toString()));
-      huobiKlineEntity.setData(list);
-      ret.getData().put("data", huobiKlineEntity);
+    public Map getUserByToken(String token) {
+        return (Map) redisTemplate.opsForValue().get(token);
     }
-    return ret;
-  }
 
-  public Map getUserByToken(String token) {
-    return (Map) redisTemplate.opsForValue().get(token);
-  }
-
-  public boolean checkToken(String token) {
-    return redisTemplate.hasKey(token);
-  }
+    public boolean checkToken(String token) {
+        return redisTemplate.hasKey(token);
+    }
 }
