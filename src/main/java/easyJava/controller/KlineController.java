@@ -1,7 +1,10 @@
 package easyJava.controller;
 
+import java.util.List;
 import java.util.Map;
 
+import easyJava.entity.HuobiKlineEntity;
+import easyJava.entity.OneKlineEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,25 +17,42 @@ import easyJava.job.HuobiDataSync;
 @RestController
 public class KlineController {
 
-	@Autowired
-	private RedisTemplate<String, Object> redisTemplate;
+  @Autowired
+  private RedisTemplate<String, Object> redisTemplate;
 
-	@RequestMapping("/getKline")
-	public ResponseEntity login(@RequestParam Map<String, Object> map) {
-		if (map.get("symbol") == null || map.get("symbol").toString().length() == 0) {
-			return new ResponseEntity(400, "symbol不能为空！");
-		}
+  @RequestMapping("/getKline")
+  public ResponseEntity getKline(@RequestParam Map<String, Object> map) {
+    if (map.get("symbol") == null || map.get("symbol").toString().length() == 0) {
+      return new ResponseEntity(400, "symbol不能为空！");
+    }
 
-		ResponseEntity<?> ret = (ResponseEntity<?>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
-				map.get("symbol")+"_"+map.get("period"));
-		return ret;
-	}
+    ResponseEntity<?> ret = (ResponseEntity<?>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
+        map.get("symbol") + "_" + map.get("period"));
+    return ret;
+  }
 
-	public Map getUserByToken(String token) {
-		return (Map) redisTemplate.opsForValue().get(token);
-	}
+  @RequestMapping("/getKlinePage")
+  public ResponseEntity getKlinePage(@RequestParam Map<String, Object> map) {
+    if (map.get("symbol") == null || map.get("symbol").toString().length() == 0) {
+      return new ResponseEntity(400, "symbol不能为空！");
+    }
 
-	public boolean checkToken(String token) {
-		return redisTemplate.hasKey(token);
-	}
+    ResponseEntity<HuobiKlineEntity> ret = (ResponseEntity<HuobiKlineEntity>) redisTemplate.opsForHash().get(HuobiDataSync.MARKET_KLINE,
+        map.get("symbol") + "_" + map.get("period"));
+    Object limit = map.get("limit");
+    if (limit != null) {
+      List<OneKlineEntity> list = (List<OneKlineEntity>) ret.getData().get("data");
+      list = list.subList(0, Integer.parseInt(limit.toString()));
+			ret.getData().put("data",list);
+    }
+    return ret;
+  }
+
+  public Map getUserByToken(String token) {
+    return (Map) redisTemplate.opsForValue().get(token);
+  }
+
+  public boolean checkToken(String token) {
+    return redisTemplate.hasKey(token);
+  }
 }
