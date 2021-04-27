@@ -48,6 +48,7 @@ public class Web3jController {
     public static final String ACCOUNT_TABLE_NAME = "accounts_coin_balance";
     public static final String pwd = "123456";
     static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
+    public static final BigInteger GAS_LIMIT = BigInteger.valueOf(21000);
 
     private void initWsToEthNode() {
         try {
@@ -276,31 +277,27 @@ public class Web3jController {
         return new ResponseEntity(ret);
     }
 
+    @GetMapping("/v1/web3j/estimate")
+    public ResponseEntity estimate(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress
+            , @RequestParam("balance") double balance) {
+        Web3j web3 = Web3j.build(ws);
+        try {
+            BigDecimal v = BigDecimal.valueOf(balance).multiply(new BigDecimal("1000000000000000000"));
+
+            EthGasPrice ethGasPrice = web3.ethGasPrice().send();
+            Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
+            EthEstimateGas gas = web3.ethEstimateGas(new org.web3j.protocol.core.methods.request.Transaction(credentials.getAddress(), BigInteger.valueOf(1),
+                    ethGasPrice.getGasPrice(), GAS_LIMIT, toAddress, v.toBigInteger(), "")).send();
+            return new ResponseEntity(gas);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity();
+    }
 
     public static void main(String[] args) throws Exception {
-//        Map<String, Object> map = createAccountRemote("2");
-//        for (Map.Entry<String, Object> e : map.entrySet()) {
-//            System.out.println(e.getKey() + ":" + e.getValue());
-//        }
-        //加载钱包
-        Credentials credentials = WalletUtils.loadCredentials(pwd, "D://eth//1.json");
-        String form = credentials.getAddress();
-        System.out.println("from:" + form);
-        String to = "0x4eece1847ad0bd4ad47456c6d8f5952f3affd2e9";
-        //初始web3j
-        BigInteger gasLimit = Transfer.GAS_LIMIT;
-        BigInteger gasPremium = new BigInteger("42000");
-        BigInteger feeCap = new BigInteger("64000");
-        Admin web3j = Admin.build(ws);  // defaults to http://localhost:8545/
-        web3j.ethChainId().setId(4);
-        TransactionReceipt transactionReceipt = Transfer.sendFunds(
-                web3j, credentials, to,
-                BigDecimal.valueOf(0.1), Convert.Unit.ETHER).send();
-//        TransactionReceipt transactionReceipt = Transfer.sendFundsEIP1559(
-//                web3j, credentials, to,
-//                BigDecimal.valueOf(0.1), Convert.Unit.ETHER, gasLimit, gasPremium, feeCap).send();
-        transactionReceipt.setLogsBloom("");
-        System.out.println(JSON.toJSON(transactionReceipt));
     }
 
 }
