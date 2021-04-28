@@ -76,9 +76,6 @@
                 </if>
             </foreach>
         </where>
-        <if test="baseModel.orderBy != null ">
-            order by #{baseModel.orderBy}
-        </if>
     </select>
 
     <insert id="insertBase" parameterType="java.util.HashMap">
