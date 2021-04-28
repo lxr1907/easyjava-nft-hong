@@ -244,6 +244,7 @@ public class Web3jController {
         map.put("to", credentials.getAddress());
         map.put("from", credentials.getAddress());
         map.put("tableName", TRANSACTION_TABLE_NAME);
+        baseModel.setOrderBy("time desc");
         int count = baseDao.selectBaseCountOr(map);
         List<Map> list = baseDao.selectBaseListOr(map, baseModel);
         return new ResponseEntity(list, count, baseModel.getPageNo(), baseModel.getPageSize());
