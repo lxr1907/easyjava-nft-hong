@@ -54,11 +54,13 @@
         <where>
             <foreach collection="map" index="key" item="value" separator="or">
                 <if test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-                    "${key}" =#{value}
+                    "${key}" = #{value}
                 </if>
             </foreach>
         </where>
-        order by #{baseModel.orderBy}
+        <if test="baseModel.orderBy != null ">
+            order by #{baseModel.orderBy}
+        </if>
         limit #{baseModel.pageSize} OFFSET #{baseModel.fromRec}
     </select>
 
@@ -67,13 +69,16 @@
         select
         count(1)
         from ${map.tableName}
-        where 1=1
-        <foreach collection="map" index="key" item="value">
-            <if
-                    test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-                or "${key}" = #{value}
-            </if>
-        </foreach>
+        <where>
+            <foreach collection="map" index="key" item="value" separator="or">
+                <if test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
+                    "${key}" = #{value}
+                </if>
+            </foreach>
+        </where>
+        <if test="baseModel.orderBy != null ">
+            order by #{baseModel.orderBy}
+        </if>
     </select>
 
     <insert id="insertBase" parameterType="java.util.HashMap">
