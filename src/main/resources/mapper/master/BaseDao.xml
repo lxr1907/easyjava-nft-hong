@@ -59,7 +59,7 @@
             </foreach>
         </where>
         <if test="baseModel.orderBy != null ">
-            order by #{baseModel.orderBy}
+            order by "${baseModel.orderBy}"
         </if>
         limit #{baseModel.pageSize} OFFSET #{baseModel.fromRec}
     </select>
