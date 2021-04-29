@@ -258,7 +258,9 @@ public class Web3jController {
         Admin web3 = Admin.build(ws);  // defaults to http://localhost:8545/
         EthGasPrice ethGasPrice = web3.ethGasPrice().send();
         BigDecimal b = new BigDecimal(balance).multiply(new BigDecimal(ETH_WEI));
-        BigDecimal balanceWithoutFee = b.subtract(new BigDecimal(ethGasPrice.getGasPrice().multiply(GAS_LIMIT))).divide(new BigDecimal(ETH_WEI)).setScale(18, RoundingMode.DOWN);
+        BigDecimal balanceWithoutFee = b.subtract(new BigDecimal(ethGasPrice.getGasPrice().multiply(GAS_LIMIT)))
+                .divide(new BigDecimal(ETH_WEI))
+                .setScale(15, RoundingMode.DOWN);
         Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
         TransactionReceipt transactionReceipt = Transfer.sendFunds(
                 web3, credentials, toAddress,
