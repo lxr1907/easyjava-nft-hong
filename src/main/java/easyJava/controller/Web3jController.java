@@ -3,6 +3,7 @@ package easyJava.controller;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import easyJava.Configs;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
@@ -43,12 +44,12 @@ import java.util.Map;
 public class Web3jController {
     @Autowired
     BaseDao baseDao;
-    public static final String ETH_NODE_URL = "ws://btcpay.lxrtalk.com:8546";
+    public String ETH_NODE_URL = "ws://" + Configs.getBtcpayHost() + ":8546";
     public static final String TRANSACTION_RECEIPT_TABLE_NAME = "accounts_coin_transaction_receipts";
     public static final String TRANSACTION_TABLE_NAME = "accounts_coin_transactions";
     public static final String ACCOUNT_TABLE_NAME = "accounts_coin_balance";
     public static final String pwd = "123456";
-    static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
+    WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
     public static final BigInteger GAS_LIMIT = BigInteger.valueOf(21000);
     public static final BigInteger ETH_WEI = BigInteger.valueOf(1000000000000000000L);
 
