@@ -214,14 +214,53 @@ public class Web3jController {
         return walletMap;
     }
 
-    @PostMapping("/v1/web3j/transfer")
-    public ResponseEntity transfer(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress
+    /**
+     * 转账金额是到账金额
+     *
+     * @param uuid
+     * @param toAddress
+     * @param balance
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/v1/web3j/transferWithoutFee")
+    public ResponseEntity transferWithoutFee(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress
             , @RequestParam("balance") double balance) throws Exception {
         Admin web3 = Admin.build(ws);  // defaults to http://localhost:8545/
         Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
         TransactionReceipt transactionReceipt = Transfer.sendFunds(
                 web3, credentials, toAddress,
                 BigDecimal.valueOf(balance), Convert.Unit.ETHER)
+                .send();
+        transactionReceipt.setLogsBloom("");
+        Map map = MapBeanUtil.object2Map(transactionReceipt);
+        map.remove("logs");
+        map.remove("logsBloom");
+        map.put("tableName", TRANSACTION_RECEIPT_TABLE_NAME);
+        baseDao.insertBase(map);
+        return new ResponseEntity(transactionReceipt);
+    }
+
+    /**
+     * 转账金额包含手续费，因此到账会少一部分
+     *
+     * @param uuid
+     * @param toAddress
+     * @param balance
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/v1/web3j/transfer")
+    public ResponseEntity transfer(@RequestParam("uuid") String uuid, @RequestParam("toAddress") String toAddress
+            , @RequestParam("balance") double balance) throws Exception {
+        Admin web3 = Admin.build(ws);  // defaults to http://localhost:8545/
+        EthGasPrice ethGasPrice = web3.ethGasPrice().send();
+        BigDecimal b = new BigDecimal(balance);
+        BigDecimal balanceWithoutFee = b.subtract(new BigDecimal(ethGasPrice.getGasPrice().multiply(GAS_LIMIT)));
+        Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
+        TransactionReceipt transactionReceipt = Transfer.sendFunds(
+                web3, credentials, toAddress,
+                balanceWithoutFee, Convert.Unit.ETHER)
                 .send();
         transactionReceipt.setLogsBloom("");
         Map map = MapBeanUtil.object2Map(transactionReceipt);
