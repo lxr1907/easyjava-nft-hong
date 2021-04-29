@@ -1,0 +1,57 @@
+1. seals.xxxxx    主域名          主服务器			27.102.134.47
+
+
+
+
+2. https://sealstalk.s3-accelerate.amazonaws.com	      亚马逊配置
+3. share.xxxx.    分享页面
+4. app.xxxx/      支持，隐私
+
+app.xxx/support.html  支持
+app.xxx/privacy.html   隐私
+
+5. shop.xxxx    商城
+6. 官网放到亚马逊被
+
+
+
+server
+27.102.134.47
+27.102.134.45
+
+27.102.134.47
+
+pwd:
+yn@fcdLY8LBOTfPeq9yyEVQU
+
+
+aws亚马逊账号:
+masterlite01@gmail.com
+QA2206BLqa@
+
+yuming:域名解析
+message.sealsapp.org		27.102.134.47		app用戶
+
+app.sealsapp.org		18.162.148.0
+share.sealsapp.org		18.162.148.0
+shop.sealsapp.org		18.162.148.0
+www.sealsapp.org		18.162.148.0
+
+
+
+
+
+
+3. share.xxxx.    分享页面	18.162.148.0
+4. app.xxxx/      支持，隐私	18.162.148.0
+
+app.xxx/support.html  支持
+app.xxx/privacy.html   隐私
+
+5. shop.xxxx    商城
+6. 官网放到亚马逊被
+
+
+
+18.162.148.0
+root

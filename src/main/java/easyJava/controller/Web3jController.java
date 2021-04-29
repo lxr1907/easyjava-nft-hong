@@ -100,14 +100,12 @@ public class Web3jController {
                 queryMap.put("tableName", ACCOUNT_TABLE_NAME);
                 int outCount = baseDao.selectBaseCount(queryMap);
                 if (outCount != 0) {
-                    t.setTransferType("2");
                     insertTransaction(t, TRANSACTION_TABLE_NAME);
                     return;
                 }
                 queryMap.put("recharge_address", transaction.getTo());
                 int inCount = baseDao.selectBaseCount(queryMap);
                 if (inCount != 0) {
-                    t.setTransferType("1");
                     insertTransaction(t, TRANSACTION_TABLE_NAME);
                     return;
                 }
