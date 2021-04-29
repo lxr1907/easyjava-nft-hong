@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.websocket.server.PathParam;
 
 import easyJava.Configs;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,8 +15,10 @@ import easyJava.utils.HttpsUtils;
 
 @RestController
 public class BtcpayController {
+    @Autowired
+    Configs configs;
 
-    public String BTCPAY_URL = "https://" + Configs.getBtcpayHost();
+    public String BTCPAY_URL = "https://" + configs.getBtcpayHost();
     public static final String GET_STORE = "/api/v1/stores";
     public static final String TOKEN = "Authorization";
     public static final String TOKEN_VALUE = "token a56fb37c559c6c0d45b31e79ebf11100792f56ea";

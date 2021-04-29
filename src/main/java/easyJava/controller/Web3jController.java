@@ -43,8 +43,10 @@ import java.util.Map;
 @RestController
 public class Web3jController {
     @Autowired
+    Configs configs;
+    @Autowired
     BaseDao baseDao;
-    public String ETH_NODE_URL = "ws://" + Configs.getBtcpayHost() + ":8546";
+    public String ETH_NODE_URL = "ws://" + configs.getBtcpayHost() + ":8546";
     public static final String TRANSACTION_RECEIPT_TABLE_NAME = "accounts_coin_transaction_receipts";
     public static final String TRANSACTION_TABLE_NAME = "accounts_coin_transactions";
     public static final String ACCOUNT_TABLE_NAME = "accounts_coin_balance";

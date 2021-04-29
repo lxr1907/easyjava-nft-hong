@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class Configs {
     private static String btcpayHost = "";
 
-    public static String getBtcpayHost() {
+    public String getBtcpayHost() {
         return btcpayHost;
     }
 
