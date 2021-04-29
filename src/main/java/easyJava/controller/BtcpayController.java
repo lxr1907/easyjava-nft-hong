@@ -15,10 +15,8 @@ import easyJava.utils.HttpsUtils;
 
 @RestController
 public class BtcpayController {
-    @Autowired
-    Configs configs;
 
-    public String BTCPAY_URL = "https://" + configs.getBtcpayHost();
+    public String BTCPAY_URL = "https://" + Configs.getBtcpayHost();
     public static final String GET_STORE = "/api/v1/stores";
     public static final String TOKEN = "Authorization";
     public static final String TOKEN_VALUE = "token a56fb37c559c6c0d45b31e79ebf11100792f56ea";
