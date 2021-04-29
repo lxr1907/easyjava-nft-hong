@@ -49,6 +49,7 @@ public class Web3jController {
     public static final String pwd = "123456";
     static WebSocketService ws = new WebSocketService(ETH_NODE_URL, false);
     public static final BigInteger GAS_LIMIT = BigInteger.valueOf(21000);
+    public static final BigInteger ETH_WEI = BigInteger.valueOf(1000000000000000000L);
 
     private void initWsToEthNode() {
         try {
@@ -255,7 +256,7 @@ public class Web3jController {
             , @RequestParam("balance") double balance) throws Exception {
         Admin web3 = Admin.build(ws);  // defaults to http://localhost:8545/
         EthGasPrice ethGasPrice = web3.ethGasPrice().send();
-        BigDecimal b = new BigDecimal(balance);
+        BigDecimal b = new BigDecimal(balance).multiply(new BigDecimal(ETH_WEI));
         BigDecimal balanceWithoutFee = b.subtract(new BigDecimal(ethGasPrice.getGasPrice().multiply(GAS_LIMIT)));
         Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
         TransactionReceipt transactionReceipt = Transfer.sendFunds(
