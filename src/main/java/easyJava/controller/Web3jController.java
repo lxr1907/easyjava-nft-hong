@@ -92,7 +92,7 @@ public class Web3jController {
                 dealWithPendingTransaction(transaction);
                 String tStr = JSON.toJSONString(transaction);
                 TransactionMy t = JSON.parseObject(tStr, TransactionMy.class);
-                t.setTime(DateUtils.getDateTimeString(new Date()));
+                t.setTime(new Date().getTime() + "");
                 t.setPending(pending);
                 Map<String, Object> queryMap = new HashMap<>();
                 queryMap.put("coin_name", "ETH");
