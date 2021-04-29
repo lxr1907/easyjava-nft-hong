@@ -217,7 +217,7 @@ public class Web3jController {
     }
 
     /**
-     * 转账金额是到账金额
+     * 转账金额是到账金额,手续费从转出账户余额扣除
      *
      * @param uuid
      * @param toAddress
