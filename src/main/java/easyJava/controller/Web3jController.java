@@ -261,8 +261,8 @@ public class Web3jController {
     }
 
 
-    @GetMapping("/v1/web3j/feeRate")
-    public ResponseEntity feeRate() throws Exception {
+    @GetMapping("/v1/web3j/gasPrice")
+    public ResponseEntity gasPrice() throws Exception {
         Web3j web3 = Web3j.build(ws);
         EthGasPrice ret = web3.ethGasPrice().send();
         return new ResponseEntity(ret);
