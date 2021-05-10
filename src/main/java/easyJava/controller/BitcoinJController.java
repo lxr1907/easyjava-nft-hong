@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
 @RestController
 public class BitcoinJController {
@@ -23,6 +24,7 @@ public class BitcoinJController {
 
     public static void main(String[] args) {
         try {
+            String uuid = "1";
             String base58Address = "";
             NetworkParameters params;
             String filePrefix;
@@ -31,19 +33,33 @@ public class BitcoinJController {
             //LegacyAddress SegwitAddress
             var forwardingAddress = LegacyAddress.fromBase58(params, base58Address);
             Wallet wallet = Wallet.createDeterministic(params, Script.ScriptType.P2PKH);
-            MemoryBlockStore blockStore = new MemoryBlockStore(params);
-            BlockChain chain = new BlockChain(params, wallet, blockStore);
-            PeerGroup peerGroup = new PeerGroup(params, chain);
-            peerGroup.addWallet(wallet);
-            peerGroup.start();
+            wallet.saveToFile(new File(getWalletFilePath(uuid)));
+//            MemoryBlockStore blockStore = new MemoryBlockStore(params);
+//            BlockChain chain = new BlockChain(params, wallet, blockStore);
+//            PeerGroup peerGroup = new PeerGroup(params, chain);
+//            peerGroup.addWallet(wallet);
+//            peerGroup.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private static String getWalletFilePath(String uuid) {
+        String walletFilePath = "./btc_wallets/uid_" + uuid + "/";
+        return walletFilePath;
+    }
+
     @PostMapping("/v1/web3j/createWallet")
     public ResponseEntity createWallet(@RequestParam("uuid") String uuid) {
 //        Map map = createAccount(uuid);
+        try {
+            NetworkParameters params = MainNetParams.get();
+            Wallet wallet = Wallet.createDeterministic(params, Script.ScriptType.P2PKH);
+            wallet.saveToFile(new File(getWalletFilePath(uuid)));
+            return new ResponseEntity(wallet.currentReceiveAddress());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return new ResponseEntity();
     }
 
