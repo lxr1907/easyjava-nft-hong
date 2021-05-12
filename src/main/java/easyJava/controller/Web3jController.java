@@ -90,7 +90,7 @@ public class Web3jController {
         private long lastUpdate = new Date().getTime();
 
         @Override
-        public void accept(Transaction transaction) throws Exception {
+        public void accept(Transaction transaction)  {
             try {
                 dealWithPendingTransaction(transaction);
                 String tStr = JSON.toJSONString(transaction);
