@@ -8,7 +8,6 @@ import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.entity.TransactionMy;
-import easyJava.utils.DateUtils;
 import easyJava.utils.HttpsUtils;
 import easyJava.utils.MapBeanUtil;
 import io.reactivex.functions.Consumer;
@@ -156,6 +155,10 @@ public class Web3jController {
         map.put("tableName", tableName);
         System.out.println(JSON.toJSON(map));
         baseDao.insertUpdateBase(map);
+    }
+    @GetMapping("/v1/web3j/ethHost")
+    public ResponseEntity ethHost() {
+        return new ResponseEntity(Configs.getBtcpayHost() );
     }
 
     @PostMapping("/v1/web3j/createWallet")
