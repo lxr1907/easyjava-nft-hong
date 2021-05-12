@@ -87,6 +87,8 @@ public class Web3jController {
 
         private Set<String> addressSet = new HashSet<>();
 
+        private long lastUpdate = new Date().getTime();
+
         @Override
         public void accept(Transaction transaction) throws Exception {
             try {
@@ -109,21 +111,33 @@ public class Web3jController {
         }
 
         private boolean hasEthAccountInOurDB(String address) {
-            Map<String, Object> queryMap = new HashMap<>();
-            queryMap.put("coin_name", "ETH");
-            queryMap.put("recharge_address", address);
-            queryMap.put("tableName", ACCOUNT_TABLE_NAME);
             if (addressSet.contains(address)) {
                 return true;
-            }
-            int outCount = baseDao.selectBaseCount(queryMap);
-            if (outCount > 0) {
-                addressSet.add(address);
-                return true;
             } else {
+                if (new Date().getTime() - lastUpdate > 10 * 1000) {
+                    updateAddressSet();
+                    return hasEthAccountInOurDB(address);
+                }
                 return false;
             }
         }
+
+        private synchronized void updateAddressSet() {
+            if (new Date().getTime() - lastUpdate < 10 * 1000) {
+                return;
+            }
+            Map<String, Object> queryMap = new HashMap<>();
+            queryMap.put("coin_name", "ETH");
+            //queryMap.put("recharge_address", address);
+            queryMap.put("tableName", ACCOUNT_TABLE_NAME);
+            var result = baseDao.selectBaseList(queryMap, new BaseModel().setPageNo(1).setPageSize(100000).setOrderBy("time desc"));
+            result.forEach(map -> {
+                String address = map.get("recharge_address").toString();
+                addressSet.add(address);
+            });
+            lastUpdate = new Date().getTime();
+        }
+
     }
 
 

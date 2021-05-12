@@ -48,7 +48,7 @@ public class CoinManageController {
 	}
 
 	@RequestMapping("/insertCoin")
-	public ResponseEntity insertBase(@RequestParam Map<String, Object> map) {
+	public ResponseEntity insertCoin(@RequestParam Map<String, Object> map) {
 		if (map.get("token") == null || map.get("token").toString().length() == 0) {
 			return new ResponseEntity(400, "token不能为空！");
 		}
