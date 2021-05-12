@@ -90,7 +90,7 @@ public class Web3jController {
         private long lastUpdate = new Date().getTime();
 
         @Override
-        public void accept(Transaction transaction)  {
+        public void accept(Transaction transaction) {
             try {
                 dealWithPendingTransaction(transaction);
                 String tStr = JSON.toJSONString(transaction);
@@ -132,8 +132,10 @@ public class Web3jController {
             queryMap.put("tableName", ACCOUNT_TABLE_NAME);
             var result = baseDao.selectBaseList(queryMap, new BaseModel().setPageNo(1).setPageSize(100000).setOrderBy("time desc"));
             result.forEach(map -> {
-                String address = map.get("recharge_address").toString();
-                addressSet.add(address);
+                if (map.get("recharge_address") != null) {
+                    String address = map.get("recharge_address").toString();
+                    addressSet.add(address);
+                }
             });
             lastUpdate = new Date().getTime();
         }
