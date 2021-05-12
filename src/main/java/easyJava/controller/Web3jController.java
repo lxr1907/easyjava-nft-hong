@@ -34,10 +34,7 @@ import java.net.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class Web3jController {
@@ -88,6 +85,8 @@ public class Web3jController {
             this.pending = pending;
         }
 
+        private Set<String> addressSet = new HashSet<>();
+
         @Override
         public void accept(Transaction transaction) throws Exception {
             try {
@@ -96,18 +95,11 @@ public class Web3jController {
                 TransactionMy t = JSON.parseObject(tStr, TransactionMy.class);
                 t.setTime(new Date().getTime() + "");
                 t.setPending(pending);
-                Map<String, Object> queryMap = new HashMap<>();
-                queryMap.put("coin_name", "ETH");
-                queryMap.put("recharge_address", transaction.getFrom());
-                queryMap.put("tableName", ACCOUNT_TABLE_NAME);
-                int outCount = baseDao.selectBaseCount(queryMap);
-                if (outCount != 0) {
+                if (hasEthAccountInOurDB(transaction.getFrom())) {
                     insertTransaction(t, TRANSACTION_TABLE_NAME);
                     return;
                 }
-                queryMap.put("recharge_address", transaction.getTo());
-                int inCount = baseDao.selectBaseCount(queryMap);
-                if (inCount != 0) {
+                if (hasEthAccountInOurDB(transaction.getTo())) {
                     insertTransaction(t, TRANSACTION_TABLE_NAME);
                     return;
                 }
@@ -115,7 +107,25 @@ public class Web3jController {
                 e.printStackTrace();
             }
         }
+
+        private boolean hasEthAccountInOurDB(String address) {
+            Map<String, Object> queryMap = new HashMap<>();
+            queryMap.put("coin_name", "ETH");
+            queryMap.put("recharge_address", address);
+            queryMap.put("tableName", ACCOUNT_TABLE_NAME);
+            if (addressSet.contains(address)) {
+                return true;
+            }
+            int outCount = baseDao.selectBaseCount(queryMap);
+            if (outCount > 0) {
+                addressSet.add(address);
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
+
 
     private static boolean isValidHexQuantity(String value) {
         if (value == null) {
@@ -156,9 +166,10 @@ public class Web3jController {
         System.out.println(JSON.toJSON(map));
         baseDao.insertUpdateBase(map);
     }
+
     @GetMapping("/v1/web3j/ethHost")
     public ResponseEntity ethHost() {
-        return new ResponseEntity(Configs.getBtcpayHost() );
+        return new ResponseEntity(Configs.getBtcpayHost());
     }
 
     @PostMapping("/v1/web3j/createWallet")
