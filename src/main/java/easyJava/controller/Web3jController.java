@@ -214,9 +214,9 @@ public class Web3jController {
         String privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
         map.put("uuid", uuid);
         map.put("address", address);
-        map.put("publicKey", publicKey);
-        map.put("privateKey", privateKey);
-        map.put("walletFileName", walletFileName);
+        map.put("publickey", publicKey);
+        map.put("privatekey", privateKey);
+        map.put("walletfilename", walletFileName);
         return map;
     }
 
