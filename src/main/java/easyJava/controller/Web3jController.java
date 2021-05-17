@@ -204,8 +204,10 @@ public class Web3jController {
         dir.setWritable(true, false);
         dir.mkdirs();
         //钱包文件保持路径，请替换位自己的某文件夹路径
-        walletFileName = WalletUtils.generateNewWalletFile(pwd, dir, false);
-        Credentials credentials = WalletUtils.loadCredentials(pwd, walletFilePath + walletFileName);
+        if (dir.list().length == 0) {
+            walletFileName = WalletUtils.generateNewWalletFile(pwd, dir, false);
+        }
+        Credentials credentials = WalletUtils.loadCredentials(pwd, getWalletFilePathName(uuid));
         //钱包地址 ：
         String address = credentials.getAddress();
         // 公钥16进制字符串表示：

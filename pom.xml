@@ -98,26 +98,20 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.75</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.web3j</groupId>-->
-<!--            <artifactId>core</artifactId>-->
-<!--            <version>5.0.0</version>-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>jnr-ffi</artifactId>-->
-<!--                    <groupId>com.github.jnr</groupId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>jnr-constants</artifactId>-->
-<!--                    <groupId>com.github.jnr</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
-        <!-- https://mvnrepository.com/artifact/org.bitcoinj/bitcoinj-core -->
         <dependency>
-            <groupId>org.bitcoinj</groupId>
-            <artifactId>bitcoinj-core</artifactId>
-            <version>0.15.10</version>
+            <groupId>org.web3j</groupId>
+            <artifactId>core</artifactId>
+            <version>5.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jnr-ffi</artifactId>
+                    <groupId>com.github.jnr</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jnr-constants</artifactId>
+                    <groupId>com.github.jnr</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>
