@@ -45,11 +45,10 @@ public class NFTController {
 
 	@RequestMapping("/insertAddressInvite")
 	public ResponseEntity insertAddressInvite(@RequestParam Map<String, Object> map) {
-		if (map.get("name") == null || map.get("name").toString().length() == 0) {
+		if (map.get("address") == null || map.get("address").toString().length() == 0) {
 			return new ResponseEntity(400, "address不能为空！");
 		}
 		map.put("tableName", AddressInvite_MANAGE);
-		map.put("invite_code",Long.parseLong(GenerateUtils.getRandomNickname(10)));
 		int count = baseDao.insertIgnoreBase(map);
 		return new ResponseEntity(count);
 	}
@@ -66,7 +65,7 @@ public class NFTController {
 
 	@RequestMapping("/getAddressInvite")
 	public ResponseEntity getAddressInvite(@RequestParam Map<String, Object> map) {
-		if (map.get("name") == null || map.get("name").toString().length() == 0) {
+		if (map.get("address") == null || map.get("address").toString().length() == 0) {
 			return new ResponseEntity(400, "address不能为空！");
 		}
 		map.put("tableName", AddressInvite_MANAGE);

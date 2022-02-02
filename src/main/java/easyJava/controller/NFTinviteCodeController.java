@@ -3,6 +3,7 @@ package easyJava.controller;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
+import easyJava.utils.GenerateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,10 +45,11 @@ public class NFTinviteCodeController {
 
 	@RequestMapping("/insertInviteCode")
 	public ResponseEntity insertInviteCode(@RequestParam Map<String, Object> map) {
-		if (map.get("address") == null || map.get("address").toString().length() == 0) {
-			return new ResponseEntity(400, "address不能为空！");
+		if (map.get("name") == null || map.get("name").toString().length() == 0) {
+			return new ResponseEntity(400, "name不能为空！");
 		}
 		map.put("tableName", InviteCode_MANAGE);
+		map.put("invite_code",Long.parseLong(GenerateUtils.getRandomNickname(10)));
 		int count = baseDao.insertIgnoreBase(map);
 		return new ResponseEntity(count);
 	}
@@ -64,8 +66,8 @@ public class NFTinviteCodeController {
 
 	@RequestMapping("/getInviteCode")
 	public ResponseEntity getInviteCode(@RequestParam Map<String, Object> map) {
-		if (map.get("address") == null || map.get("address").toString().length() == 0) {
-			return new ResponseEntity(400, "address不能为空！");
+		if (map.get("name") == null || map.get("name").toString().length() == 0) {
+			return new ResponseEntity(400, "name不能为空！");
 		}
 		map.put("tableName", InviteCode_MANAGE);
 		BaseModel baseModel = new BaseModel();
