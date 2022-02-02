@@ -49,7 +49,7 @@ public class NFTController {
 			return new ResponseEntity(400, "address不能为空！");
 		}
 		map.put("tableName", AddressInvite_MANAGE);
-		int count = baseDao.insertBase(map);
+		int count = baseDao.insertIgnoreBase(map);
 		return new ResponseEntity(count);
 	}
 

@@ -123,6 +123,26 @@
             </if>
         </foreach>
     </insert>
+
+    <insert id="insertIgnoreBase" parameterType="java.util.HashMap">
+        insert ignore into ${map.tableName}
+        (
+        <foreach collection="map" index="key" item="value"
+                 separator=",">
+            <if test="key != 'tableName' ">
+                "${key}"
+            </if>
+        </foreach>
+        )
+        values (
+        <foreach collection="map" index="key" item="value"
+                 separator=",">
+            <if test="key != 'tableName' ">
+                #{value}
+            </if>
+        </foreach>
+        )
+    </insert>
     <update id="updateBaseByPrimaryKey">
         update ${map.tableName}
         <set>
