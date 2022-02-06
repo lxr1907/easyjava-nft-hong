@@ -74,10 +74,10 @@ public class NFTdataController {
         baseModel.setPageNo(1);
         HashMap retmap = new HashMap();
         List<Map> list = baseDao.selectBaseList(map, baseModel);
-        list.forEach(retMap -> {
-            String id = retMap.get("id").toString();
-            retMap.put("tokenUrl", baseUrl + id);
-        });
+//        list.forEach(retMap -> {
+//            String id = retMap.get("id").toString();
+//            retMap.put("tokenUrl", baseUrl + id);
+//        });
         retmap.put("list", list);
         return new ResponseEntity(retmap, 1, baseModel);
     }
