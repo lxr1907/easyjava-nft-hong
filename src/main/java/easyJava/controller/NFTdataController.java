@@ -64,9 +64,11 @@ public class NFTdataController {
     }
 
     @RequestMapping("/getNFTdata")
-    public ResponseEntity getNFTdata(@RequestParam Map<String, Object> map) {
+    public Map getNFTdata(@RequestParam Map<String, Object> map) {
+        Map mapRet = new HashMap();
         if (map.get("id") == null || map.get("id").toString().length() == 0) {
-            return new ResponseEntity(400, "id不能为空！");
+            mapRet.put("error", "id不能为空！");
+            return mapRet;
         }
         map.put("tableName", NFTdata_MANAGE);
         BaseModel baseModel = new BaseModel();
@@ -78,7 +80,11 @@ public class NFTdataController {
 //            String id = retMap.get("id").toString();
 //            retMap.put("tokenUrl", baseUrl + id);
 //        });
-        retmap.put("list", list);
-        return new ResponseEntity(retmap, 1, baseModel);
+        if (list != null && list.size() > 0) {
+            return list.get(0);
+        } else {
+            mapRet.put("error", "未查询到！");
+            return mapRet;
+        }
     }
 }
