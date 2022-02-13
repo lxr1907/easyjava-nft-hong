@@ -22,7 +22,7 @@ public class NFTdataController {
     private RedisTemplate<String, Object> redisTemplate;
 
     public static final String NFTdata_MANAGE = "nft_data";
-    public static final String baseUrl = "http://175.178.10.214:8090/easyJava/baseUrl/";
+    public static final String IMAGE_BASE_URL = "https://nftrobbi.oss-us-west-1.aliyuncs.com/";
 
     @RequestMapping("/getNFTdataList")
     public ResponseEntity<?> login(@RequestParam Map<String, Object> map) {
@@ -76,10 +76,11 @@ public class NFTdataController {
         baseModel.setPageNo(1);
         HashMap retmap = new HashMap();
         List<Map> list = baseDao.selectBaseList(map, baseModel);
-//        list.forEach(retMap -> {
-//            String id = retMap.get("id").toString();
-//            retMap.put("tokenUrl", baseUrl + id);
-//        });
+        list.forEach(retMap -> {
+            String name = retMap.get("name").toString();
+            retMap.put("image", IMAGE_BASE_URL + name+".png");
+            //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
+        });
         if (list != null && list.size() > 0) {
             return list.get(0);
         } else {
