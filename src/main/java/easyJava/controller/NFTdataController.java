@@ -22,8 +22,9 @@ public class NFTdataController {
     private RedisTemplate<String, Object> redisTemplate;
 
     public static final String NFTdata_MANAGE = "nft_data";
-    public static final String IMAGE_BASE_URL = "https://nftrobbi.oss-us-west-1.aliyuncs.com/";
-
+    //public static final String IMAGE_BASE_URL = "https://nftrobbi.oss-us-west-1.aliyuncs.com/";
+    public static final String IMAGE_BASE_URL = "https://robbbbbi.oss-us-west-1.aliyuncs.com/Final_full/";
+    //https://robbbbbi.oss-us-west-1.aliyuncs.com/Final_full/
     @RequestMapping("/getNFTdataList")
     public ResponseEntity<?> login(@RequestParam Map<String, Object> map) {
         if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
