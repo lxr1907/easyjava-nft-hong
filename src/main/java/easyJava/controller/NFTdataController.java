@@ -5,6 +5,7 @@ import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,13 +67,15 @@ public class NFTdataController {
         return new ResponseEntity(count);
     }
 
-    @RequestMapping("/")
-    public Map getNFTdata(@RequestParam Map<String, Object> map) {
+    @RequestMapping("/{id}")
+    public Map getNFTdata(@PathVariable String id) {
         Map mapRet = new HashMap();
-        if (map.get("id") == null || map.get("id").toString().length() == 0) {
+        if (id == null || id.length() == 0) {
             mapRet.put("error", "id不能为空！");
             return mapRet;
         }
+        var map=new HashMap<>();
+        map.put("id",id);
         map.put("tableName", NFTdata_MANAGE);
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
