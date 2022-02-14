@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,14 @@ public class NFTdataController {
         List<Map> list = baseDao.selectBaseList(map, baseModel);
         list.forEach(retMap -> {
             String name = retMap.get("name").toString();
+            var attrList=new ArrayList<Map>();
+            for(var attr : retMap.entrySet()){
+                Map attrMap=new HashMap<>();
+                attrMap.put("trait_type",((Map.Entry)attr).getKey());
+                attrMap.put("value",((Map.Entry)attr).getValue());
+                attrList.add(attrMap);
+            }
+            retMap.put("attributes",list);
             retMap.put("image", IMAGE_BASE_URL + name + ".png");
             //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
         });
@@ -92,5 +101,18 @@ public class NFTdataController {
             mapRet.put("error", "未查询到！");
             return mapRet;
         }
+        /**
+         * {"name":"ROBBiSS #11","description":"ROBBi Hero, Solar System Series by ROBBi X MCG",
+         * "attributes":[{"trait_type":"Planet","value":"Mecury"}
+         * ,{"trait_type":"Purity","value":"Normal"},
+         * {"trait_type":"Ear","value":"Rock"},
+         * {"trait_type":"Mask","value":"Silver"},
+         * {"trait_type":"Helmet","value":"Silver"},
+         * {"trait_type":"Button","value":"Silver"},
+         * {"trait_type":"Pipe","value":"Rock"}"},
+         * {"trait_type":"Arm","value":"Silver"},
+         * {"trait_type":"heart","value":"No"}],
+         * "image":"https://content.robbiverse.io/images/SSME01_0002.png"}
+         */
     }
 }
