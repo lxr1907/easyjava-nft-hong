@@ -91,7 +91,7 @@ public class NFTdataController {
                 attrMap.put("value",((Map.Entry)attr).getValue());
                 attrList.add(attrMap);
             }
-            retMap.put("attributes",list);
+            retMap.put("attributes",attrList);
             retMap.put("image", IMAGE_BASE_URL + name + ".png");
             //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
         });
