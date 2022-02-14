@@ -66,7 +66,7 @@ public class NFTdataController {
         return new ResponseEntity(count);
     }
 
-    @RequestMapping("/getNFTdata")
+    @RequestMapping("/")
     public Map getNFTdata(@RequestParam Map<String, Object> map) {
         Map mapRet = new HashMap();
         if (map.get("id") == null || map.get("id").toString().length() == 0) {
