@@ -20,7 +20,7 @@
         table_schema='easyJava'
     </select>
     <!--根据实体参数查询 -->
-    <select id="selectBaseList" resultType="java.util.HashMap">
+    <select id="selectBaseList" resultType="java.util.LinkedHashMap">
         select
         *
         from ${map.tableName}
