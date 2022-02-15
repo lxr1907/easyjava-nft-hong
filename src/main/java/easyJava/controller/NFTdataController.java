@@ -97,7 +97,12 @@ public class NFTdataController {
             //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
         });
         if (list != null && list.size() > 0) {
-            return list.get(0);
+            Map retPre=list.get(0);
+            Map retMap=new HashMap();
+            retMap.put("name",retMap.get("name"));
+            retMap.put("image",retMap.get("image"));
+            retMap.put("attributes",retMap.get("attributes"));
+            return retMap;
         } else {
             mapRet.put("error", "未查询到！");
             return mapRet;
