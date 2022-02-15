@@ -99,9 +99,9 @@ public class NFTdataController {
         if (list != null && list.size() > 0) {
             Map retPre=list.get(0);
             Map retMap=new HashMap();
-            retMap.put("name",retMap.get("name"));
-            retMap.put("image",retMap.get("image"));
-            retMap.put("attributes",retMap.get("attributes"));
+            retMap.put("name",retPre.get("name"));
+            retMap.put("image",retPre.get("image"));
+            retMap.put("attributes",retPre.get("attributes"));
             return retMap;
         } else {
             mapRet.put("error", "未查询到！");
