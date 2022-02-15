@@ -63,6 +63,8 @@ public class NFTdataController {
         if (map.get("id") == null || map.get("id").toString().trim().length() == 0) {
             return new ResponseEntity(400, "id不能为空！");
         }
+        Integer id=Integer.parseInt(map.get("id").toString())+1;
+        map.put("id",id);
         map.put("tableName", NFTdata_MANAGE);
         int count = baseDao.updateBaseByPrimaryKey(map);
         return new ResponseEntity(count);
