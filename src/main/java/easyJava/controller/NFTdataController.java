@@ -87,6 +87,11 @@ public class NFTdataController {
             String name = retMap.get("name").toString();
             var attrList = new ArrayList<Map>();
             for (var attr : retMap.entrySet()) {
+                String key=((Map.Entry) attr).getKey().toString();
+                if(key.equals("id")
+                ||key.equals("name")||key.equals("main_material")){
+                    continue;
+                }
                 Map attrMap = new HashMap<>();
                 attrMap.put("trait_type", ((Map.Entry) attr).getKey());
                 attrMap.put("value", ((Map.Entry) attr).getValue());
@@ -104,7 +109,7 @@ public class NFTdataController {
             Map retMap = new HashMap();
             if (lootBox) {
                 retMap.put("name", "ROBBi Planet #" + id);
-                retMap.put("image", "");
+                retMap.put("image", "https://robbbbbi.oss-us-west-1.aliyuncs.com/Final_full/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20220215131330.png");
                 retMap.put("description", "ROBBi Hero, Solar System Series by ROBBi X MCG");
             } else {
                 retMap.put("name", retPre.get("name"));
