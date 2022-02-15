@@ -19,7 +19,7 @@ import java.util.Map;
 public class NFTdataController {
     @Autowired
     BaseDao baseDao;
-
+    boolean lootBox = true;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
@@ -75,9 +75,9 @@ public class NFTdataController {
             mapRet.put("error", "id不能为空！");
             return mapRet;
         }
-        var map=new HashMap<>();
-        Integer idInt=Integer.parseInt(id)+1;
-        map.put("id",idInt);
+        var map = new HashMap<>();
+        Integer idInt = Integer.parseInt(id) + 1;
+        map.put("id", idInt);
         map.put("tableName", NFTdata_MANAGE);
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
@@ -85,23 +85,34 @@ public class NFTdataController {
         List<Map> list = baseDao.selectBaseList(map, baseModel);
         list.forEach(retMap -> {
             String name = retMap.get("name").toString();
-            var attrList=new ArrayList<Map>();
-            for(var attr : retMap.entrySet()){
-                Map attrMap=new HashMap<>();
-                attrMap.put("trait_type",((Map.Entry)attr).getKey());
-                attrMap.put("value",((Map.Entry)attr).getValue());
+            var attrList = new ArrayList<Map>();
+            for (var attr : retMap.entrySet()) {
+                Map attrMap = new HashMap<>();
+                attrMap.put("trait_type", ((Map.Entry) attr).getKey());
+                attrMap.put("value", ((Map.Entry) attr).getValue());
+                if (lootBox) {
+                    attrMap.put("value", "NA");
+                }
                 attrList.add(attrMap);
             }
-            retMap.put("attributes",attrList);
+            retMap.put("attributes", attrList);
             retMap.put("image", IMAGE_BASE_URL + name + ".png");
             //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
         });
         if (list != null && list.size() > 0) {
-            Map retPre=list.get(0);
-            Map retMap=new HashMap();
-            retMap.put("name",retPre.get("name"));
-            retMap.put("image",retPre.get("image"));
-            retMap.put("attributes",retPre.get("attributes"));
+            Map retPre = list.get(0);
+            Map retMap = new HashMap();
+            if (lootBox) {
+                retMap.put("name", "ROBBi Planet #" + id);
+                retMap.put("image", "");
+                retMap.put("description", "ROBBi Hero, Solar System Series by ROBBi X MCG");
+            } else {
+                retMap.put("name", retPre.get("name"));
+                retMap.put("image", retPre.get("image"));
+            }
+            retMap.put("attributes", retPre.get("attributes"));
+            retMap.put("description", "ROBBi Hero, Solar System Series by ROBBi X MCG");
+
             return retMap;
         } else {
             mapRet.put("error", "未查询到！");
