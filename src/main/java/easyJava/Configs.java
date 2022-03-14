@@ -10,8 +10,8 @@ public class Configs {
     public static String getBtcpayHost() {
         return btcpayHost;
     }
-
-    @Value("${btcpay.host}")
+//
+//    @Value("${btcpay.host}")
     public void setBtcpayHost(String btcpayHost) {
         this.btcpayHost = btcpayHost;
     }
