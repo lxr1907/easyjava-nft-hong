@@ -12,16 +12,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class ScanServiceImpl implements ScanService {
 
-    private String contractAddress;
-    private String apiKey;
-    private String url;
-    private volatile Long currentBlock = 0L;
+    private static String contractAddress;
+    private static String apiKey;
+    private static String url;
+    private static volatile Long currentBlock = 0L;
 
-    public void init(String contractAddress, String apiKey, String url) {
-        this.contractAddress = contractAddress;
-        this.apiKey = apiKey;
-        this.url = url;
+    static {
 
+        String contractAddress = "0x04150f928c036810be42ee2e42c5a3b85561c3f7";
+        String apiKey = "NZMHHDYZ8N2I46ZA85DMIQGWBST7227KJA";
+        String url = "https://api.etherscan.io/api";
+
+        init(contractAddress, apiKey, url);
+    }
+
+    public static void init(String a, String b, String c) {
+        contractAddress = a;
+        apiKey = b;
+        url = c;
         //实际上 当前区块 从数据库 或 redis  或文件 读取
         currentBlock = 0L;
 
