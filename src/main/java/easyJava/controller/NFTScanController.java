@@ -27,6 +27,7 @@ public class NFTScanController {
     private RedisTemplate<String, Object> redisTemplate;
 
     public static final String NFT_OWNER = "nft_owner";
+    public static final String NFTdata_MANAGE = "nft_data";
 
     @Scheduled(cron = "*/15 * * * * ?")
     @RequestMapping("/scanNftTransfer")
@@ -54,6 +55,15 @@ public class NFTScanController {
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
         var retmap = new HashMap();
         var list = baseDao.selectBaseList(map, baseModel);
+        list.forEach(nft -> {
+            var id = nft.get("token_id").toString();
+            var param = new HashMap();
+            param.put("tableName", NFTdata_MANAGE);
+            Map nftDataMap = baseDao.selectBaseByPrimaryKey(Long.parseLong(id), param);
+            String name = nftDataMap.get("name").toString();
+            String imageUrl = NFTdataController.IMAGE_BASE_URL + name + ".png";
+            nft.put("img",imageUrl);
+        });
         int count = baseDao.selectBaseCount(map);
         retmap.put("list", list);
         return new ResponseEntity(retmap, count, baseModel);
