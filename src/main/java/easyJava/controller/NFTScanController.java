@@ -61,7 +61,7 @@ public class NFTScanController {
             param.put("tableName", NFTdata_MANAGE);
             Map nftDataMap = baseDao.selectBaseByPrimaryKey(Long.parseLong(id), param);
             String name = nftDataMap.get("name").toString();
-            String imageUrl = NFTdataController.IMAGE_BASE_URL + name + ".png";
+            String imageUrl = NFTdataController.IMAGE_INIT_URL + name + ".png";
             nft.put("img",imageUrl);
         });
         int count = baseDao.selectBaseCount(map);
