@@ -26,7 +26,7 @@ public class NFTScanController {
 
     public static final String NFT_OWNER = "nft_owner";
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "*/15 * * * * ?")
     @RequestMapping("/scanNftTransfer")
     public ResponseEntity<?> scanNftTransfer() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
