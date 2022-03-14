@@ -4,10 +4,10 @@
 
     <!--根据主键查询 -->
     <select id="selectBaseByPrimaryKey"
-            resultType="java.util.HashMap" parameterType="java.util.HashMap">
+            resultType="java.util.HashMap">
         select
         *
-        from ${tableName}
+        from ${map.tableName}
         where id = #{id}
     </select>
     <select id="selectBaseShowTableColumns"
