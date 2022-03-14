@@ -1,4 +1,4 @@
-# easyJava
+# easyJava-nft
 
 #### 介绍
 任意库表的增删改查接口，可以传入表名称，灵活传入字段，Map接收任意类型，list<Map>返回任意类型
