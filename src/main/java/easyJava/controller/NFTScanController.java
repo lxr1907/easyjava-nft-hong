@@ -6,6 +6,7 @@ import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.ScanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@EnableScheduling
 public class NFTScanController {
     @Autowired
     BaseDao baseDao;
