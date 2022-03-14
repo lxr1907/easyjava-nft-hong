@@ -6,6 +6,7 @@ import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.ScanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,14 +26,15 @@ public class NFTScanController {
 
     public static final String NFT_OWNER = "nft_owner";
 
+    @Scheduled(cron = "0 * * * * ?")
     @RequestMapping("/scanNftTransfer")
     public ResponseEntity<?> scanNftTransfer() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
         List<Map> retList = scanService.doScan();
-        retList.forEach(map->{
+        retList.forEach(map -> {
             map.put("tableName", NFT_OWNER);
             baseDao.insertUpdateBase(map);
-        } );
+        });
         return new ResponseEntity();
     }
 
