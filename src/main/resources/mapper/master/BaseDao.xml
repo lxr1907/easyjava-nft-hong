@@ -115,7 +115,7 @@
             </if>
         </foreach>
         )
-        on conflict key do update set
+        on DUPLICATE  key do update set
         <foreach collection="map" index="key" item="value"
                  separator=",">
             <if test="key != 'tableName' and key != 'hash'">
