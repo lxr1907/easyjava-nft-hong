@@ -115,10 +115,10 @@
             </if>
         </foreach>
         )
-        on conflict(hash) do update set
+        on conflict(token_id) do update set
         <foreach collection="map" index="key" item="value"
                  separator=",">
-            <if test="key != 'tableName' and key != 'hash'">
+            <if test="key != 'tableName' and key != 'token_id'">
                 `${key}`=#{value}
             </if>
         </foreach>
