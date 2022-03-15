@@ -24,7 +24,7 @@ public class NFTdataController {
     private RedisTemplate<String, Object> redisTemplate;
 
     public static final String NFTdata_MANAGE = "nft_data";
-    public static final String IMAGE_BASE_URL = "https://nftrobbi.oss-us-west-1.aliyuncs.com/";
+    //public static final String IMAGE_BASE_URL = "https://nftrobbi.oss-us-west-1.aliyuncs.com/";
     //    public static final String IMAGE_BASE_URL = "https://robbbbbi.oss-us-west-1.aliyuncs.com/Final_full/";
     public static final String IMAGE_INIT_URL = "https://robbbbbi.oss-us-west-1.aliyuncs.com/Final_full/";
 
@@ -101,7 +101,7 @@ public class NFTdataController {
                 attrList.add(attrMap);
             }
             retMap.put("attributes", attrList);
-            retMap.put("image", IMAGE_BASE_URL + name + ".png");
+            retMap.put("image", IMAGE_INIT_URL + name + ".png");
             //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
         });
         if (list != null && list.size() > 0) {
