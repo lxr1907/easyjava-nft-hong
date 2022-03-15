@@ -19,7 +19,7 @@ import java.util.Map;
 public class NFTdataController {
     @Autowired
     BaseDao baseDao;
-    boolean lootBox = false;
+    boolean lootBox = true;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
