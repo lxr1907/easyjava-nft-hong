@@ -87,9 +87,9 @@ public class NFTdataController {
             String name = retMap.get("name").toString();
             var attrList = new ArrayList<Map>();
             for (var attr : retMap.entrySet()) {
-                String key=((Map.Entry) attr).getKey().toString();
-                if(key.equals("id")
-                ||key.equals("name")||key.equals("main_material")){
+                String key = ((Map.Entry) attr).getKey().toString();
+                if (key.equals("id")
+                        || key.equals("name") || key.equals("main_material")) {
                     continue;
                 }
                 Map attrMap = new HashMap<>();
@@ -136,5 +136,60 @@ public class NFTdataController {
          * {"trait_type":"heart","value":"No"}],
          * "image":"https://content.robbiverse.io/images/SSME01_0002.png"}
          */
+
+
+    }
+
+    @RequestMapping("/test/{id}")
+    public Map getNFTdataTest(@PathVariable String id) {
+        Map mapRet = new HashMap();
+        if (id == null || id.length() == 0) {
+            mapRet.put("error", "id不能为空！");
+            return mapRet;
+        }
+        var map = new HashMap<>();
+        Integer idInt = Integer.parseInt(id) + 1;
+        map.put("id", idInt);
+        map.put("tableName", NFTdata_MANAGE);
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(1);
+        baseModel.setPageNo(1);
+        List<Map> list = baseDao.selectBaseList(map, baseModel);
+        list.forEach(retMap -> {
+            String name = retMap.get("name").toString();
+            var attrList = new ArrayList<Map>();
+            for (var attr : retMap.entrySet()) {
+                String key = ((Map.Entry) attr).getKey().toString();
+                if (key.equals("id")
+                        || key.equals("name") || key.equals("main_material")) {
+                    continue;
+                }
+                Map attrMap = new HashMap<>();
+                attrMap.put("trait_type", ((Map.Entry) attr).getKey());
+                attrMap.put("value", ((Map.Entry) attr).getValue());
+                if (lootBox) {
+                    attrMap.put("value", "NA");
+                }
+                attrList.add(attrMap);
+            }
+            retMap.put("attributes", attrList);
+            retMap.put("image", IMAGE_INIT_URL + name + ".png");
+            //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
+        });
+        if (list != null && list.size() > 0) {
+            Map retPre = list.get(0);
+            Map retMap = new HashMap();
+
+            retMap.put("name", retPre.get("name"));
+            retMap.put("image", retPre.get("image"));
+
+            retMap.put("attributes", retPre.get("attributes"));
+            retMap.put("description", "ROBBi Hero, Solar System Series by ROBBi X MCG");
+
+            return retMap;
+        } else {
+            mapRet.put("error", "未查询到！");
+            return mapRet;
+        }
     }
 }
