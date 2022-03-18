@@ -175,6 +175,7 @@ public class NFTdataController {
                 }
             }
 
+            retMap.put("name", namePre);
             retMap.put("attributes", attrList);
             retMap.put("image", IMAGE_INIT_URL + name + ".png");
             //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
