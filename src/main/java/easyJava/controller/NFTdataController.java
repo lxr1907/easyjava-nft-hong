@@ -167,9 +167,6 @@ public class NFTdataController {
                 Map attrMap = new HashMap<>();
                 attrMap.put("trait_type", ((Map.Entry) attr).getKey());
                 attrMap.put("value", ((Map.Entry) attr).getValue());
-                if (lootBox) {
-                    attrMap.put("value", "NA");
-                }
                 attrList.add(attrMap);
             }
             retMap.put("attributes", attrList);
