@@ -158,6 +158,8 @@ public class NFTdataController {
         list.forEach(retMap -> {
             String name = retMap.get("name").toString();
             var attrList = new ArrayList<Map>();
+
+            String namePre = "ROBBi ";
             for (var attr : retMap.entrySet()) {
                 String key = ((Map.Entry) attr).getKey().toString();
                 if (key.equals("id")
@@ -168,7 +170,11 @@ public class NFTdataController {
                 attrMap.put("trait_type", ((Map.Entry) attr).getKey());
                 attrMap.put("value", ((Map.Entry) attr).getValue());
                 attrList.add(attrMap);
+                if (((Map.Entry) attr).getKey().equals("Planet")) {
+                    namePre = namePre + ((Map.Entry) attr).getValue() + " # " + id;
+                }
             }
+
             retMap.put("attributes", attrList);
             retMap.put("image", IMAGE_INIT_URL + name + ".png");
             //https://nftrobbi.oss-us-west-1.aliyuncs.com/SSME01_0001.png
