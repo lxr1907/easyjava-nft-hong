@@ -33,11 +33,13 @@ public class NFTScanController {
     @RequestMapping("/scanNftTransfer")
     public ResponseEntity<?> scanNftTransfer() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
-        List<Map> retList = scanService.doScan();
-        retList.forEach(map -> {
-            map.put("tableName", NFT_OWNER);
-            baseDao.insertUpdateBase(map);
-        });
+
+        //暂时关闭定时采集数据的功能
+//        List<Map> retList = scanService.doScan();
+//        retList.forEach(map -> {
+//            map.put("tableName", NFT_OWNER);
+//            baseDao.insertUpdateBase(map);
+//        });
         return new ResponseEntity();
     }
 
