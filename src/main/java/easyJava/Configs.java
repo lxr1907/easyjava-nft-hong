@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Configs {
-    private static String btcpayHost = "192.168.134.45";
+    private static String btcpayHost = "43.132.248.207";
 
     public static String getBtcpayHost() {
         return btcpayHost;
