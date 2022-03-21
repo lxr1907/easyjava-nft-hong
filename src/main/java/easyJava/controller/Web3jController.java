@@ -72,10 +72,11 @@ public class Web3jController {
 
     private void subscribeTransactions(WebSocketService ws) {
         Web3j web3 = Web3j.build(ws);
-        web3.transactionFlowable().subscribe(new TransactionConsumer("finish") {
-        });
-        web3.pendingTransactionFlowable().subscribe(new TransactionConsumer("pending") {
-        });
+        //暂时屏蔽
+//        web3.transactionFlowable().subscribe(new TransactionConsumer("finish") {
+//        });
+//        web3.pendingTransactionFlowable().subscribe(new TransactionConsumer("pending") {
+//        });
     }
 
     public class TransactionConsumer implements Consumer<Transaction> {
