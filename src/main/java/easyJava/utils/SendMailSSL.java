@@ -16,9 +16,9 @@ public class SendMailSSL {
 
     /**
      * 该方式qq已经成功验证
-     * @param args
+     *
      */
-    public static void main(String[] args) {
+    public static void send() {
         Properties props = new Properties();
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.socketFactory.port", "587");
