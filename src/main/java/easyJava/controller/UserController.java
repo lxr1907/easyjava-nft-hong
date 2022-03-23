@@ -1,5 +1,6 @@
 package easyJava.controller;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +52,11 @@ public class UserController {
         map.put("tableName", USER_TABLE);
         map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         map.put("my_invite_code", GenerateUtils.getRandomNickname(8));
+        String privateKey = KlayController.generatePrivate();
+        map.put("chr_private", DESUtils.encrypt(privateKey.getBytes(StandardCharsets.UTF_8))
+                .toString());
+        map.put("chr_address", KlayController.getWalletAddress(privateKey));
+
         try {
             Map countMap = new HashMap<>();
             countMap.put("tableName", USER_TABLE);

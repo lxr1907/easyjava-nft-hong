@@ -15,6 +15,12 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.6.4</version>
     </parent>
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 <!--    <dependency>-->
 <!--        <groupId>org.springframework.boot</groupId>-->
 <!--        <artifactId>spring-boot-starter-parent</artifactId>-->
@@ -126,7 +132,7 @@
         <dependency>
             <groupId>com.klaytn.caver</groupId>
             <artifactId>core</artifactId>
-            <version>1.5.0</version>
+            <version>1.8.0</version>
         </dependency>
         <dependency>
             <groupId>org.jodd</groupId>
