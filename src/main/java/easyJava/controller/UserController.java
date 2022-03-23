@@ -1,6 +1,7 @@
 package easyJava.controller;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,14 @@ public class UserController {
         map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         map.put("my_invite_code", GenerateUtils.getRandomNickname(8));
         try {
+            Map countMap = new HashMap<>();
+            countMap.put("tableName", USER_TABLE);
+            Integer count = baseDao.selectMaxId(countMap);
+            //需求从20万开始，后面随机+1到+30
+            if (count == null || count < 200000) {
+                count = 200000;
+            }
+            map.put("id", count + GenerateUtils.getRandomOneToMax(30));
             baseDao.insertBase(map);
         } catch (Exception e) {
             logger.error("注册失败", e);

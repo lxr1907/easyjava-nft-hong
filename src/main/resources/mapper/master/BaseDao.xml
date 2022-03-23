@@ -47,6 +47,15 @@
             </if>
         </foreach>
     </select>
+    <!--根据实体参数查询个数 -->
+    <select id="selectMaxId" resultType="java.lang.Integer">
+        select
+        id
+        from ${map.tableName}
+        where 1=1
+        order by id desc
+    </select>
+
     <select id="selectBaseListOr" resultType="java.util.HashMap">
         select
         *
@@ -79,7 +88,7 @@
     </select>
 
     <insert id="insertBase" parameterType="java.util.HashMap"
-            useGeneratedKeys="true" keyProperty="id" >
+            useGeneratedKeys="true" keyProperty="id">
         insert into ${map.tableName}
         (
         <foreach collection="map" index="key" item="value"
@@ -116,7 +125,7 @@
             </if>
         </foreach>
         )
-        on DUPLICATE  key  update
+        on DUPLICATE key update
         <foreach collection="map" index="key" item="value"
                  separator=",">
             <if test="key != 'tableName' and key != 'hash'">

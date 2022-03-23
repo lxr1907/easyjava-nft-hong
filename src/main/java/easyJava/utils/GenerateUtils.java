@@ -10,33 +10,38 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GenerateUtils {
-	@Autowired
-	RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    RedisTemplate<String, Object> redisTemplate;
 
-	public String getUniqueId(String tableName) {
-		String id = "";
-		RedisAtomicLong entityIdCounter = new RedisAtomicLong(tableName, redisTemplate.getConnectionFactory());
-		long increment = entityIdCounter.getAndIncrement();
-		id = increment + "" + new Date().getTime();
-		return id;
-	}
+    public String getUniqueId(String tableName) {
+        String id = "";
+        RedisAtomicLong entityIdCounter = new RedisAtomicLong(tableName, redisTemplate.getConnectionFactory());
+        long increment = entityIdCounter.getAndIncrement();
+        id = increment + "" + new Date().getTime();
+        return id;
+    }
 
-	/**
-	 * java生成随机数字10位数
-	 *
-	 * @param
-	 * @return
-	 */
-	public static String getRandomNickname(int length) {
-		String val = "";
-		Random random = new Random();
-		for (int i = 0; i < length; i++) {
-			val += String.valueOf(random.nextInt(10));
-		}
-		return val;
-	}
+    /**
+     * java生成随机数字10位数
+     *
+     * @param
+     * @return
+     */
+    public static String getRandomNickname(int length) {
+        String val = "";
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            val += String.valueOf(random.nextInt(10));
+        }
+        return val;
+    }
 
-	public static void main(String[] args) {
-		System.out.println("java生成随机数字10位数：" + getRandomNickname(10));
-	}
+    public static int getRandomOneToMax(int max) {
+        Random random = new Random();
+        return random.nextInt(max);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("java生成随机数字10位数：" + getRandomNickname(10));
+    }
 }

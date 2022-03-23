@@ -47,7 +47,14 @@
 			</if>
 		</foreach>
 	</select>
-
+	<!--根据实体参数查询个数 -->
+	<select id="selectMaxId" resultType="java.lang.Integer">
+		select
+		id
+		from ${map.tableName}
+		where 1=1
+		order by id desc
+	</select>
 
 	<insert id="insertBase" parameterType="java.util.HashMap">
 		insert into ${map.tableName}
