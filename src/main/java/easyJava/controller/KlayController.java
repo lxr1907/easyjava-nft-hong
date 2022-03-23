@@ -77,6 +77,7 @@ public class KlayController {
     public TransactionReceipt.TransactionReceiptData sendingKLAY(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
         Caver caver = new Caver(Caver.DEFAULT_URL);
         SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
+        String fromAddress = keyring.toAccount().getAddress();
         //Add to caver wallet.
         caver.wallet.add(keyring);
         //Create a value transfer transaction
@@ -92,10 +93,12 @@ public class KlayController {
         //Send a transaction to the klaytn blockchain platform (Klaytn)
         Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).send();
         if (result.hasError()) {
-            logger.error("sendingKLAY 失败:" + result.getResult());
+            logger.error("sendingKLAY 失败:" + result.getError().getMessage()
+                    + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
             throw new RuntimeException(result.getError().getMessage());
         }
-        logger.info("sendingKLAY :" + result.getResult());
+        logger.info("sendingKLAY :" + result.getResult()
+                + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
         //Check transaction receipt.
         TransactionReceiptProcessor transactionReceiptProcessor = new PollingTransactionReceiptProcessor(caver, 1000, 15);
         TransactionReceipt.TransactionReceiptData transactionReceipt = transactionReceiptProcessor.waitForTransactionReceipt(result.getResult());
