@@ -10,12 +10,14 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 public class SendMailSSL {
-    //    public static final String mail = "lijuede6197@gmail.com";
-//    public static final String mailPass = "arpltillllqwztba";
-//    public static final String host = "smtp.gmail.com";
-    public static final String mail = "418982099@qq.com";
-    public static final String mailPass = "kvxrylmawoqgbicc";
-    public static final String host = "smtp.qq.com";
+        public static final String mail = "lijuede6197@gmail.com";
+    public static final String mailPass = "arpltillllqwztba";
+    public static final String host = "smtp.gmail.com";
+    public static final String port = "587";
+//    public static final String mail = "418982099@qq.com";
+//    public static final String mailPass = "kvxrylmawoqgbicc";
+//    public static final String host = "smtp.qq.com";
+//public static final String port = "587";
 
     public static void main(String[] args) {
         send("lijuede6197@gmail.com", "test", "test");
@@ -27,10 +29,10 @@ public class SendMailSSL {
     public static void send(String to, String subject, String text) {
         Properties props = new Properties();
         props.put("mail.smtp.host", host);
-        props.put("mail.smtp.socketFactory.port", "587");
+        props.put("mail.smtp.socketFactory.port", port);
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.port", port);
 
         Session session = Session.getDefaultInstance(props,
                 new javax.mail.Authenticator() {

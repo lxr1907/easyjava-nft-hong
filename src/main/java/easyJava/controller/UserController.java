@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import easyJava.utils.GenerateUtils;
-import easyJava.utils.KryoRedisSerializer;
-import easyJava.utils.SendMailSSL;
+import easyJava.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
-import easyJava.utils.TokenProccessor;
 
 @RestController
 public class UserController {
@@ -124,8 +121,12 @@ public class UserController {
         // code存入redis
         redisTemplate.opsForValue().set(CODE_PRE + map.get("account").toString(),
                 code, 10, TimeUnit.MINUTES);
-
-        SendMailSSL.send(map.get("account").toString(), "登录注册验证码", code);
+        if (map.get("qq") != null) {
+            //使用qq邮箱
+            SendMailSSL.send(map.get("account").toString(), "登录注册验证码", code);
+        } else {
+            SendMailTLS.gmailSender(map.get("account").toString(), "登录注册验证码", code,map.get("ssl").toString());
+        }
         return new ResponseEntity(1, "验证码已经发送至邮箱" + map.get("account").toString() +
                 ",10分钟内有效！");
     }

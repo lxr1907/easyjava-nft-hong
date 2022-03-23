@@ -12,46 +12,13 @@ public class SendMailTLS {
     public static final String mail = "lijuede6197@gmail.com";
     public static final String mailPass = "arpltillllqwztba";
     public static final String host = "smtp.gmail.com";
+    public static final String port = "587";
 
     public static void main(String[] args) {
-        gmailSender("418982099@qq.com");
+        gmailSender("418982099@qq.com",
+                "title", "content", "ssl");
     }
 
-    public static void send() {
-
-        final String username = mail;
-        final String password = mailPass;
-
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", host);
-        props.put("mail.smtp.port", "587");
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-
-        Session session = Session.getInstance(props,
-                new javax.mail.Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(username, password);
-                    }
-                });
-
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(mail));
-            message.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse("418982099@qq.com"));
-            message.setSubject("Testing Subject");
-            message.setText("Dear Mail Crawler,"
-                    + "\n\n No spam to my email, please!");
-
-            Transport.send(message);
-            System.out.println("Done");
-
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /* * gmail邮箱SSL方式 */
     public static void gmailssl(Properties props) {
@@ -74,9 +41,13 @@ public class SendMailTLS {
     }
     /* * 通过gmail邮箱发送邮件 */
 
-    public static void gmailSender(String email) { // Get a Properties object
+    public static void gmailSender(String to, String title, String content, String ssl) { // Get a Properties object
         Properties props = new Properties(); //选择ssl方式
-        gmailssl(props);
+        if (ssl == null || ssl.equals("ssl")) {
+            gmailssl(props);
+        } else {
+            gmailtls(props);
+        }
         Session session = Session.getDefaultInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(mail, mailPass);
@@ -85,9 +56,9 @@ public class SendMailTLS {
         Message msg = new MimeMessage(session); // -- Set the FROM and TO fields
         try {
             msg.setFrom(new InternetAddress(mail));
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-            msg.setSubject("12345");
-            msg.setText("45566");
+            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            msg.setSubject(title);
+            msg.setText(content);
             msg.setSentDate(new Date());
             Transport.send(msg);
         } catch (AddressException e) {
