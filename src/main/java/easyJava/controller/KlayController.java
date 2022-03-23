@@ -101,7 +101,7 @@ public class KlayController {
         return transactionReceipt;
     }
 
-    @RequestMapping("/sendKlayTo")
+    @RequestMapping("/klay/sendKlayTo")
     public ResponseEntity<?> login(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
@@ -119,7 +119,7 @@ public class KlayController {
         return new ResponseEntity(result);
     }
 
-    @RequestMapping("/insertKlay")
+    @RequestMapping("/klay/insertKlay")
     public ResponseEntity insertKlay(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
@@ -129,7 +129,7 @@ public class KlayController {
         return new ResponseEntity(count);
     }
 
-    @RequestMapping("/updateKlay")
+    @RequestMapping("/klay/updateKlay")
     public ResponseEntity updateBaseByPrimaryKey(@RequestParam Map<String, Object> map) {
         if (map.get("id") == null || map.get("id").toString().trim().length() == 0) {
             return new ResponseEntity(400, "id不能为空！");
@@ -139,7 +139,7 @@ public class KlayController {
         return new ResponseEntity(count);
     }
 
-    @RequestMapping("/getKlay")
+    @RequestMapping("/klay/getKlay")
     public ResponseEntity getKlay(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");

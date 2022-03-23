@@ -133,6 +133,12 @@
             <groupId>com.klaytn.caver</groupId>
             <artifactId>core</artifactId>
             <version>1.8.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>core</artifactId>
+                    <groupId>org.web3j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jodd</groupId>

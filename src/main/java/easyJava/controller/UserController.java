@@ -67,6 +67,7 @@ public class UserController {
             }
             map.put("id", count + GenerateUtils.getRandomOneToMax(30));
             baseDao.insertBase(map);
+
         } catch (Exception e) {
             logger.error("注册失败", e);
             return new ResponseEntity(400, "邮箱已注册！");
@@ -74,6 +75,7 @@ public class UserController {
 
         String token = TokenProccessor.makeToken();
         map.remove("password");
+        map.remove("chr_private");
         map.put("token", token);
         // token有效期1小时，存入redis
         redisTemplate.opsForValue().set(token, map, 365, TimeUnit.DAYS);
