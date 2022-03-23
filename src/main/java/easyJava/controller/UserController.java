@@ -1,12 +1,16 @@
 package easyJava.controller;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import easyJava.utils.GenerateUtils;
+import easyJava.utils.KryoRedisSerializer;
 import easyJava.utils.SendMailSSL;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +24,7 @@ import easyJava.utils.TokenProccessor;
 
 @RestController
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired
@@ -48,7 +53,12 @@ public class UserController {
         map.put("tableName", USER_TABLE);
         map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         map.put("my_invite_code", GenerateUtils.getRandomNickname(8));
-        baseDao.insertBase(map);
+        try {
+            baseDao.insertBase(map);
+        } catch (Exception e) {
+            logger.error("注册失败", e);
+            return new ResponseEntity(400, "邮箱已注册！");
+        }
 
         String token = TokenProccessor.makeToken();
         map.remove("password");
@@ -116,7 +126,7 @@ public class UserController {
             return 0;
         }
         // code存入redis
-        String code = redisTemplate.opsForValue().get(CODE_PRE + map.get("account").toString()).toString();
+        Object code = redisTemplate.opsForValue().get(CODE_PRE + map.get("account").toString());
         if (code != null && code.equals(map.get("code").toString())) {
             return 1;
         }
