@@ -133,6 +133,16 @@
             <groupId>com.klaytn.caver</groupId>
             <artifactId>core</artifactId>
             <version>1.8.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jnr-ffi</artifactId>
+                    <groupId>com.github.jnr</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jnr-constants</artifactId>
+                    <groupId>com.github.jnr</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jodd</groupId>
