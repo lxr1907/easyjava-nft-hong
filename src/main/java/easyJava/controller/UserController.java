@@ -125,7 +125,10 @@ public class UserController {
             //使用qq邮箱
             SendMailSSL.send(map.get("account").toString(), "登录注册验证码", code);
         } else {
-            SendMailTLS.gmailSender(map.get("account").toString(), "登录注册验证码", code,map.get("ssl").toString());
+            if (map.get("ssl") == null) {
+                map.put("ssl", "ssl");
+            }
+            SendMailTLS.gmailSender(map.get("account").toString(), "登录注册验证码", code, map.get("ssl").toString());
         }
         return new ResponseEntity(1, "验证码已经发送至邮箱" + map.get("account").toString() +
                 ",10分钟内有效！");

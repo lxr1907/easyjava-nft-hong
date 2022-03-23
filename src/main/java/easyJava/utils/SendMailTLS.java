@@ -12,7 +12,6 @@ public class SendMailTLS {
     public static final String mail = "lijuede6197@gmail.com";
     public static final String mailPass = "arpltillllqwztba";
     public static final String host = "smtp.gmail.com";
-    public static final String port = "587";
 
     public static void main(String[] args) {
         gmailSender("418982099@qq.com",
@@ -36,6 +35,7 @@ public class SendMailTLS {
     public static void gmailtls(Properties props) {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.ssl.enable", "false");
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", "587");
     }
