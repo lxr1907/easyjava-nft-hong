@@ -27,5 +27,6 @@ CREATE TABLE `user` (
   `status` int(11) NOT NULL DEFAULT '1' COMMENT '状态1正常',
   `chr_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '合约币数量',
   `game_coin_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '游戏币数量',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `account_unique` (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
