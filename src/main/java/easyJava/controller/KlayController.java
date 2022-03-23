@@ -92,8 +92,10 @@ public class KlayController {
         //Send a transaction to the klaytn blockchain platform (Klaytn)
         Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).send();
         if (result.hasError()) {
+            logger.error("sendingKLAY 失败:" + result.getResult());
             throw new RuntimeException(result.getError().getMessage());
         }
+        logger.info("sendingKLAY :" + result.getResult());
         //Check transaction receipt.
         TransactionReceiptProcessor transactionReceiptProcessor = new PollingTransactionReceiptProcessor(caver, 1000, 15);
         TransactionReceipt.TransactionReceiptData transactionReceipt = transactionReceiptProcessor.waitForTransactionReceipt(result.getResult());
