@@ -8,6 +8,7 @@ import com.klaytn.caver.transaction.TxPropertyBuilder;
 import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
 import com.klaytn.caver.transaction.response.TransactionReceiptProcessor;
 import com.klaytn.caver.transaction.type.ValueTransfer;
+import com.klaytn.caver.utils.Utils;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
@@ -24,6 +25,7 @@ import org.web3j.crypto.CipherException;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +65,10 @@ public class KlayController {
     }
 
     //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
-
+    public static void main(String[] args) {
+        BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
+        System.out.println(value);
+    }
     /**
      * 发送klay
      *
@@ -86,7 +91,7 @@ public class KlayController {
                         .setFrom(keyring.getAddress())
                         .setTo(toAddress)
                         .setValue(value)
-                        .setGas(BigInteger.valueOf(25000))
+                        .setGas(BigInteger.valueOf(50000))
         );
         //Sign to the transaction
         valueTransfer.sign(keyring);
