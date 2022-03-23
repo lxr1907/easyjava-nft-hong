@@ -10,15 +10,21 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 public class SendMailSSL {
-    public static final String mail = "lijuede6197@gmail.com";
-    public static final String mailPass = "arpltillllqwztba";
-    public static final String host = "smtp.gmail.com";
+    //    public static final String mail = "lijuede6197@gmail.com";
+//    public static final String mailPass = "arpltillllqwztba";
+//    public static final String host = "smtp.gmail.com";
+    public static final String mail = "418982099@qq.com";
+    public static final String mailPass = "kvxrylmawoqgbicc";
+    public static final String host = "smtp.qq.com";
+
+    public static void main(String[] args) {
+        send("lijuede6197@gmail.com", "test", "test");
+    }
 
     /**
      * 该方式qq已经成功验证
-     *
      */
-    public static void send() {
+    public static void send(String to, String subject, String text) {
         Properties props = new Properties();
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.socketFactory.port", "587");
@@ -35,12 +41,11 @@ public class SendMailSSL {
 
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("from@no-spam.com"));
+            message.setFrom(new InternetAddress(mail));
             message.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse("to@no-spam.com"));
-            message.setSubject("Testing Subject");
-            message.setText("Dear Mail Crawler," +
-                    "\n\n No spam to my email, please!");
+                    InternetAddress.parse(to));
+            message.setSubject(subject);
+            message.setText(text);
 
             Transport.send(message);
             System.out.println("Done");
