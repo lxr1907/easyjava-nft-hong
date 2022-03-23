@@ -78,7 +78,8 @@
         </where>
     </select>
 
-    <insert id="insertBase" parameterType="java.util.HashMap">
+    <insert id="insertBase" parameterType="java.util.HashMap"
+            useGeneratedKeys="true" keyProperty="id" >
         insert into ${map.tableName}
         (
         <foreach collection="map" index="key" item="value"

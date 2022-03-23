@@ -44,6 +44,7 @@ public class UserController {
         if (checkEmailCode(map) == 0) {
             return new ResponseEntity(400, "验证码错误！");
         }
+        map.remove("code");
         map.put("tableName", USER_TABLE);
         map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         map.put("my_invite_code", GenerateUtils.getRandomNickname(8));
@@ -74,6 +75,7 @@ public class UserController {
         if (checkEmailCode(map) == 0) {
             return new ResponseEntity(400, "验证码错误！");
         }
+        map.remove("code");
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
