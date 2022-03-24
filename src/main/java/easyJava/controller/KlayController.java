@@ -42,6 +42,8 @@ public class KlayController {
 
     public static final String Klay_MANAGE = "address_invite";
     public static final String SYSTEM_PRIVATE = "6b9332b28c2a689f464994cb7be26485aba9a3471077cf8607eefe8f849c10f8";
+    public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
+    public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
 
     /**
      * 生成privateKey
@@ -66,8 +68,13 @@ public class KlayController {
 
     //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
     public static void main(String[] args) {
-        BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
-        System.out.println(value);
+        try {
+            sendingKLAY(SYSTEM_PRIVATE,"0x38bd8d9f0acda0ce533f44adcfd02b403f411de7",BigInteger.valueOf(1));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TransactionException e) {
+            e.printStackTrace();
+        }
     }
     /**
      * 发送klay
@@ -79,8 +86,8 @@ public class KlayController {
      * @throws CipherException
      * @throws TransactionException
      */
-    public TransactionReceipt.TransactionReceiptData sendingKLAY(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
-        Caver caver = new Caver(Caver.DEFAULT_URL);
+    public static TransactionReceipt.TransactionReceiptData sendingKLAY(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
+        Caver caver = new Caver(Klay_HOST);
         SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
         String fromAddress = keyring.toAccount().getAddress();
         //Add to caver wallet.
