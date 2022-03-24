@@ -93,12 +93,12 @@ public class UserController {
         if (map.get("password") == null || map.get("password").toString().length() == 0) {
             return new ResponseEntity(400, "密码不能为空！");
         }
-        if (map.get("code") == null || map.get("code").toString().length() == 0) {
-            return new ResponseEntity(400, "验证码不能为空！");
-        }
-        if (checkEmailCode(map) == 0) {
-            return new ResponseEntity(400, "验证码错误！");
-        }
+//        if (map.get("code") == null || map.get("code").toString().length() == 0) {
+//            return new ResponseEntity(400, "验证码不能为空！");
+//        }
+//        if (checkEmailCode(map) == 0) {
+//            return new ResponseEntity(400, "验证码错误！");
+//        }
         map.remove("code");
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
