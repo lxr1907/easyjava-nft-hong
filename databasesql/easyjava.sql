@@ -30,3 +30,23 @@ CREATE TABLE `user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_unique` (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- nft.klay_txs definition
+
+CREATE TABLE `klay_txs` (
+  `txHash` varchar(500) NOT NULL,
+  `createdAt` bigint(20) DEFAULT NULL,
+  `txType` varchar(100) DEFAULT NULL,
+  `txStatus` int(11) DEFAULT NULL,
+  `inputHeader` varchar(100) DEFAULT NULL,
+  `blockNumber` bigint(20) DEFAULT NULL,
+  `fromAddress` varchar(500) DEFAULT NULL,
+  `toAddress` varchar(500) DEFAULT NULL,
+  `amount` varchar(100) DEFAULT NULL,
+  `txFee` varchar(100) DEFAULT NULL,
+  `gasLimit` varchar(100) DEFAULT NULL,
+  `gasUsed` varchar(100) DEFAULT NULL,
+  `nonce` varchar(100) DEFAULT NULL,
+  `gasPrice` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`txHash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
