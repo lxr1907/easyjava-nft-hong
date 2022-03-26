@@ -20,6 +20,9 @@ public class ScanServiceImpl implements ScanService {
     private static String apiKey;
     private static String url;
     private static volatile Long currentBlock = 0L;
+    public static String url_main = "https://api.etherscan.io/api";
+    public static String url_ropsten = "https://api-ropsten.etherscan.io/api";
+    public static String url_rinkeby = "https://api-rinkeby.etherscan.io/api";
 
     static {
 
@@ -33,7 +36,7 @@ public class ScanServiceImpl implements ScanService {
     public static void init(String a, String b, String c) {
         contractAddress = a;
         apiKey = b;
-        url = c;
+        url = url_ropsten;
         //实际上 当前区块 从数据库 或 redis  或文件 读取
         currentBlock = 0L;
 
