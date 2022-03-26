@@ -14,6 +14,8 @@ import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
+import easyJava.utils.DateUtils;
+import easyJava.utils.GenerateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +23,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.web3j.abi.datatypes.Int;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class KlayController {
@@ -40,11 +41,24 @@ public class KlayController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    public static final String Klay_MANAGE = "address_invite";
+    public static final String ORDER_TABLE = "order";
     public static final String SYSTEM_PRIVATE = "6b9332b28c2a689f464994cb7be26485aba9a3471077cf8607eefe8f849c10f8";
     public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
     public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
     public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
+    //usdt-erc20充值地址,ropsten测试链
+    public static final String USDT_ADDRESS_ERC20_ROPSTEN = "0xC4f459a93169bbF3CF9Dc3c50D34502473703FB0";
+    //usdt-erc20充值地址,rinkeby测试链
+    public static final String USDT_ADDRESS_ERC20_RINKEBY = "0xC4f459a93169bbF3CF9Dc3c50D34502473703FB0";
+    //一个usdt可以购买的合约币数量
+    public static final int USDT_ERC20_PRICE = 10;
+    public static Map<String, String> usdtERC20Address = new HashMap<>();
+
+    static {
+        usdtERC20Address.put("ropsten", USDT_ADDRESS_ERC20_ROPSTEN);
+        usdtERC20Address.put("rinkeby", USDT_ADDRESS_ERC20_RINKEBY);
+        usdtERC20Address.put("main", USDT_ADDRESS_ERC20_RINKEBY);
+    }
 
     /**
      * 生成privateKey
@@ -69,14 +83,16 @@ public class KlayController {
 
     //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
     public static void main(String[] args) {
-        try {
-            sendingKLAY(SYSTEM_PRIVATE,"0x38bd8d9f0acda0ce533f44adcfd02b403f411de7",BigInteger.valueOf(1));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TransactionException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            sendingKLAY(SYSTEM_PRIVATE, "0x38bd8d9f0acda0ce533f44adcfd02b403f411de7", BigInteger.valueOf(1));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (TransactionException e) {
+//            e.printStackTrace();
+//        }
+        System.out.println(0 + Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000);
     }
+
     /**
      * 发送klay
      *
@@ -137,32 +153,84 @@ public class KlayController {
         return new ResponseEntity(result);
     }
 
-    @RequestMapping("/klay/insertKlay")
-    public ResponseEntity insertKlay(@RequestParam Map<String, Object> map) {
-        if (map.get("address") == null || map.get("address").toString().length() == 0) {
-            return new ResponseEntity(400, "address不能为空！");
-        }
-        map.put("tableName", Klay_MANAGE);
-        int count = baseDao.insertIgnoreBase(map);
-        return new ResponseEntity(count);
+    public static String getUsdtToAddress(String chain) {
+        return usdtERC20Address.get("chain");
     }
 
-    @RequestMapping("/klay/updateKlay")
-    public ResponseEntity updateBaseByPrimaryKey(@RequestParam Map<String, Object> map) {
+    /**
+     * 生成用usdt-erc20购买合约币的订单
+     *
+     * @param map
+     * @return
+     */
+    @RequestMapping("/klay/createOrder")
+    public ResponseEntity createOrder(@RequestParam Map<String, Object> map) {
+        if (map.get("buy_amount") == null || map.get("buy_amount").toString().length() == 0) {
+            return new ResponseEntity(400, "buy_amount 不能为空！");
+        }
+        if (map.get("chain") == null || map.get("chain").toString().length() == 0) {
+            return new ResponseEntity(400, "chain 不能为空！");
+        }
+        String to = getUsdtToAddress(map.get("chain").toString());
+        if (to == null) {
+            return new ResponseEntity(400, "chain 未找到对应的地址！");
+        }
+        map.put("to_address", to);
+        map.remove("chain");
+        int buy_amount_int = 0;
+        try {
+            buy_amount_int = Integer.parseInt(map.get("buy_amount").toString());
+        } catch (Exception e) {
+            return new ResponseEntity(400, "buy_amount 必须是整数！");
+        }
+        map.put("tableName", ORDER_TABLE);
+        map.put("status", 1);
+        map.put("date", DateUtils.getDateTimeString(new Date()));
+        map.put("price", USDT_ERC20_PRICE);
+        //生成0.0开头加3位随机数，0.0123
+        Float tail =
+                Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000;
+        map.put("send_value",
+                buy_amount_int + tail);
+
+        int count = baseDao.insertBase(map);
+        return new ResponseEntity(map);
+    }
+
+
+    /**
+     * 获取充值erc20-usdt的充值地址
+     *
+     * @return
+     */
+    @RequestMapping("/klay/getUSDTAddress")
+    public ResponseEntity getUSDTAddress() {
+        return new ResponseEntity(usdtERC20Address);
+    }
+
+    /**
+     * 获取单个erc20-usdt可兑换合约币数量
+     *
+     * @return
+     */
+    @RequestMapping("/klay/getPrice")
+    public ResponseEntity getPrice() {
+        return new ResponseEntity(USDT_ERC20_PRICE);
+    }
+
+    public ResponseEntity updateOrder(@RequestParam Map<String, Object> map) {
         if (map.get("id") == null || map.get("id").toString().trim().length() == 0) {
             return new ResponseEntity(400, "id不能为空！");
         }
-        map.put("tableName", Klay_MANAGE);
+        map.put("tableName", ORDER_TABLE);
         int count = baseDao.updateBaseByPrimaryKey(map);
         return new ResponseEntity(count);
     }
 
-    @RequestMapping("/klay/getKlay")
-    public ResponseEntity getKlay(@RequestParam Map<String, Object> map) {
-        if (map.get("address") == null || map.get("address").toString().length() == 0) {
-            return new ResponseEntity(400, "address不能为空！");
-        }
-        map.put("tableName", Klay_MANAGE);
+    @RequestMapping("/klay/getOrder")
+    public ResponseEntity getOrder(@RequestParam Map<String, Object> map) {
+
+        map.put("tableName", ORDER_TABLE);
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
