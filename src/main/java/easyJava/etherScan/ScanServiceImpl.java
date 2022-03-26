@@ -101,14 +101,16 @@ public class ScanServiceImpl implements ScanService {
             String input = item.get("input").toString();
             if (input.length() > 100) {
                 input = input.substring(0, 100);
+                map.put("input", input);
+            } else {
+                map.put("input", item.get("input"));
             }
-            map.put("input", input);
         }
         //tokenSymbol
-        if(item.get("tokenSymbol")!=null){
+        if (item.get("tokenSymbol") != null) {
             map.put("token", item.get("tokenSymbol"));
         }
-        if(item.get("contractAddress")!=null){
+        if (item.get("contractAddress") != null) {
             map.put("contract", item.get("contractAddress"));
         }
 
