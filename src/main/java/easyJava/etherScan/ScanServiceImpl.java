@@ -3,14 +3,18 @@ package easyJava.etherScan;
 import java.math.BigInteger;
 import java.util.*;
 
+import easyJava.controller.KlayController;
 import easyJava.utils.DateUtils;
 
 import com.alibaba.fastjson.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class ScanServiceImpl implements ScanService {
+    private static final Logger logger = LoggerFactory.getLogger(ScanServiceImpl.class);
 
     private static String contractAddress;
     private static String apiKey;
@@ -19,8 +23,8 @@ public class ScanServiceImpl implements ScanService {
 
     static {
 
-        String contractAddress = "0x04150f928c036810be42ee2e42c5a3b85561c3f7";
-        String apiKey = "NZMHHDYZ8N2I46ZA85DMIQGWBST7227KJA";
+        String contractAddress = KlayController.USDT_ADDRESS_ERC20_ROPSTEN;
+        String apiKey = "8UBE25IH7EXCS97K2ZSZJGQK2MR19PN8S3";
         String url = "https://api.etherscan.io/api";
 
         init(contractAddress, apiKey, url);
@@ -45,8 +49,7 @@ public class ScanServiceImpl implements ScanService {
         map.put("fromBlock", String.valueOf(startBlock));
         map.put("toBlock", String.valueOf(endBlock));
         map.put("apikey", apiKey);
-        map.put("topic0", "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef");
-
+//        map.put("topic0", "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef");
 
         String responseStr = HttpClientUtil.httpGet(url, map, null);
         EventList response = JSON.parseObject(responseStr, EventList.class);
@@ -72,7 +75,7 @@ public class ScanServiceImpl implements ScanService {
         map.put("to_address", toAddress);
         map.put("token_id", tokenId);
         map.put("timestamp", time);
-        System.out.println(String.format("%d %s %s %s %d %s", blockNum, transactionHash, fromAddress, toAddress, tokenId, DateUtils.getDateTimeString(date)));
+//        System.out.println(String.format("%d %s %s %s %d %s", blockNum, transactionHash, fromAddress, toAddress, tokenId, DateUtils.getDateTimeString(date)));
 
         //这里的逻辑是 根据tokenId查询数据库， 如果记录不存在 插入，如果存在 判断  toAddress是否是当前token 持有人，如果不是， 更新
         return map;
@@ -90,6 +93,7 @@ public class ScanServiceImpl implements ScanService {
 
             for (Map<String, Object> item : eventList.getResult()) {
 
+                logger.info(JSON.toJSONString(item));
                 ret.add(updateInfo(item));
 
             }
