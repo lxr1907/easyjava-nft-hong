@@ -10,5 +10,6 @@ import java.util.Map;
 public interface ScanService {
 
     List<Map> doScan() ;
+    List<Map> doScanAddress() ;
 
 }

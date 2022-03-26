@@ -17,8 +17,6 @@ public class Main {
 		String apiKey = "NZMHHDYZ8N2I46ZA85DMIQGWBST7227KJA";
 		String url = "https://api.etherscan.io/api";
 		
-		scanServiceImpl.init(contractAddress, apiKey, url);
-		
 		
 		//这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
 		scanServiceImpl.doScan();
