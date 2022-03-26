@@ -87,10 +87,14 @@ public class ScanServiceImpl implements ScanService {
         map.put("value", item.get("value"));
         map.put("from", item.get("from"));
         map.put("to", item.get("to"));
-        map.put("input", item.get("input"));
+        if (item.get("input") != null) {
+            String input = item.get("input").toString();
+            if (input.length() > 100) {
+                input = input.substring(0, 100);
+            }
+            map.put("input", input);
+        }
         map.put("hash", item.get("hash"));
-
-        //这里的逻辑是 根据tokenId查询数据库， 如果记录不存在 插入，如果存在 判断  toAddress是否是当前token 持有人，如果不是， 更新
         return map;
     }
 
