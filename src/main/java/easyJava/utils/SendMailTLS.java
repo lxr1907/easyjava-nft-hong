@@ -43,7 +43,8 @@ public class SendMailTLS {
     }
     /* * 通过gmail邮箱发送邮件 */
 
-    public static void gmailSender(String to, String title, String content, String ssl) { // Get a Properties object
+    public static void gmailSender(String to, String title, String content, String ssl) {
+        System.out.println("Message sent." + content);// Get a Properties object
         Properties props = new Properties(); //选择ssl方式
         if (ssl == null || ssl.equals("ssl")) {
             gmailssl(props);
@@ -68,7 +69,6 @@ public class SendMailTLS {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
-        System.out.println("Message sent.");
     }
 }
 

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +42,7 @@ public class KlayController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    public static final String ORDER_TABLE = "order";
+    public static final String ORDER_TABLE = "order_usdt";
     public static final String SYSTEM_PRIVATE = "6b9332b28c2a689f464994cb7be26485aba9a3471077cf8607eefe8f849c10f8";
     public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
     public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
@@ -154,7 +155,7 @@ public class KlayController {
     }
 
     public static String getUsdtToAddress(String chain) {
-        return usdtERC20Address.get("chain");
+        return usdtERC20Address.get(chain);
     }
 
     /**
@@ -164,7 +165,16 @@ public class KlayController {
      * @return
      */
     @RequestMapping("/klay/createOrder")
-    public ResponseEntity createOrder(@RequestParam Map<String, Object> map) {
+    public ResponseEntity createOrder(@RequestParam Map<String, Object> map,
+                                      @RequestHeader("token") String token) {
+        if (token == null ||token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        Map user= (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
         if (map.get("buy_amount") == null || map.get("buy_amount").toString().length() == 0) {
             return new ResponseEntity(400, "buy_amount 不能为空！");
         }
@@ -185,6 +195,7 @@ public class KlayController {
         }
         map.put("tableName", ORDER_TABLE);
         map.put("status", 1);
+        map.put("user_id", user.get("id"));
         map.put("date", DateUtils.getDateTimeString(new Date()));
         map.put("price", USDT_ERC20_PRICE);
         //生成0.0开头加3位随机数，0.0123
