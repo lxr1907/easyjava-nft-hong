@@ -49,7 +49,7 @@ public class ScanServiceImpl implements ScanService {
         map.put("fromBlock", String.valueOf(startBlock));
         map.put("toBlock", String.valueOf(endBlock));
         map.put("apikey", apiKey);
-//        map.put("topic0", "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef");
+        map.put("topic0", "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef");
 
         String responseStr = HttpClientUtil.httpGet(url, map, null);
         EventList response = JSON.parseObject(responseStr, EventList.class);
