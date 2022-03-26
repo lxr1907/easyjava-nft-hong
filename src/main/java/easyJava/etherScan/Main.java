@@ -19,7 +19,7 @@ public class Main {
 		
 		
 		//这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
-		scanServiceImpl.doScan();
+//		scanServiceImpl.doScan();
 		
 		
 	}
