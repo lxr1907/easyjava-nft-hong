@@ -30,8 +30,7 @@ public class NFTScanController {
     public static final String NFTdata_MANAGE = "nft_data";
 
     @Scheduled(cron = "*/15 * * * * ?")
-    @RequestMapping("/scanNftTransfer")
-    public ResponseEntity<?> scanNftTransfer() {
+    public ResponseEntity<?> scanNftTransferJob() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
 
         List<Map> retList = scanService.doScan();
@@ -40,6 +39,12 @@ public class NFTScanController {
             baseDao.insertUpdateBase(map);
         });
         return new ResponseEntity();
+    }
+
+    @RequestMapping("/scanNftTransfer")
+    public ResponseEntity<?> scanNftTransfer() {
+        List<Map> retList = scanService.doScan();
+        return new ResponseEntity(retList);
     }
 
     @RequestMapping("/getOwnerNFTList")
