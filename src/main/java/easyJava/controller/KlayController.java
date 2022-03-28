@@ -239,9 +239,18 @@ public class KlayController {
     }
 
     @RequestMapping("/klay/getOrder")
-    public ResponseEntity getOrder(@RequestParam Map<String, Object> map) {
+    public ResponseEntity getOrder(@RequestParam Map<String, Object> map,
+                                   @RequestHeader("token") String token) {
+        if (token == null ||token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        Map user= (Map) redisTemplate.opsForValue().get(token);
 
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
         map.put("tableName", ORDER_TABLE);
+        map.put("user_id",user.get("user_id"));
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
