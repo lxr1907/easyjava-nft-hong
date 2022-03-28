@@ -174,7 +174,7 @@ public class UserController {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
 
-        String privateKey = map.get("chr_private").toString();
+        String privateKey = user.get("chr_private").toString();
         try {
             String privateDecrypt=DESUtils.decrypt(privateKey.getBytes()).toString();
             return new ResponseEntity(privateDecrypt);
