@@ -164,7 +164,7 @@ public class UserController {
 
     @RequestMapping("/user/getPrivate")
     public ResponseEntity getPrivate(@RequestParam Map<String, Object> map,
-                                   @RequestHeader("token") String token) {
+                                     @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -176,10 +176,11 @@ public class UserController {
 
         String privateKey = user.get("chr_private").toString();
         try {
-            String privateDecrypt=DESUtils.decrypt(privateKey.getBytes()).toString();
+            String privateDecrypt = DESUtils.decrypt(
+                    privateKey.getBytes(StandardCharsets.UTF_8)).toString();
             return new ResponseEntity(privateDecrypt);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("private:" + privateKey, e);
         }
         return new ResponseEntity("解析私钥失败");
     }
