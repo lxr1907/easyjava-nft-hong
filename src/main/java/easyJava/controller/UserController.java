@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,7 +76,6 @@ public class UserController {
 
         String token = TokenProccessor.makeToken();
         map.remove("password");
-        map.remove("chr_private");
         map.put("token", token);
         // token有效期1小时，存入redis
         redisTemplate.opsForValue().set(token, map, 365, TimeUnit.DAYS);
@@ -160,5 +160,27 @@ public class UserController {
 
     public boolean checkToken(String token) {
         return redisTemplate.hasKey(token);
+    }
+
+    @RequestMapping("/user/getPrivate")
+    public ResponseEntity getPrivate(@RequestParam Map<String, Object> map,
+                                   @RequestHeader("token") String token) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+
+        String privateKey = map.get("chr_private").toString();
+        try {
+            String privateDecrypt=DESUtils.decrypt(privateKey.getBytes()).toString();
+            return new ResponseEntity(privateDecrypt);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity("解析私钥失败");
     }
 }
