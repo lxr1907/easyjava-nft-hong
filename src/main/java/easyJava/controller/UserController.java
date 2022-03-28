@@ -54,7 +54,7 @@ public class UserController {
         map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         map.put("my_invite_code", GenerateUtils.getRandomNickname(8));
         String privateKey = KlayController.generatePrivate();
-        map.put("chr_private", DESUtils.encrypt(privateKey.getBytes(StandardCharsets.UTF_8)));
+        map.put("chr_private", privateKey.getBytes(StandardCharsets.UTF_8));
         map.put("chr_address", KlayController.getWalletAddress(privateKey));
 
         try {
@@ -174,13 +174,6 @@ public class UserController {
         }
 
         Object privateKey = user.get("chr_private");
-        try {
-            String privateDecrypt = DESUtils.decrypt(
-                    (byte[]) privateKey).toString();
-            return new ResponseEntity(privateDecrypt);
-        } catch (Exception e) {
-            logger.error("private:" + privateKey, e);
-        }
-        return new ResponseEntity("解析私钥失败");
+        return new ResponseEntity(privateKey);
     }
 }
