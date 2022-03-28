@@ -54,8 +54,7 @@ public class UserController {
         map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         map.put("my_invite_code", GenerateUtils.getRandomNickname(8));
         String privateKey = KlayController.generatePrivate();
-        map.put("chr_private", DESUtils.encrypt(privateKey.getBytes(StandardCharsets.UTF_8))
-                .toString());
+        map.put("chr_private", DESUtils.encrypt(privateKey.getBytes(StandardCharsets.UTF_8)));
         map.put("chr_address", KlayController.getWalletAddress(privateKey));
 
         try {
@@ -174,10 +173,10 @@ public class UserController {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
 
-        String privateKey = user.get("chr_private").toString();
+        Object privateKey = user.get("chr_private");
         try {
             String privateDecrypt = DESUtils.decrypt(
-                    privateKey.getBytes(StandardCharsets.UTF_8)).toString();
+                    (byte[]) privateKey).toString();
             return new ResponseEntity(privateDecrypt);
         } catch (Exception e) {
             logger.error("private:" + privateKey, e);
