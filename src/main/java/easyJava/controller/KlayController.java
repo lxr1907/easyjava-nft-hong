@@ -250,7 +250,7 @@ public class KlayController {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
         map.put("tableName", ORDER_TABLE);
-        map.put("user_id",user.get("user_id"));
+        map.put("user_id",user.get("id"));
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
