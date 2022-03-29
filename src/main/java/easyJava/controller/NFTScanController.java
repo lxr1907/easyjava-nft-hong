@@ -1,9 +1,12 @@
 package easyJava.controller;
 
+import com.alibaba.fastjson.JSON;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.ScanService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -11,7 +14,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.web3j.protocol.exceptions.TransactionException;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +26,7 @@ import java.util.Map;
 @RestController
 @EnableScheduling
 public class NFTScanController {
+    private static final Logger logger = LoggerFactory.getLogger(NFTScanController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired
@@ -27,8 +35,9 @@ public class NFTScanController {
     private RedisTemplate<String, Object> redisTemplate;
 
     public static final String ETH_LOG_TABLE = "eth_log";
+    public static final String ETH_USDT_CONTRACT_ADDRESS = "0xebe3a081bb66cc23fcc014ef856c512966bf6708";
 
-//    @Scheduled(cron = "*/30 * * * * ?")
+    //    @Scheduled(cron = "*/30 * * * * ?")
     public ResponseEntity<?> scanETHLogJob() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
 
@@ -39,6 +48,7 @@ public class NFTScanController {
         });
         return new ResponseEntity();
     }
+
     @Scheduled(cron = "*/50 * * * * ?")
     public ResponseEntity<?> scanUSDTLogJob() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
@@ -46,15 +56,61 @@ public class NFTScanController {
         List<Map> retList = scanService.doScanToken();
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
+            if (map.get("to").toString().equals(KlayController.SYSTEM_ADDRESS)
+                    && map.get("contract").toString().equals(ETH_USDT_CONTRACT_ADDRESS)) {
+                String amountStr = getDecimal18(map.get("value").toString());
+                Map queryOrderMap = new HashMap();
+                queryOrderMap.put("tableName", KlayController.ORDER_TABLE);
+                queryOrderMap.put("send_value", amountStr);
+                queryOrderMap.put("status", 1);
+                BaseModel baseModel = new BaseModel();
+                baseModel.setPageSize(1);
+                baseModel.setPageNo(1);
+                List<Map> list = baseDao.selectBaseList(queryOrderMap, baseModel);
+                if (list.size() != 0) {
+                    //匹配到了订单金额完全相符的，认为是该用户的订单成功支付
+                    Map matchOrder = list.get(0);
+                    logger.info("匹配到订单：" + JSON.toJSONString(matchOrder));
+                    String user_id = matchOrder.get("user_id").toString();
+                    Map userQuery = new HashMap();
+                    userQuery.put("tableName", UserController.USER_TABLE);
+                    Map user = baseDao.selectBaseByPrimaryKey(Long.parseLong(user_id), queryOrderMap);
+                    String chr_address = user.get("chr_address").toString();
+                    long buy_amount = Long.parseLong(matchOrder.get("buy_amount").toString());
+                    long price = Long.parseLong(matchOrder.get("price").toString());
+                    BigInteger chrVal = BigInteger.valueOf(buy_amount * price);
+                    matchOrder.put("status", 2);
+                    baseDao.updateBaseByPrimaryKey(matchOrder);
+                    try {
+                        KlayController.sendingKLAY(KlayController.SYSTEM_PRIVATE, chr_address, chrVal);
+                        matchOrder.put("status", 3);
+                        baseDao.updateBaseByPrimaryKey(matchOrder);
+                    } catch (Exception e) {
+                        logger.error("sendingKLAY error", e);
+                    }
+                }
+            }
             baseDao.insertUpdateBase(map);
         });
         return new ResponseEntity();
     }
+
+    public static void main(String[] args) {
+        System.out.println(getDecimal18("100"));
+    }
+
+    private static String getDecimal18(String amountStr) {
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).
+                divide(BigDecimal.valueOf(Math.pow(10, 18)));
+        return amount.toPlainString().replaceAll("(0)+$", "");
+    }
+
     @RequestMapping("/scanETH")
     public ResponseEntity<?> scanETH() {
         List<Map> retList = scanService.doScanETH();
         return new ResponseEntity(retList);
     }
+
     @RequestMapping("/scanUSDT")
     public ResponseEntity<?> scanUSDT() {
         List<Map> retList = scanService.doScanToken();

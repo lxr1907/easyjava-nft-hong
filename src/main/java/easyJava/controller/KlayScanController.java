@@ -11,6 +11,7 @@ import com.klaytn.caver.transaction.type.ValueTransfer;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
+import easyJava.entity.BaseModel;
 import easyJava.entity.KlayTxsResult;
 import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.EventList;
@@ -27,7 +28,9 @@ import org.web3j.crypto.CipherException;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +56,7 @@ public class KlayScanController {
         List<Map<String, Object>> retList = result.getResult();
         retList.forEach(map -> {
             map.put("tableName", KLAY_TXS_TABLE);
+
             baseDao.insertIgnoreBase(map);
         });
         return new ResponseEntity();
@@ -70,12 +74,12 @@ public class KlayScanController {
     }
 
     public static void main(String[] args) {
-        try {
-            KlayTxsResult result = getAddressTxs(KlayController.SYSTEM_ADDRESS);
-            System.out.println(JSON.toJSONString(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            KlayTxsResult result = getAddressTxs(KlayController.SYSTEM_ADDRESS);
+//            System.out.println(JSON.toJSONString(result));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
 

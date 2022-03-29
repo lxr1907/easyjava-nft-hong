@@ -137,7 +137,7 @@ public class KlayController {
     }
 
     @RequestMapping("/klay/sendKlayTo")
-    public ResponseEntity<?> login(@RequestParam Map<String, Object> map) {
+    public ResponseEntity<?> sendKlayTo(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
