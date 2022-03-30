@@ -9,7 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 import easyJava.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -24,7 +25,7 @@ import easyJava.entity.ResponseEntity;
 
 @RestController
 public class UserController {
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private static final Logger logger = LogManager.getLogger(NFTScanController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired

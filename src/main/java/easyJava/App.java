@@ -1,5 +1,9 @@
 package easyJava;
 
+import net.bull.javamelody.MonitoringFilter;
+import net.bull.javamelody.SessionListener;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,14 +14,15 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 
-import net.bull.javamelody.MonitoringFilter;
-import net.bull.javamelody.SessionListener;
-
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class })
 @SpringBootApplication
 @EnableCaching
 public class App {
+
+	private static final Logger logger = LogManager.getLogger(App.class);
+
 	public static void main(String[] args) {
+		logger.info("开始启动，logger测试-----------------------------");
 		SpringApplication.run(App.class, args);
 	}
 

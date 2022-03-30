@@ -16,7 +16,8 @@ import easyJava.entity.KlayTxsResult;
 import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.EventList;
 import easyJava.utils.HttpUtil;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,7 +37,7 @@ import java.util.Map;
 
 @RestController
 public class KlayScanController {
-    private static final Logger logger = LoggerFactory.getLogger(KlayScanController.class);
+    private static final Logger logger = LogManager.getLogger(NFTScanController.class);
     @Autowired
     BaseDao baseDao;
 
@@ -47,7 +48,7 @@ public class KlayScanController {
     public static final String KLAY_API_PRE = "https://api-baobab-v2.scope.klaytn.com/v2/accounts/";
     public static final String TXS_API = "/txs";
 
-    @Scheduled(cron = "*/15 * * * * ?")
+    @Scheduled(cron = "*/50 * * * * ?")
     @RequestMapping("/scanKlayTxs")
     public ResponseEntity<?> scanKlayTxs() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次

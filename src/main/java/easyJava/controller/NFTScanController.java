@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@EnableScheduling
 public class NFTScanController {
     private static final Logger logger = LogManager.getLogger(NFTScanController.class);
     @Autowired
@@ -95,7 +94,10 @@ public class NFTScanController {
     }
 
     public static void main(String[] args) {
-        System.out.println(getDecimal18("100"));
+
+
+
+        logger.info(getDecimal18("100"));
     }
 
     private static String getDecimal18(String amountStr) {
