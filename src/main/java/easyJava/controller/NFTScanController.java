@@ -45,7 +45,7 @@ public class NFTScanController {
         return new ResponseEntity();
     }
 
-    @Scheduled(cron = "*/50 * * * * ?")
+    @Scheduled(cron = "*/30 * * * * ?")
     public ResponseEntity<?> scanUSDTLogJob() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
         System.out.println("start scanUSDTLogJob----------------------------");
@@ -55,10 +55,10 @@ public class NFTScanController {
         logger.info("-----------scanUSDTLogJob retList size:" + retList.size());
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
+            System.out.println("------------map:" + JSON.toJSONString(map));
             if (map.get("to").toString().equals(KlayController.SYSTEM_ADDRESS) && map.get("contract").toString().equals(ETH_USDT_CONTRACT_ADDRESS)) {
                 String amountStr = getDecimal18(map.get("value").toString());
-
-                System.out.println("scanUSDTLogJob amountStr:" + amountStr);
+                System.out.println("-----------scanUSDTLogJob amountStr:" + amountStr);
                 logger.info("scanUSDTLogJob amountStr:" + amountStr);
                 Map queryOrderMap = new HashMap();
                 queryOrderMap.put("tableName", KlayController.ORDER_TABLE);
