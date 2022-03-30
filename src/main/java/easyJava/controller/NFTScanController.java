@@ -23,7 +23,6 @@ import java.util.Map;
 
 @RestController
 public class NFTScanController {
-    private static final Logger logger = LogManager.getLogger(NFTScanController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired
@@ -50,8 +49,9 @@ public class NFTScanController {
     public ResponseEntity<?> scanUSDTLogJob() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
 
+        Logger logger = LogManager.getLogger("scanUSDTLogJob----------------------------");
         List<Map> retList = scanService.doScanToken();
-        logger.info("scanUSDTLogJob retList size:" + retList.size());
+        logger.info("-----------scanUSDTLogJob retList size:" + retList.size());
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
             if (map.get("to").toString().equals(KlayController.SYSTEM_ADDRESS) && map.get("contract").toString().equals(ETH_USDT_CONTRACT_ADDRESS)) {
@@ -94,9 +94,7 @@ public class NFTScanController {
     }
 
     public static void main(String[] args) {
-
-
-
+        Logger logger = LogManager.getLogger("scanUSDTLogJob----------------------------");
         logger.info(getDecimal18("100"));
     }
 
