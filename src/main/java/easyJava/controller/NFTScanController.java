@@ -85,6 +85,8 @@ public class NFTScanController {
                     long price = Long.parseLong(matchOrder.get("price").toString());
                     BigInteger chrVal = BigInteger.valueOf(buy_amount * price);
                     matchOrder.put("status", 2);
+
+                    matchOrder.put("tableName", KlayController.ORDER_TABLE);
                     baseDao.updateBaseByPrimaryKey(matchOrder);
                     try {
                         System.out.println("-----------sendingKLAY to user chr_address:"
@@ -93,7 +95,7 @@ public class NFTScanController {
                         matchOrder.put("status", 3);
                         baseDao.updateBaseByPrimaryKey(matchOrder);
                         System.out.println("-----------sendingKLAY to user chr_address:"
-                                + chr_address + ",val:" + chrVal+",success");
+                                + chr_address + ",val:" + chrVal + ",success");
                     } catch (Exception e) {
                         logger.error("sendingKLAY error", e);
                     }
