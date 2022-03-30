@@ -5,8 +5,8 @@ import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.ScanService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -14,9 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.web3j.protocol.exceptions.TransactionException;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -26,7 +24,7 @@ import java.util.Map;
 @RestController
 @EnableScheduling
 public class NFTScanController {
-    private static final Logger logger = LoggerFactory.getLogger(NFTScanController.class);
+    private static final Logger logger = LogManager.getLogger(NFTScanController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired
@@ -54,13 +52,12 @@ public class NFTScanController {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
 
         List<Map> retList = scanService.doScanToken();
-        logger.info("scanUSDTLogJob retList size:"+retList.size());
+        logger.info("scanUSDTLogJob retList size:" + retList.size());
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
-            if (map.get("to").toString().equals(KlayController.SYSTEM_ADDRESS)
-                    && map.get("contract").toString().equals(ETH_USDT_CONTRACT_ADDRESS)) {
+            if (map.get("to").toString().equals(KlayController.SYSTEM_ADDRESS) && map.get("contract").toString().equals(ETH_USDT_CONTRACT_ADDRESS)) {
                 String amountStr = getDecimal18(map.get("value").toString());
-                logger.info("scanUSDTLogJob amountStr:"+amountStr);
+                logger.info("scanUSDTLogJob amountStr:" + amountStr);
                 Map queryOrderMap = new HashMap();
                 queryOrderMap.put("tableName", KlayController.ORDER_TABLE);
                 queryOrderMap.put("send_value", amountStr);
@@ -102,8 +99,7 @@ public class NFTScanController {
     }
 
     private static String getDecimal18(String amountStr) {
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).
-                divide(BigDecimal.valueOf(Math.pow(10, 18)));
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 18)));
         return amount.toPlainString().replaceAll("(0)+$", "");
     }
 
