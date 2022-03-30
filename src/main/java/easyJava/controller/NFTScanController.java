@@ -77,8 +77,8 @@ public class NFTScanController {
                     String user_id = matchOrder.get("user_id").toString();
                     Map userQuery = new HashMap();
                     userQuery.put("tableName", UserController.USER_TABLE);
-                    queryOrderMap.put("id", Long.parseLong(user_id));
-                    Map user = baseDao.selectBaseByPrimaryKey(queryOrderMap);
+                    userQuery.put("id", Long.parseLong(user_id));
+                    Map user = baseDao.selectBaseByPrimaryKey(userQuery);
                     String chr_address = user.get("chr_address").toString();
                     System.out.println("-----------匹配到订单user:" + JSON.toJSONString(user));
                     long buy_amount = Long.parseLong(matchOrder.get("buy_amount").toString());
