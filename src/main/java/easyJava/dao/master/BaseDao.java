@@ -14,7 +14,7 @@ public interface BaseDao {
 
     int insertIgnoreBase(@Param("map") Map map);
 
-    Map selectBaseByPrimaryKey(@Param("id") Long id, @Param("map") Map map);
+    Map selectBaseByPrimaryKey(@Param("map") Map map);
 
     int updateBaseByPrimaryKey(@Param("map") Map map);
 

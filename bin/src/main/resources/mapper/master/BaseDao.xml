@@ -7,8 +7,8 @@
 		resultType="java.util.HashMap" parameterType="java.util.HashMap">
 		select
 		*
-		from ${tableName}
-		where id = #{id,jdbcType=BIGINT}
+		from ${map.tableName}
+		where id = #{map.id,jdbcType=BIGINT}
 	</select>
 	<select id="selectBaseShowTableColumns"
 		resultType="java.util.HashMap" parameterType="java.util.HashMap">

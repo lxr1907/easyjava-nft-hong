@@ -8,7 +8,7 @@
         select
         *
         from ${map.tableName}
-        where id = #{id}
+        where id = #{map.id}
     </select>
     <select id="selectBaseShowTableColumns"
             resultType="java.util.HashMap" parameterType="java.util.HashMap">
