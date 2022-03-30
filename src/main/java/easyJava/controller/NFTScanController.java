@@ -48,7 +48,7 @@ public class NFTScanController {
     @Scheduled(cron = "*/50 * * * * ?")
     public ResponseEntity<?> scanUSDTLogJob() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
-
+        System.out.println("scanUSDTLogJob----------------------------");
         Logger logger = LogManager.getLogger("scanUSDTLogJob----------------------------");
         List<Map> retList = scanService.doScanToken();
         logger.info("-----------scanUSDTLogJob retList size:" + retList.size());
