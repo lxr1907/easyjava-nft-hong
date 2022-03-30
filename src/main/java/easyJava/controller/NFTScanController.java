@@ -44,7 +44,7 @@ public class NFTScanController {
         List<Map> retList = scanService.doScanETH();
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
-            baseDao.insertUpdateBase(map);
+            baseDao.insertIgnoreBase(map);
         });
         return new ResponseEntity();
     }
@@ -92,7 +92,7 @@ public class NFTScanController {
                     }
                 }
             }
-            baseDao.insertUpdateBase(map);
+            baseDao.insertIgnoreBase(map);
         });
         return new ResponseEntity();
     }
