@@ -7,6 +7,7 @@ import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.ScanService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -50,9 +51,11 @@ public class NFTScanController {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
         System.out.println("start scanUSDTLogJob----------------------------");
         Logger logger = LogManager.getLogger("scanUSDTLogJob----------------------------");
+        var loggerF = LoggerFactory.getLogger("factory scanUSDTLogJob----------------------------");
         List<Map> retList = scanService.doScanToken();
         System.out.println("-----------scanUSDTLogJob retList size:" + retList.size());
         logger.debug("-----------scanUSDTLogJob retList size:" + retList.size());
+        loggerF.debug("-----------scanUSDTLogJob retList size:\" + retList.size()");
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
             System.out.println("------------map:" + JSON.toJSONString(map));
