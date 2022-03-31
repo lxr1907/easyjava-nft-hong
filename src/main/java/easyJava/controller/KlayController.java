@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.klaytn.caver.Caver;
 import com.klaytn.caver.account.Account;
 import com.klaytn.caver.contract.Contract;
+import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.methods.response.Bytes32;
 import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.transaction.TxPropertyBuilder;
@@ -30,10 +31,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -58,6 +56,7 @@ public class KlayController {
     //一个usdt可以购买的合约币数量
     public static final int USDT_ERC20_PRICE = 10;
     public static Map<String, String> usdtERC20Address = new HashMap<>();
+    public static volatile BigInteger gas = BigInteger.valueOf(80000);
 
     static {
         usdtERC20Address.put("ropsten", USDT_ADDRESS_ERC20_ROPSTEN);
@@ -88,14 +87,12 @@ public class KlayController {
 
     //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
     public static void main(String[] args) {
-//        try {
-//            sendingKLAY(SYSTEM_PRIVATE, "0x38bd8d9f0acda0ce533f44adcfd02b403f411de7", BigInteger.valueOf(1));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (TransactionException e) {
-//            e.printStackTrace();
-//        }
-        System.out.println(0 + Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000);
+        try {
+            sendingCHR(SYSTEM_PRIVATE, "0x38bd8d9f0acda0ce533f44adcfd02b403f411de7", BigInteger.valueOf(1));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        System.out.println(0 + Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000);
     }
 
     /**
@@ -118,21 +115,17 @@ public class KlayController {
         ValueTransfer valueTransfer = caver.transaction.valueTransfer.create(
                 TxPropertyBuilder.valueTransfer()
                         .setFrom(keyring.getAddress())
-                        .setTo(toAddress)
-                        .setValue(value)
-                        .setGas(BigInteger.valueOf(50000))
-        );
+                        .setTo(toAddress).setValue(value)
+                        .setGas(gas));
         //Sign to the transaction
         valueTransfer.sign(keyring);
         //Send a transaction to the klaytn blockchain platform (Klaytn)
         Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).send();
         if (result.hasError()) {
-            logger.error("sendingKLAY 失败:" + result.getError().getMessage()
-                    + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
+            logger.error("sendingKLAY 失败:" + result.getError().getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
             throw new RuntimeException(result.getError().getMessage());
         }
-        logger.info("sendingKLAY :" + result.getResult()
-                + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
+        logger.info("sendingKLAY :" + result.getResult() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
         //Check transaction receipt.
         TransactionReceiptProcessor transactionReceiptProcessor = new PollingTransactionReceiptProcessor(caver, 1000, 15);
         TransactionReceipt.TransactionReceiptData transactionReceipt = transactionReceiptProcessor.waitForTransactionReceipt(result.getResult());
@@ -152,26 +145,26 @@ public class KlayController {
      */
     public static void sendingCHR(String fromPrivateKey, String toAddress, BigInteger value) {
         Caver caver = new Caver(Klay_HOST);
-        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
-        String fromAddress = keyring.toAccount().getAddress();
-        //Add to caver wallet.
-        caver.wallet.add(keyring);
+        SingleKeyring executor = KeyringFactory.createFromPrivateKey(fromPrivateKey);
+        String fromAddress = executor.toAccount().getAddress();
+        caver.wallet.add(executor);
         try {
-            Contract contract = caver.contract.create(KlayContractController.ABI,
-                    KLAY_CHR_ADDRESS);
-            contract.getMethods().forEach((methodName, contractMethod) -> {
-                logger.info("contract methodName : " + methodName + ", ContractMethod : " + contractMethod);
-            });
-            var ret = contract.call("transfer", toAddress, value);
-            logger.info("sendingCHR ret:" + JSON.toJSONString(ret));
+            Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
+
+            SendOptions sendOptions = new SendOptions();
+            sendOptions.setFrom(executor.getAddress());
+            sendOptions.setGas(gas);
+            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transfer")
+                    .send(Arrays.asList(toAddress, value), sendOptions);
+            logger.info("sendingCHR ret:"+ JSON.toJSONString(receipt));
         } catch (Exception e) {
-            logger.error("sendingCHR 失败:" + e.getMessage()
-                    + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
-            throw new RuntimeException(e.getMessage());
+            if (e.getMessage() != null && e.getMessage().contains("intrinsic gas too low")) {
+            } else {
+                logger.error("sendingCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
+                throw new RuntimeException(e.getMessage());
+            }
         }
 
-        logger.info("sendingCHR :" + ""
-                + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
     }
 
     @RequestMapping("/klay/sendKlayTo")
@@ -184,8 +177,7 @@ public class KlayController {
         }
         TransactionReceipt.TransactionReceiptData result = null;
         try {
-            result = sendingKLAY(SYSTEM_PRIVATE, map.get("address").toString()
-                    , BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+            result = sendingKLAY(SYSTEM_PRIVATE, map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
             logger.error("发送sendingKLAY失败！", e);
         }
@@ -202,10 +194,9 @@ public class KlayController {
         }
         TransactionReceipt.TransactionReceiptData result = null;
         try {
-            sendingCHR(SYSTEM_PRIVATE, map.get("address").toString()
-                    , BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+            sendingCHR(SYSTEM_PRIVATE, map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
-            logger.error("发送sendingKLAY失败！", e);
+            logger.error("sendingCHR error！", e);
         }
         return new ResponseEntity(result);
     }
@@ -221,8 +212,8 @@ public class KlayController {
      * @return
      */
     @RequestMapping("/klay/createOrder")
-    public ResponseEntity createOrder(@RequestParam Map<String, Object> map,
-                                      @RequestHeader("token") String token) {
+    public ResponseEntity createOrder(@RequestParam Map<String, Object> map, @RequestHeader("token") String
+            token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -255,10 +246,8 @@ public class KlayController {
         map.put("date", DateUtils.getDateTimeString(new Date()));
         map.put("price", USDT_ERC20_PRICE);
         //生成0.0开头加3位随机数，0.0123
-        Float tail =
-                Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000;
-        map.put("send_value",
-                buy_amount_int + tail);
+        Float tail = Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000;
+        map.put("send_value", buy_amount_int + tail);
 
         int count = baseDao.insertBase(map);
         return new ResponseEntity(map);
@@ -295,8 +284,7 @@ public class KlayController {
     }
 
     @RequestMapping("/klay/getOrder")
-    public ResponseEntity getOrder(@RequestParam Map<String, Object> map,
-                                   @RequestHeader("token") String token) {
+    public ResponseEntity getOrder(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
