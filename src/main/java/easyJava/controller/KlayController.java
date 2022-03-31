@@ -144,6 +144,7 @@ public class KlayController {
      * @throws TransactionException
      */
     public static void sendingCHR(String fromPrivateKey, String toAddress, BigInteger value) {
+        logger.info("---------start sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
         SingleKeyring executor = KeyringFactory.createFromPrivateKey(fromPrivateKey);
         String fromAddress = executor.toAccount().getAddress();
@@ -156,15 +157,12 @@ public class KlayController {
             sendOptions.setGas(gas);
             TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transfer")
                     .send(Arrays.asList(toAddress, value), sendOptions);
-            logger.info("sendingCHR ret:"+ JSON.toJSONString(receipt));
+            logger.info("------sendingCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
         } catch (Exception e) {
-            if (e.getMessage() != null && e.getMessage().contains("intrinsic gas too low")) {
-            } else {
-                logger.error("sendingCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
-                throw new RuntimeException(e.getMessage());
-            }
+            logger.error("sendingCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
+            throw new RuntimeException(e.getMessage());
         }
-
+        logger.info("---------end sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
     }
 
     @RequestMapping("/klay/sendKlayTo")
