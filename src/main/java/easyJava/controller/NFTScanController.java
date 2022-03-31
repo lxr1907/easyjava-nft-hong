@@ -5,12 +5,10 @@ import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.ScanService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +22,8 @@ import java.util.Map;
 
 @RestController
 public class NFTScanController {
+    public static final Logger logger = LoggerFactory.getLogger(NFTScanController.class);
+
     @Autowired
     BaseDao baseDao;
     @Autowired
@@ -49,13 +49,8 @@ public class NFTScanController {
     @Scheduled(cron = "*/30 * * * * ?")
     public ResponseEntity<?> scanUSDTLogJob() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
-        System.out.println("start scanUSDTLogJob----------------------------");
-        Logger logger = LogManager.getLogger("scanUSDTLogJob----------------------------");
-        var loggerF = LoggerFactory.getLogger("factory scanUSDTLogJob----------------------------");
         List<Map> retList = scanService.doScanToken();
-        System.out.println("-----------scanUSDTLogJob retList size:" + retList.size());
-        logger.debug("-----------scanUSDTLogJob retList size:" + retList.size());
-        loggerF.debug("-----------scanUSDTLogJob retList size:\" + retList.size()");
+        logger.info("-----------scanUSDTLogJob retList size:" + retList.size());
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
             System.out.println("------------map:" + JSON.toJSONString(map));
@@ -75,15 +70,14 @@ public class NFTScanController {
                 if (list.size() != 0) {
                     //匹配到了订单金额完全相符的，认为是该用户的订单成功支付
                     Map matchOrder = list.get(0);
-                    logger.info("匹配到订单：" + JSON.toJSONString(matchOrder));
-                    System.out.println("-----------匹配到订单:" + JSON.toJSONString(matchOrder));
+                    logger.info("-----------匹配到订单：" + JSON.toJSONString(matchOrder));
                     String user_id = matchOrder.get("user_id").toString();
                     Map userQuery = new HashMap();
                     userQuery.put("tableName", UserController.USER_TABLE);
                     userQuery.put("id", Long.parseLong(user_id));
                     Map user = baseDao.selectBaseByPrimaryKey(userQuery);
                     String chr_address = user.get("chr_address").toString();
-                    System.out.println("-----------匹配到订单user:" + JSON.toJSONString(user));
+                    logger.info("-----------匹配到订单user:" + JSON.toJSONString(user));
                     long buy_amount = Long.parseLong(matchOrder.get("buy_amount").toString());
                     long price = Long.parseLong(matchOrder.get("price").toString());
                     BigInteger chrVal = BigInteger.valueOf(buy_amount * price);
@@ -92,12 +86,12 @@ public class NFTScanController {
                     matchOrder.put("tableName", KlayController.ORDER_TABLE);
                     baseDao.updateBaseByPrimaryKey(matchOrder);
                     try {
-                        System.out.println("-----------sendingKLAY to user chr_address:"
+                        logger.info("-----------sendingKLAY to user chr_address:"
                                 + chr_address + ",val:" + chrVal);
                         KlayController.sendingKLAY(KlayController.SYSTEM_PRIVATE, chr_address, chrVal);
                         matchOrder.put("status", 3);
                         baseDao.updateBaseByPrimaryKey(matchOrder);
-                        System.out.println("-----------sendingKLAY to user chr_address:"
+                        logger.info("-----------sendingKLAY to user chr_address:"
                                 + chr_address + ",val:" + chrVal + ",success");
                     } catch (Exception e) {
                         logger.error("sendingKLAY error", e);
@@ -106,12 +100,12 @@ public class NFTScanController {
             }
             baseDao.insertIgnoreBase(map);
         });
-        System.out.println("end scanUSDTLogJob----------------------------");
+        logger.info("end scanUSDTLogJob----------------------------");
         return new ResponseEntity();
     }
 
     public static void main(String[] args) {
-        Logger logger = LogManager.getLogger("scanUSDTLogJob----------------------------");
+        Logger logger = LoggerFactory.getLogger("scanUSDTLogJob----------------------------");
         logger.info(getDecimal18("100"));
     }
 

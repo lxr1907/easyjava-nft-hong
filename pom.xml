@@ -21,12 +21,12 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
-<!--    <dependency>-->
-<!--        <groupId>org.springframework.boot</groupId>-->
-<!--        <artifactId>spring-boot-starter-parent</artifactId>-->
-<!--        <version>2.6.4</version>-->
-<!--        <type>pom</type>-->
-<!--    </dependency>-->
+    <!--    <dependency>-->
+    <!--        <groupId>org.springframework.boot</groupId>-->
+    <!--        <artifactId>spring-boot-starter-parent</artifactId>-->
+    <!--        <version>2.6.4</version>-->
+    <!--        <type>pom</type>-->
+    <!--    </dependency>-->
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -109,21 +109,21 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.75</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.web3j</groupId>-->
-<!--            <artifactId>core</artifactId>-->
-<!--            <version>5.0.0</version>-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>jnr-ffi</artifactId>-->
-<!--                    <groupId>com.github.jnr</groupId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>jnr-constants</artifactId>-->
-<!--                    <groupId>com.github.jnr</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.web3j</groupId>-->
+        <!--            <artifactId>core</artifactId>-->
+        <!--            <version>5.0.0</version>-->
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                    <artifactId>jnr-ffi</artifactId>-->
+        <!--                    <groupId>com.github.jnr</groupId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <artifactId>jnr-constants</artifactId>-->
+        <!--                    <groupId>com.github.jnr</groupId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -168,12 +168,6 @@
             <artifactId>javax.mail</artifactId>
             <version>1.5.4</version>
         </dependency>
-        <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>2.17.2</version>
-        <type>pom</type>
-    </dependency>
     </dependencies>
 
     <properties>
