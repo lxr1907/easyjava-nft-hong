@@ -52,7 +52,7 @@ public class NFTScanController {
         Logger logger = LogManager.getLogger("scanUSDTLogJob----------------------------");
         List<Map> retList = scanService.doScanToken();
         System.out.println("-----------scanUSDTLogJob retList size:" + retList.size());
-        logger.info("-----------scanUSDTLogJob retList size:" + retList.size());
+        logger.debug("-----------scanUSDTLogJob retList size:" + retList.size());
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
             System.out.println("------------map:" + JSON.toJSONString(map));
