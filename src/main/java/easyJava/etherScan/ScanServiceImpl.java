@@ -63,14 +63,15 @@ public class ScanServiceImpl implements ScanService {
         return response;
     }
 
-    private EventList scanAddressTransactions(String action, String tokenAddress) {
+    private EventList scanAddressContractTransactions(String action, String contractaddress, Long startblock) {
 
         Map<String, String> map = new HashMap<String, String>();
 
         map.put("module", "account");
         map.put("action", action);
         map.put("address", myAddress);
-        map.put("fromBlock", "0");
+        map.put("contractaddress", contractaddress);
+        map.put("startblock", startblock + "");
         map.put("page", "1");
         map.put("sort", "desc");
         map.put("toBlock", "latest");
@@ -176,11 +177,11 @@ public class ScanServiceImpl implements ScanService {
         return doScan("tokentx", usdtContractAddress);
     }
 
-    private List<Map> doScan(String action, String tokenAddress) {
+    private List<Map> doScan(String action, String contractaddress) {
         List<Map> ret = new ArrayList<>();
         EventList eventList = null;
 
-        eventList = scanAddressTransactions(action, tokenAddress);
+        eventList = scanAddressContractTransactions(action, contractaddress, currentBlock);
 
         if (eventList != null && eventList.getResult() != null && eventList.getResult().size() > 0) {
 
