@@ -1,14 +1,15 @@
 package easyJava.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.klaytn.caver.Caver;
 import com.klaytn.caver.account.Account;
+import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.methods.response.Bytes32;
 import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.transaction.TxPropertyBuilder;
 import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
 import com.klaytn.caver.transaction.response.TransactionReceiptProcessor;
 import com.klaytn.caver.transaction.type.ValueTransfer;
-import com.klaytn.caver.utils.Utils;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
@@ -24,14 +25,16 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.web3j.abi.datatypes.Int;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 @RestController
 public class KlayController {
@@ -47,6 +50,7 @@ public class KlayController {
     public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
     public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
     public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
+    public static final String KLAY_CHR_ADDRESS = "0xc3aCA86099BCcf65EdC65E83fC7CCFae6bbe87dC";
     //usdt-erc20充值地址,ropsten测试链
     public static final String USDT_ADDRESS_ERC20_ROPSTEN = "0xC4f459a93169bbF3CF9Dc3c50D34502473703FB0";
     //usdt-erc20充值地址,rinkeby测试链
@@ -136,6 +140,40 @@ public class KlayController {
         return transactionReceipt;
     }
 
+    /**
+     * 发送klay链上合约chr币
+     *
+     * @param fromPrivateKey
+     * @param toAddress
+     * @param value
+     * @throws IOException
+     * @throws CipherException
+     * @throws TransactionException
+     */
+    public static void sendingCHR(String fromPrivateKey, String toAddress, BigInteger value) {
+        Caver caver = new Caver(Klay_HOST);
+        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
+        String fromAddress = keyring.toAccount().getAddress();
+        //Add to caver wallet.
+        caver.wallet.add(keyring);
+        try {
+            Contract contract = caver.contract.create(KlayContractController.ABI,
+                    KLAY_CHR_ADDRESS);
+            contract.getMethods().forEach((methodName, contractMethod) -> {
+                logger.info("contract methodName : " + methodName + ", ContractMethod : " + contractMethod);
+            });
+            var ret = contract.call("transfer", toAddress, value);
+            logger.info("sendingCHR ret:" + JSON.toJSONString(ret));
+        } catch (Exception e) {
+            logger.error("sendingCHR 失败:" + e.getMessage()
+                    + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
+            throw new RuntimeException(e.getMessage());
+        }
+
+        logger.info("sendingCHR :" + ""
+                + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
+    }
+
     @RequestMapping("/klay/sendKlayTo")
     public ResponseEntity<?> sendKlayTo(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
@@ -147,6 +185,24 @@ public class KlayController {
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             result = sendingKLAY(SYSTEM_PRIVATE, map.get("address").toString()
+                    , BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+        } catch (Exception e) {
+            logger.error("发送sendingKLAY失败！", e);
+        }
+        return new ResponseEntity(result);
+    }
+
+    @RequestMapping("/klay/sendingCHR")
+    public ResponseEntity<?> sendingCHR(@RequestParam Map<String, Object> map) {
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("value") == null || map.get("value").toString().length() == 0) {
+            return new ResponseEntity(400, "value不能为空！");
+        }
+        TransactionReceipt.TransactionReceiptData result = null;
+        try {
+            sendingCHR(SYSTEM_PRIVATE, map.get("address").toString()
                     , BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
             logger.error("发送sendingKLAY失败！", e);
@@ -167,10 +223,10 @@ public class KlayController {
     @RequestMapping("/klay/createOrder")
     public ResponseEntity createOrder(@RequestParam Map<String, Object> map,
                                       @RequestHeader("token") String token) {
-        if (token == null ||token.length() == 0) {
+        if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
-        Map user= (Map) redisTemplate.opsForValue().get(token);
+        Map user = (Map) redisTemplate.opsForValue().get(token);
 
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
@@ -241,16 +297,16 @@ public class KlayController {
     @RequestMapping("/klay/getOrder")
     public ResponseEntity getOrder(@RequestParam Map<String, Object> map,
                                    @RequestHeader("token") String token) {
-        if (token == null ||token.length() == 0) {
+        if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
-        Map user= (Map) redisTemplate.opsForValue().get(token);
+        Map user = (Map) redisTemplate.opsForValue().get(token);
 
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
         map.put("tableName", ORDER_TABLE);
-        map.put("user_id",user.get("id"));
+        map.put("user_id", user.get("id"));
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
@@ -259,4 +315,5 @@ public class KlayController {
         retmap.put("list", list);
         return new ResponseEntity(retmap, 1, baseModel);
     }
+
 }
