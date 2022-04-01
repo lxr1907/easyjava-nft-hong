@@ -56,7 +56,7 @@ public class NFTScanController {
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
             logger.info("------------map:" + JSON.toJSONString(map));
-            if (map.get("to").toString().equalsIgnoreCase(KlayController.SYSTEM_ADDRESS)) {
+            if (map.get("to").toString().equalsIgnoreCase(KlayController.USDT_ADDRESS_ERC20_ROPSTEN)) {
                 String amountStr = getDecimal18(map.get("value").toString());
                 logger.info("--------scanUSDTLogJob amountStr:" + amountStr
                         + ",value" + map.get("value").toString() + "-------");
