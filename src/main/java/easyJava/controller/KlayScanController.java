@@ -47,7 +47,7 @@ public class KlayScanController {
     @RequestMapping("/scanKlayTxs")
     public ResponseEntity<?> scanKlayTxs() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
-        KlayTxsResult result = getAddressTxs(KlayController.SYSTEM_ADDRESS);
+        KlayTxsResult result = getAddressTxs(KlayController.KLAY_CHR_ADDRESS);
 
         List<Map<String, Object>> retList = result.getResult();
         retList.forEach(map -> {

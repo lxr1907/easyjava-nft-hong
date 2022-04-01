@@ -48,6 +48,8 @@ public class KlayController {
     public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
     public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
     public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
+
+    //合约币chr在klay链的地址
     public static final String KLAY_CHR_ADDRESS = "0xc3aCA86099BCcf65EdC65E83fC7CCFae6bbe87dC";
     //usdt-erc20充值地址,ropsten测试链
     public static final String USDT_ADDRESS_ERC20_ROPSTEN = "0xC4f459a93169bbF3CF9Dc3c50D34502473703FB0";
