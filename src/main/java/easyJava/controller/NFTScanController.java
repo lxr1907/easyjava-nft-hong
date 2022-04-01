@@ -34,6 +34,7 @@ public class NFTScanController {
 
     public static final String ETH_LOG_TABLE = "eth_log";
     public static final String ETH_USDT_CONTRACT_ADDRESS = "0xebe3a081bb66cc23fcc014ef856c512966bf6708";
+    public static final BigInteger decimals18 = BigInteger.valueOf(Double.valueOf(Math.pow(10, 18)).longValue());
 
     //    @Scheduled(cron = "*/30 * * * * ?")
     public ResponseEntity<?> scanETHLogJob() {
@@ -81,7 +82,7 @@ public class NFTScanController {
                     logger.info("-----------匹配到订单user:" + JSON.toJSONString(user));
                     long buy_amount = Long.parseLong(matchOrder.get("buy_amount").toString());
                     long price = Long.parseLong(matchOrder.get("price").toString());
-                    BigInteger chrVal = BigInteger.valueOf(buy_amount * price);
+                    BigInteger chrVal = BigInteger.valueOf(buy_amount * price).multiply(decimals18);
                     matchOrder.put("status", 2);
 
                     matchOrder.put("tableName", KlayController.ORDER_TABLE);
