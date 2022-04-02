@@ -82,3 +82,16 @@ CREATE TABLE `eth_log` (
   KEY `eth_log_from_IDX` (`from`) USING BTREE,
   KEY `eth_log_to_IDX` (`to`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- nft.user_wallet definition
+
+CREATE TABLE `user_wallet` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '钱包地址',
+  `encrypt_key` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `encrypted_private` varchar(500) COLLATE utf8mb4_bin DEFAULT NULL,
+  `status` int NOT NULL DEFAULT '0' COMMENT '钱包状态1主钱包',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_wallet_UN` (`address`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

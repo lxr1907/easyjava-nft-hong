@@ -81,11 +81,11 @@ public class NFTScanController {
                     logger.info("-----------匹配到订单：" + JSON.toJSONString(matchOrder) + "----------");
                     String user_id = matchOrder.get("user_id").toString();
                     Map userQuery = new HashMap();
-                    userQuery.put("tableName", UserController.USER_TABLE);
+                    userQuery.put("tableName", UserController.USER_WALLET_TABLE);
                     userQuery.put("id", Long.parseLong(user_id));
-                    Map user = baseDao.selectBaseByPrimaryKey(userQuery);
-                    String chr_address = user.get("chr_address").toString();
-                    logger.info("-----------匹配到订单user:" + JSON.toJSONString(user));
+                    List<Map> walletList = baseDao.selectBaseList(userQuery, baseModel);
+                    String address = walletList.get(0).get("address").toString();
+                    logger.info("-----------匹配到订单 user wallet:" + JSON.toJSONString(walletList) + "----------");
                     long buy_amount = Long.parseLong(matchOrder.get("buy_amount").toString());
                     long price = Long.parseLong(matchOrder.get("price").toString());
                     BigInteger chrVal = BigInteger.valueOf(buy_amount * price).multiply(decimals18);
@@ -98,13 +98,13 @@ public class NFTScanController {
                     baseDao.updateBaseByPrimaryKey(matchOrder);
                     try {
                         logger.info("-----------sendingKLAY to user chr_address:------"
-                                + chr_address + ",val:" + chrVal);
-                        KlayController.sendingCHR(KlayController.SYSTEM_PRIVATE, chr_address, chrVal);
+                                + address + ",val:" + chrVal);
+                        KlayController.sendingCHR(KlayController.SYSTEM_PRIVATE, address, chrVal);
                         //更新订单状态，支付chr完成
                         matchOrder.put("status", 3);
                         baseDao.updateBaseByPrimaryKey(matchOrder);
                         logger.info("-----------sendingKLAY to user chr_address:"
-                                + chr_address + ",val:" + chrVal + ",success-----");
+                                + address + ",val:" + chrVal + ",success-----");
                     } catch (Exception e) {
                         logger.error("sendingKLAY error", e);
                     }
