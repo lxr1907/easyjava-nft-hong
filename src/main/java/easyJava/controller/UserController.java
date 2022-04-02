@@ -3,10 +3,7 @@ package easyJava.controller;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
-import easyJava.utils.GenerateUtils;
-import easyJava.utils.SendMailSSL;
-import easyJava.utils.SendMailTLS;
-import easyJava.utils.TokenProccessor;
+import easyJava.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +27,7 @@ public class UserController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     public static final String USER_TABLE = "user";
+    public static final String USER_WALLET_TABLE = "user_wallet";
     public static final String CODE_PRE = "email_code_";
 
     /**
@@ -54,9 +51,6 @@ public class UserController {
         map.put("tableName", USER_TABLE);
         map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         map.put("my_invite_code", GenerateUtils.getRandomNickname(8));
-        String privateKey = KlayController.generatePrivate();
-        map.put("chr_private", privateKey.getBytes(StandardCharsets.UTF_8));
-        map.put("chr_address", KlayController.getWalletAddress(privateKey));
 
         try {
             Map countMap = new HashMap<>();
@@ -66,8 +60,21 @@ public class UserController {
             if (count == null || count < 200000) {
                 count = 200000;
             }
-            map.put("id", count + GenerateUtils.getRandomOneToMax(30));
+            var uniqueId = count + GenerateUtils.getRandomOneToMax(30);
+            map.put("id", uniqueId);
             baseDao.insertBase(map);
+            String privateKey = KlayController.generatePrivate();
+            String address = KlayController.getWalletAddress(privateKey);
+            Map walletMap = new HashMap<>();
+            walletMap.put("tableName", USER_WALLET_TABLE);
+            walletMap.put("user_id", uniqueId);
+            walletMap.put("private_key", privateKey);
+            walletMap.put("address", address);
+            int encrypt_key = GenerateUtils.getRandomOneToMax(40000);
+            walletMap.put("encrypt_key", encrypt_key);
+            walletMap.put("encrypted_private", DESUtils.encrypt(privateKey, encrypt_key));
+            baseDao.insertBase(walletMap);
+            map.put("wallet", walletMap);
 
         } catch (Exception e) {
             logger.error("注册失败", e);
@@ -110,11 +117,21 @@ public class UserController {
             return new ResponseEntity(400, "账号或密码错误！");
         }
         String token = TokenProccessor.makeToken();
-        list.get(0).remove("password");
-        list.get(0).put("token", token);
+        Map user = list.get(0);
+        user.remove("password");
+        user.put("token", token);
         // token有效期1小时，存入redis
-        redisTemplate.opsForValue().set(token, list.get(0), 365, TimeUnit.DAYS);
-        return new ResponseEntity(list.get(0));
+        redisTemplate.opsForValue().set(token, user, 365, TimeUnit.DAYS);
+
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        user.put("userWalletList", userWalletList);
+        return new ResponseEntity(user);
+
     }
 
     /**
@@ -126,6 +143,7 @@ public class UserController {
             return new ResponseEntity(400, "账号不能为空！");
         }
         String code = GenerateUtils.getRandomNickname(6);
+        logger.info("mail 邮箱验证code：" + code);
         // code存入redis
         redisTemplate.opsForValue().set(CODE_PRE + map.get("account").toString(),
                 code, 10, TimeUnit.MINUTES);
@@ -172,7 +190,13 @@ public class UserController {
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
-        Object privateKey = user.get("chr_private");
-        return new ResponseEntity(privateKey);
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        return new ResponseEntity(userWalletList);
     }
 }

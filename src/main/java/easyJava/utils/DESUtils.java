@@ -1,10 +1,10 @@
 package easyJava.utils;
 
-import java.security.SecureRandom;
-import javax.crypto.spec.DESKeySpec;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.SecretKey;
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
+import java.security.SecureRandom;
 
 /**
  * DES加密介绍
@@ -20,21 +20,21 @@ public class DESUtils {
                     "11960574122434059469100235892702736860872901247123456";
 
     //测试
-    public static void main(String args[]) {
-        //待加密内容
-        String str = "测试内容";
-        //密码，长度要是8的倍数
-        String password = "9588028820109132570743325311898426347857298773549468758875018579537757772163084478873699447306034466200616411960574122434059469100235892702736860872901247123456";
-        byte[] result = DESUtils.encrypt(str.getBytes());
-        System.out.println("加密后：" + new String(result));
-        //直接将如上内容解密
-        try {
-            byte[] decryResult = DESUtils.decrypt(result);
-            System.out.println("解密后：" + new String(decryResult));
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
-    }
+//    public static void main(String args[]) {
+//        //待加密内容
+//        String str = "测试内容";
+//        //密码，长度要是8的倍数
+//        String password = "9588028820109132570743325311898426347857298773549468758875018579537757772163084478873699447306034466200616411960574122434059469100235892702736860872901247123456";
+//        byte[] result = DESUtils.encrypt(str.getBytes());
+//        System.out.println("加密后：" + new String(result));
+//        //直接将如上内容解密
+//        try {
+//            byte[] decryResult = DESUtils.decrypt(result);
+//            System.out.println("解密后：" + new String(decryResult));
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
+//    }
 
     /**
      * 加密     * @param datasource byte[]     * @param password String
@@ -80,5 +80,21 @@ public class DESUtils {
         cipher.init(Cipher.DECRYPT_MODE, securekey, random);
         // 真正开始解密操作
         return cipher.doFinal(src);
+    }
+
+    public static String encrypt(String str, Integer numSalt) {
+
+        //讲获取的字符串转成字符数组
+        char[] c = str.toCharArray();
+        //使用for循环给字符数组加密
+        for (int i = 0; i < c.length; i++) {
+            c[i] = (char) (c[i] ^ 20000);
+        }
+        return new String(c);
+    }
+
+    public static void main(String[] args) {
+        String c = encrypt("丐乘世丒世专乁丕丗丙丘乆久丗丗世丘乃丒世丐乆专丐丑乆乃专世乃专专丕专乃丕久丒乃乁丑且久乂丒丐且久丙且乄世久丒乄丙世久久丕丐乄丗丕乆乁", 20000);
+        System.out.println(c);
     }
 }
