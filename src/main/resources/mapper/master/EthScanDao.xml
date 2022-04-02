@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="easyJava.dao.master.EthScanDao">
+
+    <!--根据实体参数查询 -->
+    <select id="selectBaseList" resultType="java.util.LinkedHashMap">
+        select
+        *
+        from ${map.tableName}
+        where 1=1
+        <foreach collection="map" index="key" item="value">
+            <if
+                    test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
+                or `${key}` =#{value}
+            </if>
+        </foreach>
+        limit #{baseModel.pageSize} OFFSET #{baseModel.fromRec}
+    </select>
+
+</mapper>

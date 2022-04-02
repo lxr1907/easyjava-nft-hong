@@ -11,6 +11,8 @@ import com.klaytn.caver.transaction.type.ValueTransfer;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
+import easyJava.dao.master.KlayScanDao;
+import easyJava.entity.BaseModel;
 import easyJava.entity.KlayTxsResult;
 import easyJava.entity.ResponseEntity;
 import easyJava.utils.HttpUtil;
@@ -35,6 +37,8 @@ public class KlayScanController {
     private static final Logger logger = LogManager.getLogger(NFTScanController.class);
     @Autowired
     BaseDao baseDao;
+    @Autowired
+    KlayScanDao klayScanDao;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -43,6 +47,7 @@ public class KlayScanController {
     public static final String KLAY_API_PRE = "https://api-baobab-v2.scope.klaytn.com/v2/accounts/";
     public static final String KLAY_CHR_API_TAIL = "/ftBalances";
     public static final String TXS_API = "/txs";
+
     @Scheduled(cron = "*/50 * * * * ?")
     @RequestMapping("/scanKlayTxs")
     public ResponseEntity<?> scanKlayTxs() {
@@ -57,6 +62,7 @@ public class KlayScanController {
         });
         return new ResponseEntity();
     }
+
     @RequestMapping("/klayScan/getAddressTokens")
     public ResponseEntity<?> getAddressTokens(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
@@ -65,10 +71,34 @@ public class KlayScanController {
         return new ResponseEntity(getAddressTokens(map.get("address").toString()));
     }
 
+    @RequestMapping("/klayScan/getAddressTx")
+    public ResponseEntity<?> getAddressTx(@RequestParam Map<String, Object> map) {
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
+            return new ResponseEntity(400, "pageSize不能为空！");
+        }
+        if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
+            return new ResponseEntity(400, "pageNo不能为空！");
+        }
+        map.put("tableName", KLAY_TXS_TABLE);
+        String address = map.get("address").toString();
+        map.put("fromAddress", address);
+        map.put("toAddress", address);
+        map.remove("address");
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
+        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        var list = klayScanDao.selectBaseList(map, baseModel);
+        return new ResponseEntity(list);
+    }
+
     public static Object getAddressTokens(String address) {
         String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_API_TAIL);
         return JSON.parse(result);
     }
+
     /**
      * 获取privateKey对应的address
      *

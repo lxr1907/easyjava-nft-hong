@@ -127,8 +127,11 @@ public class NFTScanController {
         return new ResponseEntity(retList);
     }
 
-    @RequestMapping("/getOwnerNFTList")
+    @RequestMapping("/ethScan/getAddressTx")
     public ResponseEntity<?> getOwnerNFTList(@RequestParam Map<String, Object> map) {
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
         if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
             return new ResponseEntity(400, "pageSize不能为空！");
         }
@@ -136,6 +139,10 @@ public class NFTScanController {
             return new ResponseEntity(400, "pageNo不能为空！");
         }
         map.put("tableName", ETH_LOG_TABLE);
+        String address = map.get("address").toString();
+        map.put("from", address);
+        map.put("to", address);
+        map.remove("address");
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
