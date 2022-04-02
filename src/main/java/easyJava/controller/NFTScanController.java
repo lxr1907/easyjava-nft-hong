@@ -86,7 +86,7 @@ public class NFTScanController {
                     logger.info("-----------匹配到订单user:" + JSON.toJSONString(user));
                     long buy_amount = Long.parseLong(matchOrder.get("buy_amount").toString());
                     long price = Long.parseLong(matchOrder.get("price").toString());
-                    BigInteger chrVal = BigInteger.valueOf(buy_amount * price).multiply(decimals18);
+                    BigInteger chrVal = BigInteger.valueOf(buy_amount * price);//.multiply(decimals18);
                     matchOrder.put("status", 2);
 
                     matchOrder.put("tableName", KlayController.ORDER_TABLE);

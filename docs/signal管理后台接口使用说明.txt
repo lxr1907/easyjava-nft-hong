@@ -1,6 +1,0 @@
-1.login接口登录
-默认账户lxrtalkAdmin,密码srh;MG%23sV3S;M9!
-
-2.所有查询接口不需要token可以直接访问
-
-3.增删改接口传入login接口返回的token
