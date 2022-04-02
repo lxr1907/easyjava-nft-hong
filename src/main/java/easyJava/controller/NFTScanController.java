@@ -167,7 +167,10 @@ public class NFTScanController {
         orderList.forEach(order -> {
             hashList.add(order.get("hash").toString());
         });
-        var list = ethScanDao.selectListByHash(hashList);
-        return new ResponseEntity(list);
+        List<Map> retList = new ArrayList<>();
+        if (hashList != null && hashList.size() != 0) {
+            retList = ethScanDao.selectListByHash(hashList);
+        }
+        return new ResponseEntity(retList);
     }
 }
