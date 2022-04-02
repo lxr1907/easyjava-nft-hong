@@ -91,7 +91,7 @@ public class NFTScanController {
                     String user_id = matchOrder.get("user_id").toString();
                     Map userQuery = new HashMap();
                     userQuery.put("tableName", UserController.USER_WALLET_TABLE);
-                    userQuery.put("id", Long.parseLong(user_id));
+                    userQuery.put("user_id", Long.parseLong(user_id));
                     List<Map> walletList = baseDao.selectBaseList(userQuery, baseModel);
                     String address = walletList.get(0).get("address").toString();
                     logger.info("-----------匹配到订单 user wallet:" + JSON.toJSONString(walletList) + "----------");
