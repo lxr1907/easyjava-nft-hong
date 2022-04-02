@@ -12,12 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +138,18 @@ public class NFTScanController {
     }
 
     @RequestMapping("/ethScan/getAddressTx")
-    public ResponseEntity<?> getAddressTx(@RequestParam Map<String, Object> map) {
+    public ResponseEntity<?> getAddressTx(@RequestParam Map<String, Object> map,
+                                          @RequestHeader("token") String token) {
+
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
@@ -146,15 +159,24 @@ public class NFTScanController {
         if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
             return new ResponseEntity(400, "pageNo不能为空！");
         }
+        Map queryOrderMap = new HashMap();
+        queryOrderMap.put("tableName", KlayController.ORDER_TABLE);
+        queryOrderMap.put("user_id", user.get("id"));
+        queryOrderMap.put("status", 3);
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
+        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        List<Map> orderList = baseDao.selectBaseList(queryOrderMap, baseModel);
         map.put("tableName", ETH_LOG_TABLE);
         String address = map.get("address").toString();
         map.put("from", address);
         map.put("to", address);
         map.remove("address");
-        BaseModel baseModel = new BaseModel();
-        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
-        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
-        var list = ethScanDao.selectBaseList(map, baseModel);
+        List<String > hashList=new ArrayList<>();
+        orderList.forEach(order->{
+            hashList.add(order.get("hash").toString());
+        });
+        var list = ethScanDao.selectListByHash(hashList);
         return new ResponseEntity(list);
     }
 }

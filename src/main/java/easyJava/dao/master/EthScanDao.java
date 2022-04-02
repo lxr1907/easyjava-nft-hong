@@ -10,4 +10,6 @@ public interface EthScanDao {
 
     List<Map> selectBaseList(@Param("map") Map map, @Param("baseModel") BaseModel baseModel);
 
+    List<Map> selectListByHash(@Param("list") List<String> list);
+
 }

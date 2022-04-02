@@ -16,5 +16,15 @@
         </foreach>
         limit #{baseModel.pageSize} OFFSET #{baseModel.fromRec}
     </select>
+    <!--根据实体参数查询 -->
+    <select id="selectListByHash" resultType="java.util.LinkedHashMap">
+        select
+        *
+        from ${map.tableName}
+        where  hash in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 
 </mapper>
