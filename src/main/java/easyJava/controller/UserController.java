@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.web3j.abi.datatypes.Int;
 
 import java.util.HashMap;
 import java.util.List;
@@ -235,5 +234,15 @@ public class UserController {
         var walletMap = generateWallet(Integer.parseInt(user.get("id").toString()), privateKey);
         baseDao.insertBase(walletMap);
         return new ResponseEntity(walletMap.get("address"));
+    }
+
+    @RequestMapping("/user/generatePrivate")
+    public ResponseEntity generatePrivate() {
+        Map wallet = new HashMap();
+        String privateKey = KlayController.generatePrivate();
+        String address = KlayController.getWalletAddress(privateKey);
+        wallet.put("private", privateKey);
+        wallet.put("address", address);
+        return new ResponseEntity(wallet);
     }
 }
