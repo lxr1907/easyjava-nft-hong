@@ -149,10 +149,6 @@ public class NFTScanController {
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
-
-        if (map.get("address") == null || map.get("address").toString().length() == 0) {
-            return new ResponseEntity(400, "address不能为空！");
-        }
         if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
             return new ResponseEntity(400, "pageSize不能为空！");
         }

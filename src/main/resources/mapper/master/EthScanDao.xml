@@ -20,7 +20,7 @@
     <select id="selectListByHash" resultType="java.util.LinkedHashMap">
         select
         *
-        from ${map.tableName}
+        from eth_log
         where  hash in
         <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
             #{item}
