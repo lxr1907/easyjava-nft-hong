@@ -163,13 +163,8 @@ public class NFTScanController {
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
         List<Map> orderList = baseDao.selectBaseList(queryOrderMap, baseModel);
-        map.put("tableName", ETH_LOG_TABLE);
-        String address = map.get("address").toString();
-        map.put("from", address);
-        map.put("to", address);
-        map.remove("address");
-        List<String > hashList=new ArrayList<>();
-        orderList.forEach(order->{
+        List<String> hashList = new ArrayList<>();
+        orderList.forEach(order -> {
             hashList.add(order.get("hash").toString());
         });
         var list = ethScanDao.selectListByHash(hashList);
