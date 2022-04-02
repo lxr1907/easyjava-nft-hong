@@ -88,13 +88,13 @@ public class DESUtils {
         char[] c = str.toCharArray();
         //使用for循环给字符数组加密
         for (int i = 0; i < c.length; i++) {
-            c[i] = (char) (c[i] ^ 20000);
+            c[i] = (char) (c[i] ^ numSalt);
         }
         return new String(c);
     }
 
     public static void main(String[] args) {
-        String c = encrypt("丐乘世丒世专乁丕丗丙丘乆久丗丗世丘乃丒世丐乆专丐丑乆乃专世乃专专丕专乃丕久丒乃乁丑且久乂丒丐且久丙且乄世久丒乄丙世久久丕丐乄丗丕乆乁", 20000);
+        String c = encrypt("丐乘乆乄丕丕乂专乃丒丕丐久乄乂且乄久乄专丙久久丑丒丐久丙丐乁丗丑乃乂乄丑丕久乁丗丘乆久丘丐丒丘丙丙丕丒乆且乂丒乆乁丑世丕丙丒乃丒乄久", 20000);
         System.out.println(c);
     }
 }
