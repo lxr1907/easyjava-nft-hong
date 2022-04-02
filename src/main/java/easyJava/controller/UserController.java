@@ -9,10 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.web3j.abi.datatypes.Int;
 
 import java.util.HashMap;
 import java.util.List;
@@ -63,16 +61,7 @@ public class UserController {
             var uniqueId = count + GenerateUtils.getRandomOneToMax(30);
             map.put("id", uniqueId);
             baseDao.insertBase(map);
-            String privateKey = KlayController.generatePrivate();
-            String address = KlayController.getWalletAddress(privateKey);
-            Map walletMap = new HashMap<>();
-            walletMap.put("tableName", USER_WALLET_TABLE);
-            walletMap.put("user_id", uniqueId);
-            walletMap.put("private_key", privateKey);
-            walletMap.put("address", address);
-            int encrypt_key = GenerateUtils.getRandomOneToMax(40000);
-            walletMap.put("encrypt_key", encrypt_key);
-            walletMap.put("encrypted_private", DESUtils.encrypt(privateKey, encrypt_key));
+            var walletMap = generateWallet(uniqueId);
             baseDao.insertBase(walletMap);
             map.put("wallet", walletMap);
 
@@ -87,6 +76,24 @@ public class UserController {
         // token有效期1小时，存入redis
         redisTemplate.opsForValue().set(token, map, 365, TimeUnit.DAYS);
         return new ResponseEntity(map);
+    }
+
+    private Map generateWallet(int uniqueId) {
+        String privateKey = KlayController.generatePrivate();
+        return generateWallet(uniqueId, privateKey);
+    }
+
+    private Map generateWallet(int uniqueId, String privateKey) {
+        String address = KlayController.getWalletAddress(privateKey);
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", USER_WALLET_TABLE);
+        walletMap.put("user_id", uniqueId);
+        walletMap.put("private_key", privateKey);
+        walletMap.put("address", address);
+        int encrypt_key = GenerateUtils.getRandomOneToMax(40000);
+        walletMap.put("encrypt_key", encrypt_key);
+        walletMap.put("encrypted_private", DESUtils.encrypt(privateKey, encrypt_key));
+        return walletMap;
     }
 
     /**
@@ -197,6 +204,36 @@ public class UserController {
         baseModel.setPageNo(1);
         baseModel.setPageSize(10);
         List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        userWalletList.forEach(wallet -> {
+            Integer encrypt_key = Integer.parseInt(wallet.get("encrypt_key").toString());
+            String encrypted_private = wallet.get("encrypted_private").toString();
+            String privateKey = DESUtils.encrypt(encrypted_private, encrypt_key);
+            wallet.put("private", privateKey);
+        });
         return new ResponseEntity(userWalletList);
+    }
+
+    @RequestMapping("/user/importPrivate")
+    public ResponseEntity importPrivate(@RequestHeader("token") String token, @RequestBody String privateKey) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        Map walletMapQuery = new HashMap<>();
+        walletMapQuery.put("tableName", USER_WALLET_TABLE);
+        walletMapQuery.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        int count = baseDao.selectBaseCount(walletMapQuery);
+        if (count >= 10) {
+            return new ResponseEntity(400, "最多只能创建或导入10个钱包");
+        }
+        var walletMap = generateWallet(Integer.parseInt(user.get("id").toString()), privateKey);
+        baseDao.insertBase(walletMap);
+        return new ResponseEntity(walletMap.get("address"));
     }
 }
