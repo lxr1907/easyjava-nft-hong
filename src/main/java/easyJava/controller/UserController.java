@@ -87,7 +87,6 @@ public class UserController {
         Map walletMap = new HashMap<>();
         walletMap.put("tableName", USER_WALLET_TABLE);
         walletMap.put("user_id", uniqueId);
-        walletMap.put("private_key", privateKey);
         walletMap.put("address", address);
         int encrypt_key = GenerateUtils.getRandomOneToMax(40000);
         walletMap.put("encrypt_key", encrypt_key);
