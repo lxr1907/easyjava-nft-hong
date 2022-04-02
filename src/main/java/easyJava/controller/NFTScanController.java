@@ -86,8 +86,11 @@ public class NFTScanController {
                     logger.info("-----------匹配到订单user:" + JSON.toJSONString(user));
                     long buy_amount = Long.parseLong(matchOrder.get("buy_amount").toString());
                     long price = Long.parseLong(matchOrder.get("price").toString());
-                    BigInteger chrVal = BigInteger.valueOf(buy_amount * price);//.multiply(decimals18);
+                    BigInteger chrVal = BigInteger.valueOf(buy_amount * price).multiply(decimals18);
+                    //更新订单状态，支付chr开始
                     matchOrder.put("status", 2);
+                    matchOrder.put("from_address", map.get("from"));
+                    matchOrder.put("hash", map.get("hash"));
 
                     matchOrder.put("tableName", KlayController.ORDER_TABLE);
                     baseDao.updateBaseByPrimaryKey(matchOrder);
@@ -95,6 +98,7 @@ public class NFTScanController {
                         logger.info("-----------sendingKLAY to user chr_address:------"
                                 + chr_address + ",val:" + chrVal);
                         KlayController.sendingCHR(KlayController.SYSTEM_PRIVATE, chr_address, chrVal);
+                        //更新订单状态，支付chr完成
                         matchOrder.put("status", 3);
                         baseDao.updateBaseByPrimaryKey(matchOrder);
                         logger.info("-----------sendingKLAY to user chr_address:"
