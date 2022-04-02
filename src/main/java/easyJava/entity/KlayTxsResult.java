@@ -12,6 +12,15 @@ public class KlayTxsResult implements Serializable {
     Integer limit;
     Integer total;
     List<Map<String, Object>> result;
+    Map<String, Map<String,Object>> tokens;
+
+    public Map<String, Map<String, Object>> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(Map<String, Map<String, Object>> tokens) {
+        this.tokens = tokens;
+    }
 
     public Boolean getSuccess() {
         return success;

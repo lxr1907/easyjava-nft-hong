@@ -46,12 +46,13 @@ public class KlayScanController {
     public static final String KLAY_TXS_TABLE = "klay_txs";
     public static final String KLAY_API_PRE = "https://api-baobab-v2.scope.klaytn.com/v2/accounts/";
     public static final String KLAY_CHR_API_TAIL = "/ftBalances";
+    public static final String KLAY_CHR_TRANSFER_API_TAIL = "/ftTransfers";
     public static final String TXS_API = "/txs";
 
     @Scheduled(cron = "*/50 * * * * ?")
     @RequestMapping("/scanKlayTxs")
     public ResponseEntity<?> scanKlayTxs() {
-        //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
+        //查询直接给chr合约转入klay的链上交易
         KlayTxsResult result = getAddressTxs(KlayController.KLAY_CHR_ADDRESS);
 
         List<Map<String, Object>> retList = result.getResult();
@@ -61,6 +62,15 @@ public class KlayScanController {
             baseDao.insertIgnoreBase(map);
         });
         return new ResponseEntity();
+    }
+
+    @RequestMapping("/klayScan/getAddressTokenTxs")
+    public ResponseEntity<?> getAddressTokenTxs(@RequestParam Map<String, Object> map) {
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+
+        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString()));
     }
 
     @RequestMapping("/klayScan/getAddressTokens")
@@ -100,12 +110,22 @@ public class KlayScanController {
     }
 
     /**
-     * 获取privateKey对应的address
+     * 获取address的klay转账记录
      *
      * @return
      */
     public static KlayTxsResult getAddressTxs(String address) {
         String result = HttpUtil.get(KLAY_API_PRE + address + TXS_API);
+        KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
+        return response;
+    }
+    /**
+     * 获取address的klay链上的token转账记录
+     *
+     * @return
+     */
+    public static KlayTxsResult getAddressTokenTxs(String address) {
+        String result = HttpUtil.get(KLAY_API_PRE + address +KLAY_CHR_TRANSFER_API_TAIL);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         return response;
     }
