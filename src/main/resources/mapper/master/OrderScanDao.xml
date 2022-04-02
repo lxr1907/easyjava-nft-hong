@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="easyJava.dao.master.OrderScanDao">
+
+    <!--根据实体参数查询 -->
+    <update id="updateOrderOutOfDate">
+        <![CDATA[
+        update nft.order_usdt ou set status=5
+        where ou.`date` < DATE_SUB(now(), INTERVAL 6 HOUR)
+        ]]>
+    </update>
+</mapper>

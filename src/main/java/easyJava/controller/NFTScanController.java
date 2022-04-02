@@ -3,6 +3,7 @@ package easyJava.controller;
 import com.alibaba.fastjson.JSON;
 import easyJava.dao.master.BaseDao;
 import easyJava.dao.master.EthScanDao;
+import easyJava.dao.master.OrderScanDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.ScanService;
@@ -32,7 +33,8 @@ public class NFTScanController {
     BaseDao baseDao;
     @Autowired
     EthScanDao ethScanDao;
-
+    @Autowired
+    OrderScanDao orderScanDao;
     @Autowired
     ScanService scanService;
     @Autowired
@@ -52,6 +54,13 @@ public class NFTScanController {
             baseDao.insertIgnoreBase(map);
         });
         return new ResponseEntity();
+    }
+
+    @Scheduled(cron = "0 * * * * ?")
+    @Transactional
+    public void updateOrderOutOfDate() {
+        int count = orderScanDao.updateOrderOutOfDate();
+        logger.info("-------updateOrderOutOfDate update status to5 count:" + count + "-------");
     }
 
     @Scheduled(cron = "*/30 * * * * ?")
