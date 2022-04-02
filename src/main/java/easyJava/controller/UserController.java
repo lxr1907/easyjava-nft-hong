@@ -172,11 +172,7 @@ public class UserController {
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
-        Map map = new HashMap();
-        map.put("tableName", USER_TABLE);
-        map.put("id", user.get("id"));
-        Map userMap = baseDao.selectBaseByPrimaryKey(map);
-        Object privateKey = userMap.get("chr_private");
+        Object privateKey = user.get("chr_private");
         return new ResponseEntity(privateKey);
     }
 }
