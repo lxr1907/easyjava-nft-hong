@@ -1,17 +1,15 @@
 package easyJava.controller;
 
-import java.nio.charset.StandardCharsets;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import easyJava.utils.*;
+import easyJava.dao.master.BaseDao;
+import easyJava.entity.BaseModel;
+import easyJava.entity.ResponseEntity;
+import easyJava.utils.GenerateUtils;
+import easyJava.utils.SendMailSSL;
+import easyJava.utils.SendMailTLS;
+import easyJava.utils.TokenProccessor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,9 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import easyJava.dao.master.BaseDao;
-import easyJava.entity.BaseModel;
-import easyJava.entity.ResponseEntity;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class UserController {
@@ -163,8 +163,7 @@ public class UserController {
     }
 
     @RequestMapping("/user/getPrivate")
-    public ResponseEntity getPrivate(@RequestParam Map<String, Object> map,
-                                     @RequestHeader("token") String token) {
+    public ResponseEntity getPrivate(@RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -173,8 +172,11 @@ public class UserController {
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
-
-        Object privateKey = user.get("chr_private");
+        Map map = new HashMap();
+        map.put("tableName", USER_TABLE);
+        map.put("id", user.get("id"));
+        Map userMap = baseDao.selectBaseByPrimaryKey(map);
+        Object privateKey = userMap.get("chr_private");
         return new ResponseEntity(privateKey);
     }
 }
