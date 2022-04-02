@@ -77,9 +77,17 @@ public class UserController {
         return new ResponseEntity(map);
     }
 
+    /**
+     * 初次注册生成，默认status=1是主钱包
+     * @param uniqueId
+     * @return
+     */
     private Map generateWallet(int uniqueId) {
         String privateKey = KlayController.generatePrivate();
-        return generateWallet(uniqueId, privateKey);
+        Map map= generateWallet(uniqueId, privateKey);
+        //此时生成主钱包
+        map.put("status",1);
+        return map;
     }
 
     private Map generateWallet(int uniqueId, String privateKey) {
