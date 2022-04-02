@@ -66,11 +66,9 @@ CREATE TABLE `order_usdt` (
   KEY `order_usdt_date_IDX` (`date`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
 -- nft.eth_log definition
 
 CREATE TABLE `eth_log` (
-  `id` int NOT NULL AUTO_INCREMENT,
   `block_num` bigint DEFAULT NULL,
   `from` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `to` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
@@ -80,8 +78,7 @@ CREATE TABLE `eth_log` (
   `value` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `contract` varchar(500) COLLATE utf8mb4_bin DEFAULT NULL,
-  PRIMARY KEY (`id`),
   UNIQUE KEY `hash_unique` (`hash`),
   KEY `eth_log_from_IDX` (`from`) USING BTREE,
   KEY `eth_log_to_IDX` (`to`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=6005 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
