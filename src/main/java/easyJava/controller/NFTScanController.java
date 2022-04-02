@@ -2,6 +2,7 @@ package easyJava.controller;
 
 import com.alibaba.fastjson.JSON;
 import easyJava.dao.master.BaseDao;
+import easyJava.dao.master.EthScanDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.etherScan.ScanService;
@@ -27,6 +28,9 @@ public class NFTScanController {
 
     @Autowired
     BaseDao baseDao;
+    @Autowired
+    EthScanDao ethScanDao;
+
     @Autowired
     ScanService scanService;
     @Autowired
@@ -128,7 +132,7 @@ public class NFTScanController {
     }
 
     @RequestMapping("/ethScan/getAddressTx")
-    public ResponseEntity<?> getOwnerNFTList(@RequestParam Map<String, Object> map) {
+    public ResponseEntity<?> getAddressTx(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
@@ -146,10 +150,7 @@ public class NFTScanController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
-        var retmap = new HashMap();
-        var list = baseDao.selectBaseList(map, baseModel);
-        int count = baseDao.selectBaseCount(map);
-        retmap.put("list", list);
-        return new ResponseEntity(retmap, count, baseModel);
+        var list = ethScanDao.selectBaseList(map, baseModel);
+        return new ResponseEntity(list);
     }
 }
