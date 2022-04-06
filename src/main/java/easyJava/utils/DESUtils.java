@@ -82,6 +82,12 @@ public class DESUtils {
         return cipher.doFinal(src);
     }
 
+    /**
+     * 异或加密
+     * @param str
+     * @param numSalt
+     * @return
+     */
     public static String encrypt(String str, Integer numSalt) {
 
         //讲获取的字符串转成字符数组
@@ -93,8 +99,21 @@ public class DESUtils {
         return new String(c);
     }
 
+    /**
+     * js版本
+     * @param args
+     */
+//    var a="丐乘乆乄丕丕乂专乃丒丕丐久乄乂且乄久乄专丙久久丑丒丐久丙丐乁丗丑乃乂乄丑丕久乁丗丘乆久丘丐丒丘丙丙丕丒乆且乂丒乆乁丑世丕丙丒乃丒乄久"
+//    var key=20000
+//    var str="";
+//for(var i=0;i<a.length;i++){
+//        str=str+String.fromCharCode(a.charCodeAt(i)^key)
+//    }
+//console.log(str);
+
     public static void main(String[] args) {
         String c = encrypt("丐乘乆乄丕丕乂专乃丒丕丐久乄乂且乄久乄专丙久久丑丒丐久丙丐乁丗丑乃乂乄丑丕久乁丗丘乆久丘丐丒丘丙丙丕丒乆且乂丒乆乁丑世丕丙丒乃丒乄久", 20000);
         System.out.println(c);
     }
+
 }
