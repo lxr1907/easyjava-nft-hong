@@ -45,8 +45,11 @@ public class KlayController {
 
     public static final String ORDER_TABLE = "order_usdt";
     public static final String CHR_PRICE_TABLE = "chr_price";
-    public static final String SYSTEM_PRIVATE = "6b9332b28c2a689f464994cb7be26485aba9a3471077cf8607eefe8f849c10f8";
-    public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
+    //0x0CcEB89A051711b0af1Afd52855fA76Da8aea265
+//    public static final String SYSTEM_PRIVATE = "6b9332b28c2a689f464994cb7be26485aba9a3471077cf8607eefe8f849c10f8";
+//    public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
+    public static final String SYSTEM_PRIVATE = "55490a18860328954ba2d80eaed84dbe1b7a2c42073b6cec3704cf591990e71f";
+    public static final String SYSTEM_ADDRESS = "0x0CcEB89A051711b0af1Afd52855fA76Da8aea265";
     public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
     public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
 
