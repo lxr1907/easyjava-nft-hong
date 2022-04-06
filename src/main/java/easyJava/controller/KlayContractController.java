@@ -7,5 +7,402 @@ import org.springframework.web.bind.annotation.RestController;
 public class KlayContractController {
 
 
-    public static String ABI="[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"initialSupply\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"subtractedValue\",\"type\":\"uint256\"}],\"name\":\"decreaseAllowance\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"addedValue\",\"type\":\"uint256\"}],\"name\":\"increaseAllowance\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"name\":\"setPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"onePrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]";
+    public static String ABI="[\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"initialSupply\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"constructor\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"anonymous\": false,\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"indexed\": true,\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"owner\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"indexed\": true,\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"spender\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"indexed\": false,\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"value\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"Approval\",\n" +
+            "\t\t\"type\": \"event\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"spender\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"amount\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"approve\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"bool\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"bool\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"spender\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"subtractedValue\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"decreaseAllowance\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"bool\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"bool\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"spender\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"addedValue\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"increaseAllowance\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"bool\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"bool\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"anonymous\": false,\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"indexed\": true,\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"previousOwner\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"indexed\": true,\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"newOwner\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"OwnershipTransferred\",\n" +
+            "\t\t\"type\": \"event\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [],\n" +
+            "\t\t\"name\": \"renounceOwnership\",\n" +
+            "\t\t\"outputs\": [],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"price\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"setPrice\",\n" +
+            "\t\t\"outputs\": [],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"to\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"amount\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"transfer\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"bool\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"bool\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"anonymous\": false,\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"indexed\": true,\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"from\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"indexed\": true,\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"to\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"indexed\": false,\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"value\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"Transfer\",\n" +
+            "\t\t\"type\": \"event\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"from\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"to\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"amount\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"transferFrom\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"bool\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"bool\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"newOwner\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"transferOwnership\",\n" +
+            "\t\t\"outputs\": [],\n" +
+            "\t\t\"stateMutability\": \"nonpayable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"amount\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address payable\",\n" +
+            "\t\t\t\t\"name\": \"receiver\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"withDraw\",\n" +
+            "\t\t\"outputs\": [],\n" +
+            "\t\t\"stateMutability\": \"payable\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"stateMutability\": \"payable\",\n" +
+            "\t\t\"type\": \"receive\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"owner\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"spender\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"allowance\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"account\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"name\": \"balanceOf\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [],\n" +
+            "\t\t\"name\": \"decimals\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint8\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"uint8\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [],\n" +
+            "\t\t\"name\": \"getBalance\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"balance\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [],\n" +
+            "\t\t\"name\": \"name\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"string\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"string\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [],\n" +
+            "\t\t\"name\": \"onePrice\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [],\n" +
+            "\t\t\"name\": \"owner\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"address\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"address\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [],\n" +
+            "\t\t\"name\": \"symbol\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"string\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"string\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t},\n" +
+            "\t{\n" +
+            "\t\t\"inputs\": [],\n" +
+            "\t\t\"name\": \"totalSupply\",\n" +
+            "\t\t\"outputs\": [\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"internalType\": \"uint256\",\n" +
+            "\t\t\t\t\"name\": \"\",\n" +
+            "\t\t\t\t\"type\": \"uint256\"\n" +
+            "\t\t\t}\n" +
+            "\t\t],\n" +
+            "\t\t\"stateMutability\": \"view\",\n" +
+            "\t\t\"type\": \"function\"\n" +
+            "\t}\n" +
+            "]" +
+            "";
+
 }
