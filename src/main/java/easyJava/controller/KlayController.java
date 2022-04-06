@@ -171,7 +171,29 @@ public class KlayController {
         logger.info("---------end sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
     }
 
-    @RequestMapping("/klay/sendKlayTo")
+    public static void withDrawCHR(String fromPrivateKey, String toAddress, BigInteger value) {
+        logger.info("---------start withDrawCHR,to:" + toAddress + ",amount:" + value + "-----");
+        Caver caver = new Caver(Klay_HOST);
+        SingleKeyring executor = KeyringFactory.createFromPrivateKey(fromPrivateKey);
+        String fromAddress = executor.toAccount().getAddress();
+        caver.wallet.add(executor);
+        try {
+            Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
+
+            SendOptions sendOptions = new SendOptions();
+            sendOptions.setFrom(executor.getAddress());
+            sendOptions.setGas(gas);
+            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("withDraw")
+                    .send(Arrays.asList(value, toAddress), sendOptions);
+            logger.info("------withDrawCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
+        } catch (Exception e) {
+            logger.error("withDrawCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
+            throw new RuntimeException(e.getMessage());
+        }
+        logger.info("---------end withDrawCHR,to:" + toAddress + ",amount:" + value + "-----");
+    }
+
+    //    @RequestMapping("/klay/sendKlayTo")
     public ResponseEntity<?> sendKlayTo(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
@@ -188,8 +210,50 @@ public class KlayController {
         return new ResponseEntity(result);
     }
 
+    @RequestMapping("/klay/withDrawCHR")
+    public ResponseEntity<?> withDrawCHR(@RequestParam Map<String, Object> map,
+                                         @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("value") == null || map.get("value").toString().length() == 0) {
+            return new ResponseEntity(400, "value不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", UserController.USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        boolean myWallet = false;
+        for (var wallet : userWalletList) {
+            if (wallet.get("address").equals(map.get("address").toString())) {
+                myWallet = true;
+            }
+        }
+        if (!myWallet) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            withDrawCHR(SYSTEM_PRIVATE, map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+        } catch (Exception e) {
+            logger.error("withDrawCHR失败！", e);
+        }
+        return new ResponseEntity();
+    }
+
     @RequestMapping("/klay/sendingCHR")
-    public ResponseEntity<?> sendingCHR(@RequestParam Map<String, Object> map) {
+    public ResponseEntity<?> sendingCHRApi(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
@@ -216,8 +280,8 @@ public class KlayController {
      * @return
      */
     @RequestMapping("/klay/createOrder")
-    public ResponseEntity createOrder(@RequestParam Map<String, Object> map, @RequestHeader("token") String
-            token) {
+    public ResponseEntity createOrder(@RequestParam Map<String, Object> map,
+                                      @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -274,15 +338,15 @@ public class KlayController {
      * @return
      */
     @RequestMapping("/klay/getPrice")
-    public ResponseEntity getPrice( @RequestParam Map<String, Object> map) {
-            map.put("tableName", CHR_PRICE_TABLE);
-            BaseModel baseModel = new BaseModel();
-            baseModel.setPageSize(10);
-            baseModel.setPageNo(1);
-            HashMap retmap = new HashMap();
-            List list = baseDao.selectBaseList(map, baseModel);
-            retmap.put("list", list);
-            return new ResponseEntity(retmap, 1, baseModel);
+    public ResponseEntity getPrice(@RequestParam Map<String, Object> map) {
+        map.put("tableName", CHR_PRICE_TABLE);
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(10);
+        baseModel.setPageNo(1);
+        HashMap retmap = new HashMap();
+        List list = baseDao.selectBaseList(map, baseModel);
+        retmap.put("list", list);
+        return new ResponseEntity(retmap, 1, baseModel);
     }
 
     public ResponseEntity updateOrder(@RequestParam Map<String, Object> map) {
