@@ -181,7 +181,7 @@ public class KlayController {
             Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
             SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(executor.getAddress());
-            sendOptions.setGas(gas);
+            sendOptions.setGas(gas.multiply(BigInteger.valueOf(2)));
             TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("withDrawCHR")
                     .send(Arrays.asList(value, toAddress), sendOptions);
             logger.info("------withDrawCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
