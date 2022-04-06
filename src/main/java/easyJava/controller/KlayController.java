@@ -296,6 +296,13 @@ public class KlayController {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
+        if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
+            return new ResponseEntity(400, "pageSize不能为空！");
+        }
+        if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
+            return new ResponseEntity(400, "pageNo不能为空！");
+        }
+
         Map user = (Map) redisTemplate.opsForValue().get(token);
 
         if (user == null || user.get("id").toString().length() == 0) {
@@ -304,8 +311,8 @@ public class KlayController {
         map.put("tableName", ORDER_TABLE);
         map.put("user_id", user.get("id"));
         BaseModel baseModel = new BaseModel();
-        baseModel.setPageSize(10);
-        baseModel.setPageNo(1);
+        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
+        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
         HashMap retmap = new HashMap();
         List list = baseDao.selectBaseList(map, baseModel);
         retmap.put("list", list);
