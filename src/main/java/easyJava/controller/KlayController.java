@@ -44,6 +44,7 @@ public class KlayController {
     private RedisTemplate<String, Object> redisTemplate;
 
     public static final String ORDER_TABLE = "order_usdt";
+    public static final String CHR_PRICE_TABLE = "chr_price";
     public static final String SYSTEM_PRIVATE = "6b9332b28c2a689f464994cb7be26485aba9a3471077cf8607eefe8f849c10f8";
     public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
     public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
@@ -270,8 +271,15 @@ public class KlayController {
      * @return
      */
     @RequestMapping("/klay/getPrice")
-    public ResponseEntity getPrice() {
-        return new ResponseEntity(USDT_ERC20_PRICE);
+    public ResponseEntity getPrice( @RequestParam Map<String, Object> map) {
+            map.put("tableName", CHR_PRICE_TABLE);
+            BaseModel baseModel = new BaseModel();
+            baseModel.setPageSize(10);
+            baseModel.setPageNo(1);
+            HashMap retmap = new HashMap();
+            List list = baseDao.selectBaseList(map, baseModel);
+            retmap.put("list", list);
+            return new ResponseEntity(retmap, 1, baseModel);
     }
 
     public ResponseEntity updateOrder(@RequestParam Map<String, Object> map) {
@@ -296,7 +304,7 @@ public class KlayController {
         map.put("tableName", ORDER_TABLE);
         map.put("user_id", user.get("id"));
         BaseModel baseModel = new BaseModel();
-        baseModel.setPageSize(1);
+        baseModel.setPageSize(10);
         baseModel.setPageNo(1);
         HashMap retmap = new HashMap();
         List list = baseDao.selectBaseList(map, baseModel);
