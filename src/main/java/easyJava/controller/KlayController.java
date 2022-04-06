@@ -182,7 +182,7 @@ public class KlayController {
             SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(executor.getAddress());
             sendOptions.setGas(gas);
-            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transfer")
+            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("withDrawCHR")
                     .send(Arrays.asList(value, toAddress), sendOptions);
             logger.info("------withDrawCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
         } catch (Exception e) {
