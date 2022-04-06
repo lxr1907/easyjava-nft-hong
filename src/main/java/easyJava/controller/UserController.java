@@ -148,6 +148,41 @@ public class UserController {
     }
 
     /**
+     * 重新获取钱包等信息
+     */
+    @RequestMapping("/user/getLoginInfo")
+    public ResponseEntity getLoginInfo( @RequestHeader("token") String token) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(1);
+        baseModel.setPageNo(1);
+        Map map=new HashMap();
+        map.put("tableName", USER_TABLE);
+        map.put("id", user.get("id"));
+        List<Map> list = baseDao.selectBaseList(map, baseModel);
+        if (list == null || list.size() == 0) {
+            return new ResponseEntity(400, "账号错误！");
+        }
+        user.remove("password");
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        user.put("userWalletList", userWalletList);
+        return new ResponseEntity(user);
+
+    }
+
+    /**
      * 登录
      */
     @RequestMapping("/user/getEmailCode")
