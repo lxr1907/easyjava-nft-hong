@@ -179,9 +179,12 @@ public class KlayController {
         caver.wallet.add(executor);
         try {
             Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
-            var result = contract.getMethod("withDraw")
-                    .call(Arrays.asList(value, toAddress));
-            logger.info("------withDrawCHR ret:" + JSON.toJSONString(result) + "--to:" + toAddress + ",amount:" + value + "------");
+            SendOptions sendOptions = new SendOptions();
+            sendOptions.setFrom(executor.getAddress());
+            sendOptions.setGas(gas);
+            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transfer")
+                    .send(Arrays.asList(value, toAddress), sendOptions);
+            logger.info("------withDrawCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
         } catch (Exception e) {
             logger.error("withDrawCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
             throw new RuntimeException(e.getMessage());
