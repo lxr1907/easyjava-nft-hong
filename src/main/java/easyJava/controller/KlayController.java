@@ -5,7 +5,6 @@ import com.klaytn.caver.Caver;
 import com.klaytn.caver.account.Account;
 import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.SendOptions;
-import com.klaytn.caver.methods.request.CallObject;
 import com.klaytn.caver.methods.response.Bytes32;
 import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.transaction.TxPropertyBuilder;
@@ -179,12 +178,9 @@ public class KlayController {
         String fromAddress = executor.toAccount().getAddress();
         caver.wallet.add(executor);
         try {
-          BigInteger gasPrice=  caver.rpc.klay.getGasPrice().send().getValue();
-            logger.info("---------start withDrawCHR,gasPrice:" + gasPrice+ "-----");
             Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
             var result = contract.getMethod("withDraw")
-                    .call(Arrays.asList(value, toAddress), new CallObject(executor.getAddress(),KLAY_CHR_ADDRESS,gas,gasPrice
-                           , BigInteger.valueOf(0),""));
+                    .call(Arrays.asList(value, toAddress));
             logger.info("------withDrawCHR ret:" + JSON.toJSONString(result) + "--to:" + toAddress + ",amount:" + value + "------");
         } catch (Exception e) {
             logger.error("withDrawCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
