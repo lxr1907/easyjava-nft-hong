@@ -69,8 +69,7 @@ public class KlayScanController {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
-
-        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString()));
+        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString(), Integer.parseInt(map.get("pageNo").toString())));
     }
 
     @RequestMapping("/klayScan/getAddressTokens")
@@ -125,8 +124,8 @@ public class KlayScanController {
      *
      * @return
      */
-    public static KlayTxsResult getAddressTokenTxs(String address) {
-        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL);
+    public static KlayTxsResult getAddressTokenTxs(String address, int page) {
+        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL + "?page=" + page);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         response.getResult().forEach(row -> {
             if (row.containsKey("amount")) {
