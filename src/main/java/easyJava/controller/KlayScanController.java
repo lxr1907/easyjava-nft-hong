@@ -140,7 +140,7 @@ public class KlayScanController {
     }
 
     public static void main(String[] args) {
-        String amountStr = "0x000000000000000000000011";
+        String amountStr = "0x0000000000000000000000000000000000000001";
         System.out.println(jin_zhi(amountStr));
 //        try {
 //            KlayTxsResult result = getAddressTxs(KlayController.SYSTEM_ADDRESS);
@@ -164,12 +164,11 @@ public class KlayScanController {
             System.out.println(amount1);
             System.out.println(amount2);
             result = BigInteger.valueOf(amount1).add(BigInteger.valueOf(amount2).multiply(BigInteger.valueOf(((Double) Math.pow(16d, 10d)).longValue()))).toString();
-            System.out.println(result);
         } else {
             Long amount1 = Long.parseLong(amountStr, 16);
-            System.out.println(amount1);
-            System.out.println(result);
+            result = BigInteger.valueOf(amount1).toString();
         }
+        System.out.println(result);
         return result;
     }
 
