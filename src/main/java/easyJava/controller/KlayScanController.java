@@ -69,7 +69,15 @@ public class KlayScanController {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
-        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString(), Integer.parseInt(map.get("pageNo").toString())));
+        if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
+            return new ResponseEntity(400, "pageSize不能为空！");
+        }
+        if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
+            return new ResponseEntity(400, "pageNo不能为空！");
+        }
+        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString(),
+                Integer.parseInt(map.get("pageNo").toString()),
+                Integer.parseInt(map.get("pageSize").toString())));
     }
 
     @RequestMapping("/klayScan/getAddressTokens")
@@ -124,8 +132,9 @@ public class KlayScanController {
      *
      * @return
      */
-    public static KlayTxsResult getAddressTokenTxs(String address, int page) {
-        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL + "?page=" + page);
+    public static KlayTxsResult getAddressTokenTxs(String address, int page, int limit) {
+        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL +
+                "?page=" + page + "&limit=" + limit);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         response.getResult().forEach(row -> {
             if (row.containsKey("amount")) {
