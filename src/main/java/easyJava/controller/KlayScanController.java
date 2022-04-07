@@ -119,18 +119,30 @@ public class KlayScanController {
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         return response;
     }
+
     /**
      * 获取address的klay链上的token转账记录
      *
      * @return
      */
     public static KlayTxsResult getAddressTokenTxs(String address) {
-        String result = HttpUtil.get(KLAY_API_PRE + address +KLAY_CHR_TRANSFER_API_TAIL);
+        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
+        response.getResult().forEach(row -> {
+            if (row.containsKey("amount")) {
+                String amountStr = row.get("amount").toString();
+                if (amountStr.startsWith("0x")) {
+                    row.put("amountNum", jin_zhi(amountStr));
+                }
+
+            }
+        });
         return response;
     }
 
     public static void main(String[] args) {
+        String amountStr = "0x000000000000000000000011";
+        System.out.println(jin_zhi(amountStr));
 //        try {
 //            KlayTxsResult result = getAddressTxs(KlayController.SYSTEM_ADDRESS);
 //            System.out.println(JSON.toJSONString(result));
@@ -139,6 +151,28 @@ public class KlayScanController {
 //        }
     }
 
+    public static String jin_zhi(String amountStr) {
+        String result = "";
+        amountStr = amountStr.replace("0x", "");
+        amountStr = amountStr.replaceAll("^(0+)", "");
+        if (amountStr.length() > 10) {
+            String amountStr1 = amountStr.substring(amountStr.length() - 10);
+            String amountStr2 = amountStr.substring(0, amountStr.length() - 10);
+            Long amount1 = Long.parseLong(amountStr1, 16);
+            Long amount2 = Long.parseLong(amountStr2, 16);
+            System.out.println(amountStr.substring(amountStr.length() - 10));
+            System.out.println(amountStr.substring(0, amountStr.length() - 10));
+            System.out.println(amount1);
+            System.out.println(amount2);
+            result = BigInteger.valueOf(amount1).add(BigInteger.valueOf(amount2).multiply(BigInteger.valueOf(((Double) Math.pow(16d, 10d)).longValue()))).toString();
+            System.out.println(result);
+        } else {
+            Long amount1 = Long.parseLong(amountStr, 16);
+            System.out.println(amount1);
+            System.out.println(result);
+        }
+        return result;
+    }
 
     /**
      * 发送klay
@@ -150,7 +184,8 @@ public class KlayScanController {
      * @throws CipherException
      * @throws TransactionException
      */
-    public static TransactionReceipt.TransactionReceiptData sendingKLAY(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
+    public static TransactionReceipt.TransactionReceiptData sendingKLAY(String fromPrivateKey, String
+            toAddress, BigInteger value) throws IOException, TransactionException {
         Caver caver = new Caver("");
         SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
         String fromAddress = keyring.toAccount().getAddress();
