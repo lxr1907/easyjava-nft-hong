@@ -69,8 +69,15 @@ public class KlayScanController {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
-
-        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString()));
+        if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
+            return new ResponseEntity(400, "pageSize不能为空！");
+        }
+        if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
+            return new ResponseEntity(400, "pageNo不能为空！");
+        }
+        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString(),
+                Integer.parseInt(map.get("pageNo").toString()),
+                Integer.parseInt(map.get("pageSize").toString())));
     }
 
     @RequestMapping("/klayScan/getAddressTokens")
@@ -119,18 +126,31 @@ public class KlayScanController {
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         return response;
     }
+
     /**
      * 获取address的klay链上的token转账记录
      *
      * @return
      */
-    public static KlayTxsResult getAddressTokenTxs(String address) {
-        String result = HttpUtil.get(KLAY_API_PRE + address +KLAY_CHR_TRANSFER_API_TAIL);
+    public static KlayTxsResult getAddressTokenTxs(String address, int page, int limit) {
+        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL +
+                "?page=" + page + "&limit=" + limit);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
+        response.getResult().forEach(row -> {
+            if (row.containsKey("amount")) {
+                String amountStr = row.get("amount").toString();
+                if (amountStr.startsWith("0x")) {
+                    row.put("amountNum", jin_zhi(amountStr));
+                }
+
+            }
+        });
         return response;
     }
 
     public static void main(String[] args) {
+        String amountStr = "0x0000000000000000000000000000000000000001";
+        System.out.println(jin_zhi(amountStr));
 //        try {
 //            KlayTxsResult result = getAddressTxs(KlayController.SYSTEM_ADDRESS);
 //            System.out.println(JSON.toJSONString(result));
@@ -139,6 +159,27 @@ public class KlayScanController {
 //        }
     }
 
+    public static String jin_zhi(String amountStr) {
+        String result = "";
+        amountStr = amountStr.replace("0x", "");
+        amountStr = amountStr.replaceAll("^(0+)", "");
+        if (amountStr.length() > 10) {
+            String amountStr1 = amountStr.substring(amountStr.length() - 10);
+            String amountStr2 = amountStr.substring(0, amountStr.length() - 10);
+            Long amount1 = Long.parseLong(amountStr1, 16);
+            Long amount2 = Long.parseLong(amountStr2, 16);
+            System.out.println(amountStr.substring(amountStr.length() - 10));
+            System.out.println(amountStr.substring(0, amountStr.length() - 10));
+            System.out.println(amount1);
+            System.out.println(amount2);
+            result = BigInteger.valueOf(amount1).add(BigInteger.valueOf(amount2).multiply(BigInteger.valueOf(((Double) Math.pow(16d, 10d)).longValue()))).toString();
+        } else {
+            Long amount1 = Long.parseLong(amountStr, 16);
+            result = BigInteger.valueOf(amount1).toString();
+        }
+        System.out.println(result);
+        return result;
+    }
 
     /**
      * 发送klay
@@ -150,7 +191,8 @@ public class KlayScanController {
      * @throws CipherException
      * @throws TransactionException
      */
-    public static TransactionReceipt.TransactionReceiptData sendingKLAY(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
+    public static TransactionReceipt.TransactionReceiptData sendingKLAY(String fromPrivateKey, String
+            toAddress, BigInteger value) throws IOException, TransactionException {
         Caver caver = new Caver("");
         SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
         String fromAddress = keyring.toAccount().getAddress();
