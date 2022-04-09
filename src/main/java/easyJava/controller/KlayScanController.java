@@ -35,7 +35,7 @@ import java.util.Map;
 
 @RestController
 public class KlayScanController {
-    private static final Logger logger = LogManager.getLogger(NFTScanController.class);
+    private static final Logger logger = LogManager.getLogger(KlayScanController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired
@@ -69,6 +69,7 @@ public class KlayScanController {
         retList.forEach(map -> {
             map.put("tableName", KLAY_TXS_TABLE);
             map.put("txHash", map.get("parentHash"));
+            logger.info(JSON.toJSONString(map));
             baseDao.insertIgnoreBase(map);
         });
         return new ResponseEntity();
@@ -155,7 +156,6 @@ public class KlayScanController {
      */
     public static KlayTxsResult getAddressInternalTxs(String address) {
         String result = HttpUtil.get(KLAY_API_PRE + address + TXS_INTERNAL_API);
-        logger.info(result);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         return response;
     }
