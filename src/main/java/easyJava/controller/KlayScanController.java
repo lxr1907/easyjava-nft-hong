@@ -68,7 +68,7 @@ public class KlayScanController {
         retList = result.getResult();
         retList.forEach(map -> {
             map.put("tableName", KLAY_TXS_TABLE);
-            map.put("txHash", map.get("parentHash"));
+            map.put("txHash", map.get("parentHash").toString() + map.get("toAddress"));
             logger.info(JSON.toJSONString(map));
             baseDao.insertIgnoreBase(map);
         });
