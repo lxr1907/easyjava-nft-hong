@@ -199,16 +199,11 @@ public class KlayScanController {
             String amountStr2 = amountStr.substring(0, amountStr.length() - 10);
             Long amount1 = Long.parseLong(amountStr1, 16);
             Long amount2 = Long.parseLong(amountStr2, 16);
-            System.out.println(amountStr.substring(amountStr.length() - 10));
-            System.out.println(amountStr.substring(0, amountStr.length() - 10));
-            System.out.println(amount1);
-            System.out.println(amount2);
             result = BigInteger.valueOf(amount1).add(BigInteger.valueOf(amount2).multiply(BigInteger.valueOf(((Double) Math.pow(16d, 10d)).longValue()))).toString();
         } else {
             Long amount1 = Long.parseLong(amountStr, 16);
             result = BigInteger.valueOf(amount1).toString();
         }
-        System.out.println(result);
         return result;
     }
 
