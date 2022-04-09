@@ -29,6 +29,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +86,11 @@ public class KlayScanController {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
-        return new ResponseEntity(getAddressTokens(map.get("address").toString()));
+        String address = map.get("address").toString();
+        Map ret = new HashMap();
+        ret.put("tokens", getAddressTokens(address));
+        ret.put("klay", getAddressAccounts(address));
+        return new ResponseEntity();
     }
 
     @RequestMapping("/klayScan/getAddressTx")
@@ -113,6 +118,11 @@ public class KlayScanController {
 
     public static Object getAddressTokens(String address) {
         String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_API_TAIL);
+        return JSON.parse(result);
+    }
+
+    public static Object getAddressAccounts(String address) {
+        String result = HttpUtil.get(KLAY_API_PRE + address);
         return JSON.parse(result);
     }
 
