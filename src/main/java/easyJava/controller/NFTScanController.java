@@ -171,7 +171,9 @@ public class NFTScanController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
-        List<Map> orderList = baseDao.selectBaseList(queryOrderMap, baseModel);
+        baseModel.setOrderColumn("timestamp");
+        baseModel.setOrderAsc("desc");
+        List<Map> orderList = baseDao.selectBaseListOrder(queryOrderMap, baseModel);
         List<String> hashList = new ArrayList<>();
         orderList.forEach(order -> {
             hashList.add(order.get("hash").toString());

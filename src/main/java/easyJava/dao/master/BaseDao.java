@@ -1,11 +1,10 @@
 package easyJava.dao.master;
 
-import java.util.List;
-import java.util.Map;
-
+import easyJava.entity.BaseModel;
 import org.apache.ibatis.annotations.Param;
 
-import easyJava.entity.BaseModel;
+import java.util.List;
+import java.util.Map;
 
 public interface BaseDao {
     int insertBase(@Param("map") Map map);
@@ -19,6 +18,8 @@ public interface BaseDao {
     int updateBaseByPrimaryKey(@Param("map") Map map);
 
     List<Map> selectBaseList(@Param("map") Map map, @Param("baseModel") BaseModel baseModel);
+
+    List<Map> selectBaseListOrder(@Param("map") Map map, @Param("baseModel") BaseModel baseModel);
 
     int selectBaseCount(@Param("map") Map map);
 
