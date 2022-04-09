@@ -155,6 +155,7 @@ public class KlayScanController {
      */
     public static KlayTxsResult getAddressInternalTxs(String address) {
         String result = HttpUtil.get(KLAY_API_PRE + address + TXS_INTERNAL_API);
+        logger.info(result);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         return response;
     }
