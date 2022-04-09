@@ -7,13 +7,15 @@
         select
         *
         from ${map.tableName}
-        where 1=1
-        <foreach collection="map" index="key" item="value">
-            <if
-                    test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-                or `${key}` =#{value}
-            </if>
-        </foreach>
+        <where>
+            <foreach collection="map" index="key" item="value">
+                <if
+                        test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
+                    or `${key}` =#{value}
+                </if>
+            </foreach>
+        </where>
+        order by  ${baseModel.orderColumn}  ${baseModel.orderAsc}
         limit #{baseModel.pageSize} OFFSET #{baseModel.fromRec}
     </select>
 

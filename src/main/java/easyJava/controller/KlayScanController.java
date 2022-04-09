@@ -112,6 +112,8 @@ public class KlayScanController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        baseModel.setOrderAsc("desc");
+        baseModel.setOrderColumn("createdAt");
         var list = klayScanDao.selectBaseList(map, baseModel);
         return new ResponseEntity(list);
     }
