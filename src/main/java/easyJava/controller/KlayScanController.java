@@ -90,7 +90,7 @@ public class KlayScanController {
         Map ret = new HashMap();
         ret.put("tokens", getAddressTokens(address));
         ret.put("klay", getAddressAccounts(address));
-        return new ResponseEntity();
+        return new ResponseEntity(ret);
     }
 
     @RequestMapping("/klayScan/getAddressTx")
