@@ -9,10 +9,10 @@
         from ${map.tableName}
         <where>
             (
-            <foreach collection="map" index="key" item="value">
+            <foreach collection="map" index="key" item="value" separator="or">
                 <if
                         test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
-                    or `${key}` =#{value}
+                     `${key}` =#{value}
                 </if>
             </foreach>
             ) and amount!=0
