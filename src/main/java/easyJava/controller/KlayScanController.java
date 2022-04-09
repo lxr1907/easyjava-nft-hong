@@ -49,6 +49,8 @@ public class KlayScanController {
     public static final String KLAY_CHR_API_TAIL = "/ftBalances";
     public static final String KLAY_CHR_TRANSFER_API_TAIL = "/ftTransfers";
     public static final String TXS_API = "/txs";
+    //提现合约给用户转klay的记录，内部转账
+    public static final String TXS_INTERNAL_API = "/itxs";
 
     @Scheduled(cron = "*/50 * * * * ?")
     @RequestMapping("/scanKlayTxs")
@@ -59,7 +61,13 @@ public class KlayScanController {
         List<Map<String, Object>> retList = result.getResult();
         retList.forEach(map -> {
             map.put("tableName", KLAY_TXS_TABLE);
-
+            baseDao.insertIgnoreBase(map);
+        });
+        //提现合约给用户转klay的记录，内部转账
+        result = getAddressInternalTxs(KlayController.KLAY_CHR_ADDRESS);
+        retList = result.getResult();
+        retList.forEach(map -> {
+            map.put("tableName", KLAY_TXS_TABLE);
             baseDao.insertIgnoreBase(map);
         });
         return new ResponseEntity();
@@ -135,6 +143,17 @@ public class KlayScanController {
      */
     public static KlayTxsResult getAddressTxs(String address) {
         String result = HttpUtil.get(KLAY_API_PRE + address + TXS_API);
+        KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
+        return response;
+    }
+
+    /**
+     * 获取address的提现klay转账记录
+     *
+     * @return
+     */
+    public static KlayTxsResult getAddressInternalTxs(String address) {
+        String result = HttpUtil.get(KLAY_API_PRE + address + TXS_INTERNAL_API);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         return response;
     }
