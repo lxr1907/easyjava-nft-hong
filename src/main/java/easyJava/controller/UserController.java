@@ -151,7 +151,7 @@ public class UserController {
      * 重新获取钱包等信息
      */
     @RequestMapping("/user/getLoginInfo")
-    public ResponseEntity getLoginInfo( @RequestHeader("token") String token) {
+    public ResponseEntity getLoginInfo( @RequestHeader("token") String token,@RequestParam Map<String, Object> map) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -160,10 +160,17 @@ public class UserController {
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
+
+        if (map.get("code") == null || map.get("code").toString().length() == 0) {
+            return new ResponseEntity(400, "验证码不能为空！");
+        }
+        if (checkEmailCode(map) == 0) {
+            return new ResponseEntity(400, "验证码错误！");
+        }
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
-        Map map=new HashMap();
+        map.clear();
         map.put("tableName", USER_TABLE);
         map.put("id", user.get("id"));
         List<Map> list = baseDao.selectBaseList(map, baseModel);
