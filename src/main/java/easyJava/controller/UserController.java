@@ -229,9 +229,15 @@ public class UserController {
     }
 
     @RequestMapping("/user/getPrivate")
-    public ResponseEntity getPrivate(@RequestHeader("token") String token) {
+    public ResponseEntity getPrivate(@RequestHeader("token") String token,@RequestParam Map<String, Object> map) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("code") == null || map.get("code").toString().length() == 0) {
+            return new ResponseEntity(400, "验证码不能为空！");
+        }
+        if (checkEmailCode(map) == 0) {
+            return new ResponseEntity(400, "验证码错误！");
         }
         Map user = (Map) redisTemplate.opsForValue().get(token);
 
