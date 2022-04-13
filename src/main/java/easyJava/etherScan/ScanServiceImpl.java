@@ -1,15 +1,16 @@
 package easyJava.etherScan;
 
-import java.math.BigInteger;
-import java.util.*;
-
-import easyJava.controller.KlayController;
-import easyJava.utils.DateUtils;
-
 import com.alibaba.fastjson.JSON;
+import easyJava.controller.KlayController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -151,7 +152,7 @@ public class ScanServiceImpl implements ScanService {
 
             for (Map<String, Object> item : eventList.getResult()) {
 
-                logger.info(JSON.toJSONString(item));
+                logger.debug(JSON.toJSONString(item));
                 ret.add(updateEventInfo(item));
 
             }
@@ -187,7 +188,7 @@ public class ScanServiceImpl implements ScanService {
 
             for (Map<String, Object> item : eventList.getResult()) {
 
-                logger.info(JSON.toJSONString(item));
+                logger.debug(JSON.toJSONString(item));
                 ret.add(updateInfo(item));
 
             }

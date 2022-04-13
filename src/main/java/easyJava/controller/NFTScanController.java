@@ -60,7 +60,7 @@ public class NFTScanController {
     @Transactional
     public void updateOrderOutOfDate() {
         int count = orderScanDao.updateOrderOutOfDate();
-        logger.info("-------updateOrderOutOfDate update status to5 count:" + count + "-------");
+        logger.debug("-------updateOrderOutOfDate update status to5 count:" + count + "-------");
     }
 
     @Scheduled(cron = "*/30 * * * * ?")
@@ -68,13 +68,13 @@ public class NFTScanController {
     public void scanUSDTLogJob() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
         List<Map> retList = scanService.doScanToken();
-        logger.info("-----------scanUSDTLogJob retList------ size:" + retList.size());
+        logger.debug("-----------scanUSDTLogJob retList------ size:" + retList.size());
         retList.forEach(map -> {
             map.put("tableName", ETH_LOG_TABLE);
-            logger.info("------------map:" + JSON.toJSONString(map));
+            logger.debug("------------map:" + JSON.toJSONString(map));
             if (map.get("to").toString().equalsIgnoreCase(KlayController.USDT_ADDRESS_ERC20_ROPSTEN)) {
                 String amountStr = getDecimal18(map.get("value").toString());
-                logger.info("--------scanUSDTLogJob amountStr:" + amountStr
+                logger.debug("--------scanUSDTLogJob amountStr:" + amountStr
                         + ",value" + map.get("value").toString() + "-------");
                 Map queryOrderMap = new HashMap();
                 queryOrderMap.put("tableName", KlayController.ORDER_TABLE);
@@ -87,14 +87,14 @@ public class NFTScanController {
                 if (list.size() != 0) {
                     //匹配到了订单金额完全相符的，认为是该用户的订单成功支付
                     Map matchOrder = list.get(0);
-                    logger.info("-----------匹配到订单：" + JSON.toJSONString(matchOrder) + "----------");
+                    logger.debug("-----------匹配到订单：" + JSON.toJSONString(matchOrder) + "----------");
                     String user_id = matchOrder.get("user_id").toString();
                     Map userQuery = new HashMap();
                     userQuery.put("tableName", UserController.USER_WALLET_TABLE);
                     userQuery.put("user_id", Long.parseLong(user_id));
                     List<Map> walletList = baseDao.selectBaseList(userQuery, baseModel);
                     String address = walletList.get(0).get("address").toString();
-                    logger.info("-----------匹配到订单 user wallet:" + JSON.toJSONString(walletList) + "----------");
+                    logger.debug("-----------匹配到订单 user wallet:" + JSON.toJSONString(walletList) + "----------");
                     long buy_amount = Long.parseLong(matchOrder.get("buy_amount").toString());
                     long price = Long.parseLong(matchOrder.get("price").toString());
                     BigInteger chrVal = BigInteger.valueOf(buy_amount * price).multiply(decimals18);
@@ -106,13 +106,13 @@ public class NFTScanController {
                     matchOrder.put("tableName", KlayController.ORDER_TABLE);
                     baseDao.updateBaseByPrimaryKey(matchOrder);
                     try {
-                        logger.info("-----------sendingKLAY to user chr_address:------"
+                        logger.debug("-----------sendingKLAY to user chr_address:------"
                                 + address + ",val:" + chrVal);
                         KlayController.sendingCHR(KlayController.SYSTEM_PRIVATE, address, chrVal);
                         //更新订单状态，支付chr完成
                         matchOrder.put("status", 3);
                         baseDao.updateBaseByPrimaryKey(matchOrder);
-                        logger.info("-----------sendingKLAY to user chr_address:"
+                        logger.debug("-----------sendingKLAY to user chr_address:"
                                 + address + ",val:" + chrVal + ",success-----");
                     } catch (Exception e) {
                         logger.error("sendingKLAY error", e);
@@ -121,12 +121,12 @@ public class NFTScanController {
             }
             baseDao.insertIgnoreBase(map);
         });
-        logger.info("----end scanUSDTLogJob----------------------------");
+        logger.debug("----end scanUSDTLogJob----------------------------");
     }
 
     public static void main(String[] args) {
         Logger logger = LoggerFactory.getLogger("scanUSDTLogJob:");
-        logger.info(getDecimal18("1003000000000000000"));
+        logger.debug(getDecimal18("1003000000000000000"));
     }
 
     private static String getDecimal18(String amountStr) {
@@ -171,7 +171,9 @@ public class NFTScanController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
-        List<Map> orderList = baseDao.selectBaseList(queryOrderMap, baseModel);
+        baseModel.setOrderColumn("timestamp");
+        baseModel.setOrderAsc("desc");
+        List<Map> orderList = baseDao.selectBaseListOrder(queryOrderMap, baseModel);
         List<String> hashList = new ArrayList<>();
         orderList.forEach(order -> {
             hashList.add(order.get("hash").toString());

@@ -10,15 +10,23 @@ public class BaseModel implements Serializable {
 	private Integer pageSize = 10;// 每页大小
 	private Integer pageNo = 1;// 当前页数
 	private Long fromRec;// 当前查询的索引位置
-	private String orderBy;// 排序
+	private String orderColumn="id";// 排序字段
+	private String orderAsc="asc";// 排序规则
 
-	public String getOrderBy() {
-		return this.orderBy;
+	public String getOrderColumn() {
+		return orderColumn;
 	}
 
-	public BaseModel setOrderBy(String orderBy) {
-		this.orderBy = orderBy;
-		return this;
+	public void setOrderColumn(String orderColumn) {
+		this.orderColumn = orderColumn;
+	}
+
+	public String getOrderAsc() {
+		return orderAsc;
+	}
+
+	public void setOrderAsc(String orderAsc) {
+		this.orderAsc = orderAsc;
 	}
 
 	public Integer getPageSize() {

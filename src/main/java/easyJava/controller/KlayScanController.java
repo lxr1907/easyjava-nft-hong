@@ -29,12 +29,13 @@ import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 public class KlayScanController {
-    private static final Logger logger = LogManager.getLogger(NFTScanController.class);
+    private static final Logger logger = LogManager.getLogger(KlayScanController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired
@@ -48,6 +49,8 @@ public class KlayScanController {
     public static final String KLAY_CHR_API_TAIL = "/ftBalances";
     public static final String KLAY_CHR_TRANSFER_API_TAIL = "/ftTransfers";
     public static final String TXS_API = "/txs";
+    //提现合约给用户转klay的记录，内部转账
+    public static final String TXS_INTERNAL_API = "/itxs";
 
     @Scheduled(cron = "*/50 * * * * ?")
     @RequestMapping("/scanKlayTxs")
@@ -58,7 +61,15 @@ public class KlayScanController {
         List<Map<String, Object>> retList = result.getResult();
         retList.forEach(map -> {
             map.put("tableName", KLAY_TXS_TABLE);
-
+            baseDao.insertIgnoreBase(map);
+        });
+        //提现合约给用户转klay的记录，内部转账
+        result = getAddressInternalTxs(KlayController.KLAY_CHR_ADDRESS);
+        retList = result.getResult();
+        retList.forEach(map -> {
+            map.put("tableName", KLAY_TXS_TABLE);
+            map.put("txHash", map.get("parentHash").toString() + map.get("toAddress"));
+            logger.info(JSON.toJSONString(map));
             baseDao.insertIgnoreBase(map);
         });
         return new ResponseEntity();
@@ -85,7 +96,11 @@ public class KlayScanController {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
-        return new ResponseEntity(getAddressTokens(map.get("address").toString()));
+        String address = map.get("address").toString();
+        Map ret = new HashMap();
+        ret.put("tokens", getAddressTokens(address));
+        ret.put("klay", getAddressAccounts(address));
+        return new ResponseEntity(ret);
     }
 
     @RequestMapping("/klayScan/getAddressTx")
@@ -107,12 +122,19 @@ public class KlayScanController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        baseModel.setOrderAsc("desc");
+        baseModel.setOrderColumn("createdAt");
         var list = klayScanDao.selectBaseList(map, baseModel);
         return new ResponseEntity(list);
     }
 
     public static Object getAddressTokens(String address) {
         String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_API_TAIL);
+        return JSON.parse(result);
+    }
+
+    public static Object getAddressAccounts(String address) {
+        String result = HttpUtil.get(KLAY_API_PRE + address);
         return JSON.parse(result);
     }
 
@@ -123,6 +145,17 @@ public class KlayScanController {
      */
     public static KlayTxsResult getAddressTxs(String address) {
         String result = HttpUtil.get(KLAY_API_PRE + address + TXS_API);
+        KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
+        return response;
+    }
+
+    /**
+     * 获取address的提现klay转账记录
+     *
+     * @return
+     */
+    public static KlayTxsResult getAddressInternalTxs(String address) {
+        String result = HttpUtil.get(KLAY_API_PRE + address + TXS_INTERNAL_API);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         return response;
     }
@@ -168,16 +201,11 @@ public class KlayScanController {
             String amountStr2 = amountStr.substring(0, amountStr.length() - 10);
             Long amount1 = Long.parseLong(amountStr1, 16);
             Long amount2 = Long.parseLong(amountStr2, 16);
-            System.out.println(amountStr.substring(amountStr.length() - 10));
-            System.out.println(amountStr.substring(0, amountStr.length() - 10));
-            System.out.println(amount1);
-            System.out.println(amount2);
             result = BigInteger.valueOf(amount1).add(BigInteger.valueOf(amount2).multiply(BigInteger.valueOf(((Double) Math.pow(16d, 10d)).longValue()))).toString();
         } else {
             Long amount1 = Long.parseLong(amountStr, 16);
             result = BigInteger.valueOf(amount1).toString();
         }
-        System.out.println(result);
         return result;
     }
 
