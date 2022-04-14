@@ -206,8 +206,10 @@ public class UserController {
         }
         String code = "";
         var hasCode = redisTemplate.opsForValue().get(CODE_PRE + map.get("account").toString());
-        if (hasCode == null) {
+        if (hasCode == null || hasCode.toString().length() == 0) {
             code = GenerateUtils.getRandomNickname(6);
+        } else {
+            code = hasCode.toString();
         }
         logger.info("mail 邮箱验证code：" + code);
         // code存入redis
