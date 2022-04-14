@@ -204,7 +204,11 @@ public class UserController {
         if (map.get("account") == null || map.get("account").toString().length() == 0) {
             return new ResponseEntity(400, "账号不能为空！");
         }
-        String code = GenerateUtils.getRandomNickname(6);
+        String code = "";
+        var hasCode = redisTemplate.opsForValue().get(CODE_PRE + map.get("account").toString());
+        if (hasCode == null) {
+            code = GenerateUtils.getRandomNickname(6);
+        }
         logger.info("mail 邮箱验证code：" + code);
         // code存入redis
         redisTemplate.opsForValue().set(CODE_PRE + map.get("account").toString(),
