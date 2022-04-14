@@ -143,6 +143,9 @@ public class UserController {
         baseModel.setPageSize(10);
         List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
         user.put("userWalletList", userWalletList);
+        userWalletList.forEach(wallet->{
+            wallet.remove("encrypted_private");
+        });
         return new ResponseEntity(user);
 
     }
@@ -161,12 +164,12 @@ public class UserController {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
 
-        if (map.get("code") == null || map.get("code").toString().length() == 0) {
-            return new ResponseEntity(400, "验证码不能为空！");
-        }
-        if (checkEmailCode(map) == 0) {
-            return new ResponseEntity(400, "验证码错误！");
-        }
+//        if (map.get("code") == null || map.get("code").toString().length() == 0) {
+//            return new ResponseEntity(400, "验证码不能为空！");
+//        }
+//        if (checkEmailCode(map) == 0) {
+//            return new ResponseEntity(400, "验证码错误！");
+//        }
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
@@ -185,6 +188,9 @@ public class UserController {
         baseModel.setPageSize(10);
         List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
         user.put("userWalletList", userWalletList);
+        userWalletList.forEach(wallet->{
+            wallet.remove("encrypted_private");
+        });
         return new ResponseEntity(user);
 
     }
@@ -258,12 +264,7 @@ public class UserController {
         baseModel.setPageNo(1);
         baseModel.setPageSize(10);
         List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
-        userWalletList.forEach(wallet -> {
-            Integer encrypt_key = Integer.parseInt(wallet.get("encrypt_key").toString());
-            String encrypted_private = wallet.get("encrypted_private").toString();
-            String privateKey = DESUtils.encrypt(encrypted_private, encrypt_key);
-            wallet.put("private", privateKey);
-        });
+
         return new ResponseEntity(userWalletList);
     }
 
