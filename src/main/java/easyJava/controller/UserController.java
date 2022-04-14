@@ -79,14 +79,15 @@ public class UserController {
 
     /**
      * 初次注册生成，默认status=1是主钱包
+     *
      * @param uniqueId
      * @return
      */
     private Map generateWallet(int uniqueId) {
         String privateKey = KlayController.generatePrivate();
-        Map map= generateWallet(uniqueId, privateKey);
+        Map map = generateWallet(uniqueId, privateKey);
         //此时生成主钱包
-        map.put("status",1);
+        map.put("status", 1);
         return map;
     }
 
@@ -143,7 +144,7 @@ public class UserController {
         baseModel.setPageSize(10);
         List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
         user.put("userWalletList", userWalletList);
-        userWalletList.forEach(wallet->{
+        userWalletList.forEach(wallet -> {
             wallet.remove("encrypted_private");
         });
         return new ResponseEntity(user);
@@ -154,7 +155,7 @@ public class UserController {
      * 重新获取钱包等信息
      */
     @RequestMapping("/user/getLoginInfo")
-    public ResponseEntity getLoginInfo( @RequestHeader("token") String token,@RequestParam Map<String, Object> map) {
+    public ResponseEntity getLoginInfo(@RequestHeader("token") String token, @RequestParam Map<String, Object> map) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -188,7 +189,7 @@ public class UserController {
         baseModel.setPageSize(10);
         List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
         user.put("userWalletList", userWalletList);
-        userWalletList.forEach(wallet->{
+        userWalletList.forEach(wallet -> {
             wallet.remove("encrypted_private");
         });
         return new ResponseEntity(user);
@@ -242,20 +243,21 @@ public class UserController {
     }
 
     @RequestMapping("/user/getPrivate")
-    public ResponseEntity getPrivate(@RequestHeader("token") String token,@RequestParam Map<String, Object> map) {
+    public ResponseEntity getPrivate(@RequestHeader("token") String token, @RequestParam Map<String, Object> map) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
         if (map.get("code") == null || map.get("code").toString().length() == 0) {
             return new ResponseEntity(400, "验证码不能为空！");
         }
-        if (checkEmailCode(map) == 0) {
-            return new ResponseEntity(400, "验证码错误！");
-        }
         Map user = (Map) redisTemplate.opsForValue().get(token);
 
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        map.put("account", user.get("account"));
+        if (checkEmailCode(map) == 0) {
+            return new ResponseEntity(400, "验证码错误！");
         }
         Map walletMap = new HashMap<>();
         walletMap.put("tableName", USER_WALLET_TABLE);
