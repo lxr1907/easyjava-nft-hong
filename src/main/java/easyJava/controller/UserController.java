@@ -179,7 +179,7 @@ public class UserController {
         if (checkEmailCode(map) == 0) {
             return new ResponseEntity(400, "验证码错误！");
         }
-        map.remove("code");
+        map.clear();
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
