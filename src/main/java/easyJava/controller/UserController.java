@@ -193,7 +193,7 @@ public class UserController {
 
         Map updateUserMap = new HashMap<>();
         updateUserMap.put("tableName", USER_TABLE);
-        updateUserMap.put("user_id", user.get("id"));
+        updateUserMap.put("id", user.get("id"));
         updateUserMap.put("password", DigestUtils.md5Hex(map.get("newPassword").toString()));
         baseDao.updateBaseByPrimaryKey(updateUserMap);
         //token删除
