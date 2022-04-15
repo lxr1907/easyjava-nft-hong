@@ -197,7 +197,7 @@ public class UserController {
         updateUserMap.put("password", DigestUtils.md5Hex(map.get("newPassword").toString()));
         baseDao.updateBaseByPrimaryKey(updateUserMap);
         //token删除
-        redisTemplate.opsForValue().getAndDelete(token);
+        redisTemplate.delete(token);
         return new ResponseEntity(200, "密码修改成功");
 
     }
