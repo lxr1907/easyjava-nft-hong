@@ -38,6 +38,9 @@ public class UserController {
         if (map.get("password") == null || map.get("password").toString().length() == 0) {
             return new ResponseEntity(400, "密码不能为空！");
         }
+        if (map.get("password").toString().length() > 20) {
+            return new ResponseEntity(400, "密码过长！");
+        }
         if (map.get("code") == null || map.get("code").toString().length() == 0) {
             return new ResponseEntity(400, "验证码不能为空！");
         }
@@ -114,12 +117,6 @@ public class UserController {
         if (map.get("password") == null || map.get("password").toString().length() == 0) {
             return new ResponseEntity(400, "密码不能为空！");
         }
-//        if (map.get("code") == null || map.get("code").toString().length() == 0) {
-//            return new ResponseEntity(400, "验证码不能为空！");
-//        }
-//        if (checkEmailCode(map) == 0) {
-//            return new ResponseEntity(400, "验证码错误！");
-//        }
         map.remove("code");
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
@@ -148,6 +145,59 @@ public class UserController {
             wallet.remove("encrypted_private");
         });
         return new ResponseEntity(user);
+
+    }
+
+    /**
+     * 修改密码
+     */
+    @RequestMapping("/user/editPassword")
+    public ResponseEntity editPassword(@RequestHeader("token") String token, @RequestParam Map<String, Object> map) {
+        if (map.get("account") == null || map.get("account").toString().length() == 0) {
+            return new ResponseEntity(400, "账号不能为空！");
+        }
+        if (map.get("password") == null || map.get("password").toString().length() == 0) {
+            return new ResponseEntity(400, "密码不能为空！");
+        }
+        if (map.get("newPassword") == null || map.get("newPassword").toString().length() == 0) {
+            return new ResponseEntity(400, "新密码不能为空！");
+        }
+        if (map.get("newPassword").toString().length() > 20) {
+            return new ResponseEntity(400, "新密码过长！");
+        }
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        if (map.get("code") == null || map.get("code").toString().length() == 0) {
+            return new ResponseEntity(400, "验证码不能为空！");
+        }
+        if (checkEmailCode(map) == 0) {
+            return new ResponseEntity(400, "验证码错误！");
+        }
+        map.remove("code");
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(1);
+        baseModel.setPageNo(1);
+        map.put("tableName", USER_TABLE);
+        map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
+        List<Map> list = baseDao.selectBaseList(map, baseModel);
+        if (list == null || list.size() == 0) {
+            return new ResponseEntity(400, "原密码错误！");
+        }
+
+        Map updateUserMap = new HashMap<>();
+        updateUserMap.put("tableName", USER_TABLE);
+        updateUserMap.put("user_id", user.get("id"));
+        updateUserMap.put("password", DigestUtils.md5Hex(map.get("newPassword").toString()));
+        baseDao.updateBaseByPrimaryKey(updateUserMap);
+        //token删除
+        redisTemplate.opsForValue().getAndDelete(token);
+        return new ResponseEntity(200, "密码修改成功");
 
     }
 
