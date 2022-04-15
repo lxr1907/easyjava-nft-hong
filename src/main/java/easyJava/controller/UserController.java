@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class UserController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     public static final String USER_TABLE = "user";
+    public static final String USER_LOG_TABLE = "user_log";
     public static final String USER_WALLET_TABLE = "user_wallet";
     public static final String CODE_PRE = "email_code_";
 
@@ -198,8 +200,20 @@ public class UserController {
         baseDao.updateBaseByPrimaryKey(updateUserMap);
         //token删除
         redisTemplate.delete(token);
+        //计入log
+        insertUserLog(user.get("id").toString(),"旧密码更改为新密码");
         return new ResponseEntity(200, "密码修改成功");
 
+    }
+
+    public void insertUserLog(String userId, String log) {
+
+        Map userLogMap = new HashMap<>();
+        userLogMap.put("tableName", USER_LOG_TABLE);
+        userLogMap.put("user_id", userId);
+        userLogMap.put("log", log);
+        userLogMap.put("create_time", new Date());
+        baseDao.insertIgnoreBase(userLogMap);
     }
 
     /**
