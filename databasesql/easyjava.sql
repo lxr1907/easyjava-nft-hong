@@ -35,11 +35,11 @@ CREATE TABLE `user` (
 
 CREATE TABLE `klay_txs` (
   `txHash` varchar(500) NOT NULL,
-  `createdAt` bigint(20) DEFAULT NULL,
+  `createdAt` bigint DEFAULT NULL,
   `txType` varchar(100) DEFAULT NULL,
-  `txStatus` int(11) DEFAULT NULL,
+  `txStatus` int DEFAULT NULL,
   `inputHeader` varchar(100) DEFAULT NULL,
-  `blockNumber` bigint(20) DEFAULT NULL,
+  `blockNumber` bigint DEFAULT NULL,
   `fromAddress` varchar(500) DEFAULT NULL,
   `toAddress` varchar(500) DEFAULT NULL,
   `amount` varchar(100) DEFAULT NULL,
@@ -48,8 +48,11 @@ CREATE TABLE `klay_txs` (
   `gasUsed` varchar(100) DEFAULT NULL,
   `nonce` varchar(100) DEFAULT NULL,
   `gasPrice` varchar(100) DEFAULT NULL,
+  `parentHash` varchar(255) DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL,
+  `methodName` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`txHash`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 CREATE TABLE `order_usdt` (
@@ -95,3 +98,14 @@ CREATE TABLE `user_wallet` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_wallet_UN` (`address`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- nft.user_log definition
+
+CREATE TABLE `user_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `log` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `data` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
