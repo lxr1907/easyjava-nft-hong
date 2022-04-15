@@ -239,9 +239,8 @@ public class UserController {
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
-        Map userLogMap = new HashMap<>();
-        userLogMap.put("tableName", USER_LOG_TABLE);
-        userLogMap.put("user_id", user.get("id"));
+        map.put("tableName", USER_LOG_TABLE);
+        map.put("user_id", user.get("id"));
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
