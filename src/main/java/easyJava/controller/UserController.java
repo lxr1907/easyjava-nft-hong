@@ -201,7 +201,7 @@ public class UserController {
         //token删除
         redisTemplate.delete(token);
         //计入log
-        insertUserLog(user.get("id").toString(),"旧密码更改为新密码");
+        insertUserLog(user.get("id").toString(), "旧密码更改为新密码");
         return new ResponseEntity(200, "密码修改成功");
 
     }
@@ -214,6 +214,42 @@ public class UserController {
         userLogMap.put("log", log);
         userLogMap.put("create_time", new Date());
         baseDao.insertIgnoreBase(userLogMap);
+    }
+
+    /**
+     * 修改密码等用户行为日志
+     *
+     * @param token
+     * @param map
+     * @return
+     */
+    @RequestMapping("/user/log")
+    public ResponseEntity log(@RequestHeader("token") String token, @RequestParam Map<String, Object> map) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
+            return new ResponseEntity(400, "pageSize不能为空！");
+        }
+        if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
+            return new ResponseEntity(400, "pageNo不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        Map userLogMap = new HashMap<>();
+        userLogMap.put("tableName", USER_LOG_TABLE);
+        userLogMap.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
+        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        HashMap retmap = new HashMap();
+        List list = baseDao.selectBaseList(map, baseModel);
+        retmap.put("list", list);
+        return new ResponseEntity(retmap, 1, baseModel);
+
     }
 
     /**
