@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +113,7 @@ public class UserController {
      * 登录
      */
     @RequestMapping("/user/login")
-    public ResponseEntity login(@RequestParam Map<String, Object> map) {
+    public ResponseEntity login(@RequestParam Map<String, Object> map, HttpServletRequest request) {
         if (map.get("account") == null || map.get("account").toString().length() == 0) {
             return new ResponseEntity(400, "账号不能为空！");
         }
@@ -146,6 +147,7 @@ public class UserController {
         userWalletList.forEach(wallet -> {
             wallet.remove("encrypted_private");
         });
+        insertUserLog(user.get("id").toString(), "login", "用户登录", IpUtils.getIpAddr(request));
         return new ResponseEntity(user);
 
     }
@@ -201,17 +203,22 @@ public class UserController {
         //token删除
         redisTemplate.delete(token);
         //计入log
-        insertUserLog(user.get("id").toString(), "旧密码更改为新密码");
+        insertUserLog(user.get("id").toString(), "editPassword", "旧密码更改为新密码");
         return new ResponseEntity(200, "密码修改成功");
 
     }
 
-    public void insertUserLog(String userId, String log) {
+    public void insertUserLog(String userId, String type, String log) {
+        insertUserLog(userId, type, log, null);
+    }
 
+    public void insertUserLog(String userId, String type, String log, String data) {
         Map userLogMap = new HashMap<>();
         userLogMap.put("tableName", USER_LOG_TABLE);
         userLogMap.put("user_id", userId);
         userLogMap.put("log", log);
+        userLogMap.put("type", type);
+        userLogMap.put("data", data);
         userLogMap.put("create_time", new Date());
         baseDao.insertIgnoreBase(userLogMap);
     }
@@ -227,6 +234,9 @@ public class UserController {
     public ResponseEntity log(@RequestHeader("token") String token, @RequestParam Map<String, Object> map) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("type") == null || map.get("type").toString().length() == 0) {
+            return new ResponseEntity(400, "type 不能为空！");
         }
         if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
             return new ResponseEntity(400, "pageSize不能为空！");

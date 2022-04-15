@@ -107,5 +107,6 @@ CREATE TABLE `user_log` (
   `log` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `data` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `type` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
