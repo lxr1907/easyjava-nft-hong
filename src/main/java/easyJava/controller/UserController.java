@@ -186,7 +186,7 @@ public class UserController {
         queryMap.put("tableName", USER_TABLE);
         queryMap.put("account", map.get("account"));
         queryMap.put("password", DigestUtils.md5Hex(map.get("password").toString()));
-        List<Map> list = baseDao.selectBaseList(map, baseModel);
+        List<Map> list = baseDao.selectBaseList(queryMap, baseModel);
         if (list == null || list.size() == 0) {
             return new ResponseEntity(400, "原密码错误！");
         }
