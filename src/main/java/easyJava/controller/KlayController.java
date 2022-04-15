@@ -39,6 +39,8 @@ public class KlayController {
     private static final Logger logger = LoggerFactory.getLogger(KlayController.class);
     @Autowired
     BaseDao baseDao;
+    @Autowired
+    UserController userController;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -221,6 +223,12 @@ public class KlayController {
         }
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
+        }
+        if (map.get("code") == null || map.get("code").toString().length() == 0) {
+            return new ResponseEntity(400, "验证码不能为空！");
+        }
+        if (userController.checkEmailCode(map) == 0) {
+            return new ResponseEntity(400, "验证码错误！");
         }
         Map user = (Map) redisTemplate.opsForValue().get(token);
 
