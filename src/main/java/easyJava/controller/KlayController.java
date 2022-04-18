@@ -227,13 +227,14 @@ public class KlayController {
         if (map.get("code") == null || map.get("code").toString().length() == 0) {
             return new ResponseEntity(400, "验证码不能为空！");
         }
-        if (userController.checkEmailCode(map) == 0) {
-            return new ResponseEntity(400, "验证码错误！");
-        }
         Map user = (Map) redisTemplate.opsForValue().get(token);
 
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        map.put("account", user.get("account"));
+        if (userController.checkEmailCode(map) == 0) {
+            return new ResponseEntity(400, "验证码错误！");
         }
         Map walletMap = new HashMap<>();
         walletMap.put("tableName", UserController.USER_WALLET_TABLE);
