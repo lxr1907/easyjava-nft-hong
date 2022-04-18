@@ -157,9 +157,6 @@ public class UserController {
      */
     @RequestMapping("/user/editPassword")
     public ResponseEntity editPassword(@RequestHeader("token") String token, @RequestParam Map<String, Object> map) {
-        if (map.get("account") == null || map.get("account").toString().length() == 0) {
-            return new ResponseEntity(400, "账号不能为空！");
-        }
         if (map.get("password") == null || map.get("password").toString().length() == 0) {
             return new ResponseEntity(400, "密码不能为空！");
         }
@@ -188,7 +185,7 @@ public class UserController {
         baseModel.setPageNo(1);
         Map<String, Object> queryMap = new HashMap<>();
         queryMap.put("tableName", USER_TABLE);
-        queryMap.put("account", map.get("account"));
+        queryMap.put("account", user.get("account"));
         queryMap.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         List<Map> list = baseDao.selectBaseList(queryMap, baseModel);
         if (list == null || list.size() == 0) {
