@@ -252,8 +252,10 @@ public class UserController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        baseModel.setOrderColumn("id");
+        baseModel.setOrderAsc("desc");
         HashMap retmap = new HashMap();
-        List list = baseDao.selectBaseList(map, baseModel);
+        List list = baseDao.selectBaseListOrder(map, baseModel);
         retmap.put("list", list);
         return new ResponseEntity(retmap, 1, baseModel);
 
