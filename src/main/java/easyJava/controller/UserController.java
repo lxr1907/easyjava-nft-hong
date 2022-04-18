@@ -177,6 +177,7 @@ public class UserController {
         if (map.get("code") == null || map.get("code").toString().length() == 0) {
             return new ResponseEntity(400, "验证码不能为空！");
         }
+        map.put("account",user.get("account"));
         if (checkEmailCode(map) == 0) {
             return new ResponseEntity(400, "验证码错误！");
         }
