@@ -234,7 +234,6 @@ public class UserController {
             return new ResponseEntity(400, "账户名错误！");
         }
         Map user = list.get(0);
-        queryMap.put("password", DigestUtils.md5Hex(map.get("password").toString()));
 
         Map updateUserMap = new HashMap<>();
         updateUserMap.put("tableName", USER_TABLE);
