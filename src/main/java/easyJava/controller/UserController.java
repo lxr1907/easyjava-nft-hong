@@ -177,7 +177,7 @@ public class UserController {
         if (map.get("code") == null || map.get("code").toString().length() == 0) {
             return new ResponseEntity(400, "验证码不能为空！");
         }
-        map.put("account",user.get("account"));
+        map.put("account", user.get("account"));
         if (checkEmailCode(map) == 0) {
             return new ResponseEntity(400, "验证码错误！");
         }
@@ -203,6 +203,47 @@ public class UserController {
         //计入log
         insertUserLog(user.get("id").toString(), "editPassword", "旧密码更改为新密码");
         return new ResponseEntity(200, "密码修改成功");
+
+    }
+
+    /**
+     * 修改密码
+     */
+    @RequestMapping("/user/resetPassword")
+    public ResponseEntity resetPassword(@RequestParam Map<String, Object> map) {
+        if (map.get("newPassword") == null || map.get("newPassword").toString().length() == 0) {
+            return new ResponseEntity(400, "新密码不能为空！");
+        }
+        if (map.get("newPassword").toString().length() > 20) {
+            return new ResponseEntity(400, "新密码过长！");
+        }
+        if (map.get("account").toString().length() > 20) {
+            return new ResponseEntity(400, "账户不能为空！");
+        }
+        if (checkEmailCode(map) == 0) {
+            return new ResponseEntity(400, "验证码错误！");
+        }
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(1);
+        baseModel.setPageNo(1);
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("tableName", USER_TABLE);
+        queryMap.put("account", map.get("account"));
+        List<Map> list = baseDao.selectBaseList(queryMap, baseModel);
+        if (list == null || list.size() == 0) {
+            return new ResponseEntity(400, "账户名错误！");
+        }
+        Map user = list.get(0);
+        queryMap.put("password", DigestUtils.md5Hex(map.get("password").toString()));
+
+        Map updateUserMap = new HashMap<>();
+        updateUserMap.put("tableName", USER_TABLE);
+        updateUserMap.put("id", user.get("id"));
+        updateUserMap.put("password", DigestUtils.md5Hex(map.get("newPassword").toString()));
+        baseDao.updateBaseByPrimaryKey(updateUserMap);
+        //计入log
+        insertUserLog(user.get("id").toString(), "resetPassword", "重置密码");
+        return new ResponseEntity(200, "重置密码成功");
 
     }
 
