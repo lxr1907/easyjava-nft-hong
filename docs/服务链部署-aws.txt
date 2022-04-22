@@ -1,0 +1,31 @@
+服务器
+3.0.50.153
+baobab：
+data目录 /data/baobab
+端口，32323,8551,8552,50505
+
+wget https://packages.klaytn.net/klaytn/v1.8.2/ken-baobab-v1.8.2-0-linux-amd64.tar.gz
+tar -xvf ken-baobab-v1.8.2-0-linux-amd64.tar.gz
+
+curl -X GET https://packages.klaytn.net/baobab/genesis.json -o ~/genesis.json
+
+sudo ./ken --datadir /data/baobab init genesis.json 
+
+
+正式klay
+data目录 /data/klay
+端口，12323,8651,8652,50505
+
+
+下载kscn，homi并解压缩
+
+./homi setup local --cn-num 1 --test-num 1 --servicechain --chainID 1002 --p2p-port 22323 -o homi-output
+
+初始化kscn
+kscn --datadir ~/data init ~/homi-output/scripts/genesis.json
+
+cp ~/homi-output/scripts/static-nodes.json ~/data/
+sudo cp ~/homi-output/keys/nodekey1 ~/data/klay/nodekey
+sudo ./kscn attach --datadir ~/data
+配置文件端口8551,8552改为7551，7552
+sudo ./kscnd start

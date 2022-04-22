@@ -1,0 +1,62 @@
+服务器部署说明
+43.129.207.62
+正式：
+ken-linux-amd64 目录klay的正式链
+正式链data目录 /mnt/datadisk0
+
+测试及服务链：
+ken-baobab 目录klay的测试链 8551，8552改为8571和8572
+SC_MAIN_BRIDGE_PORT=50505
+kscn-linux-amd64 目录服务链 data目录在其bin下面  8551，8552改为8561和8562，
+SC_SUB_BRIDGE_PORT=50506
+homi-linux-amd64 服务链生成过程中的目录
+
+执行命令
+kscn account import --datadir  data /home/ubuntu/homi-linux-amd64/bin/homi-output/keys_test/testkey1
+
+
+sudo ./ken attach --datadir /mnt/datadisk0
+
+服务链
+sudo ./kscn attach --datadir data
+klay.blockNumber
+subbridge.latestAnchoredBlockNumber
+subbridge.anchoring(true)
+subbridge.peers
+subbridge.txPendingCount
+net.peerCount
+
+klay.getBalance("0xC238b2365B3F0CF03B6564fa9D40de3a4563FBbC")
+klay.getBalance("d33979108183c7dd2f6c4bf47420dbf163792147")
+klay.getBalance("0x028b5bfe710e190012cb57e488a9f3d12dc13140")
+klay.getBalance("0x0ca711531029cd05638e80dbf5db9558482492be")
+
+subbridge.parentOperator:
+"0x028b5bfe710e190012cb57e488a9f3d12dc13140"
+
+ subbridge.childOperator:
+"0x0ca711531029cd05638e80dbf5db9558482492be"
+
+personal.unlockAccount("d33979108183c7dd2f6c4bf47420dbf163792147")
+
+klay.sendTransaction({from:"d33979108183c7dd2f6c4bf47420dbf163792147", to:"0xC238b2365B3F0CF03B6564fa9D40de3a4563FBbC", value: 2}) 
+
+klay.sendTransaction({from:"d33979108183c7dd2f6c4bf47420dbf163792147", to:subbridge.childOperator, value: 1}) 
+klay.sendTransaction({from:"d33979108183c7dd2f6c4bf47420dbf163792147", to:subbridge.parentOperator, value: 1000000000}) 
+
+klay.getBalance(subbridge.childOperator)
+klay.getBalance(subbridge.parentOperator)
+klay.getBalance("d33979108183c7dd2f6c4bf47420dbf163792147")
+
+baobab
+sudo ./ken attach --datadir data
+mainbridge.nodeInfo.kni
+
+
+sudo ./homi setup local --cn-num 1 --test-num 1 --servicechain --chainID 1002 --p2p-port 22323 -o homi-output
+
+
+
+
+
+
