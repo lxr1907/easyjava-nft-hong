@@ -70,3 +70,7 @@ true
 
 > subbridge.parentOperatorBalance
 klay.sendTransaction({from:"5392fcdc9266cfb605f706bad502d40f242f9160", to:subbridge.parentOperator, value: 1})
+
+sudo curl -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' http://54.169.70.175:8551
+
+sudo  curl -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' https://api.baobab.klaytn.net:8651
