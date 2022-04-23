@@ -74,3 +74,10 @@ klay.sendTransaction({from:"5392fcdc9266cfb605f706bad502d40f242f9160", to:subbri
 sudo curl -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' http://54.169.70.175:8551
 
 sudo  curl -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' https://api.baobab.klaytn.net:8651
+
+# 参考论坛
+# https://forum.klaytn.com/t/baobab/635
+# https://forum.klaytn.com/t/service-chain-anchoring-fail/4901/3
+# https://forum.klaytn.com/t/topic/3127
+
+
