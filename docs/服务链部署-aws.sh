@@ -49,7 +49,7 @@ sudo ./kscn account import --datadir ~/data ~/homi-output/keys_test/testkey1
 > subbridge.peers.length
 1
 > subbridge.parentOperator
-"0x14a0717d5bb8b42e1a33a8f944d37464be9e6624"
+"0x14a0717d5bb8b42e1a33a8f944d37464be9e6624"  0x4dca18a1d7e4c2a04d8b5d0f4552963624b02abd
 > subbridge.childOperator
 "0x27e273c93cb822bc04ee4864e0f187706de6fd3c"
 > klay.getBalance(subbridge.childOperator)
@@ -79,5 +79,27 @@ sudo  curl -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method"
 # https://forum.klaytn.com/t/baobab/635
 # https://forum.klaytn.com/t/service-chain-anchoring-fail/4901/3
 # https://forum.klaytn.com/t/topic/3127
+
+
+#正式klay
+# data目录 /data/klay_tar/klay #端口，32323,8551,8552,50505
+sudo ./ken attach --datadir  /data/klay_tar/klay
+> mainbridge.nodeInfo.kni
+["kni://bd534ae8e27dc9f6fbc39c7fc5be432ed72d5f4d5707a1ecb478a6426e7f39da7ba3c5ff7f17098969273a6a7991dea8d49ee50aeb5d8d4ff1fcfda4ab85a715@127.0.0.1:50505?discport=0"]
+
+
+> klay.blockNumber
+1939
+> subbridge.latestAnchoredBlockNumber
+1910
+> subbridge.parentOperatorBalance
+506575000000000000
+> klay.blockNumber
+1966
+> subbridge.parentOperatorBalance
+506575000000000000
+> klay.blockNumber
+2012
+>
 
 
