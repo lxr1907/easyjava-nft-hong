@@ -51,7 +51,7 @@ sudo ./kscn account import --datadir ~/data ~/homi-output/keys_test/testkey1
 > subbridge.parentOperator
 "0x14a0717d5bb8b42e1a33a8f944d37464be9e6624"  0x4dca18a1d7e4c2a04d8b5d0f4552963624b02abd
 > subbridge.childOperator
-"0x27e273c93cb822bc04ee4864e0f187706de6fd3c"
+"0x56c8cb5daf329fc8613112b51e359b2dbae4fd97"
 > klay.getBalance(subbridge.childOperator)
 0
 > klay.getBalance(subbridge.parentOperator)
@@ -64,12 +64,15 @@ true
 #该步骤总是结果为0
 > subbridge.latestAnchoredBlockNumber
 100
-> personal.unlockAccount("5392fcdc9266cfb605f706bad502d40f242f9160")
-> klay.sendTransaction({from:"5392fcdc9266cfb605f706bad502d40f242f9160", to:subbridge.childOperator, value: 1})
-> klay.getBalance(subbridge.childOperator)
+> personal.unlockAccount("5392fcdc9266cfb605f706bad502d40f242f9160") # PIdjRGLuvFFAdE[7
+> klay.sendTransaction({from:"5392fcdc9266cfb605f706bad502d40f242f9160", to:subbridge.childOperator, value: 99997999999999997})
+> klay.getBalance("5392fcdc9266cfb605f706bad502d40f242f9160")
 
 > subbridge.parentOperatorBalance
-klay.sendTransaction({from:"5392fcdc9266cfb605f706bad502d40f242f9160", to:subbridge.parentOperator, value: 1})
+klay.sendTransaction({from:"5392fcdc9266cfb605f706bad502d40f242f9160", to:subbridge.parentOperator, value: 99997999999999997})
+
+klay.sendTransaction({from:"5392fcdc9266cfb605f706bad502d40f242f9160", to:subbridge.childOperator, value: 1000000000000})
+klay.sendTransaction({from:"5392fcdc9266cfb605f706bad502d40f242f9160", to:subbridge.parentOperator, value: 1000000000000})
 
 sudo curl -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' http://54.169.70.175:8551
 
@@ -92,14 +95,34 @@ sudo ./ken attach --datadir  /data/klay_tar/klay
 1939
 > subbridge.latestAnchoredBlockNumber
 1910
+> subbridge.childOperatorBalance
 > subbridge.parentOperatorBalance
 506575000000000000
 > klay.blockNumber
 1966
-> subbridge.parentOperatorBalance
-506575000000000000
 > klay.blockNumber
 2012
 >
+klay.getBalance("0x9c4d8c2a7ba6c3316cb6abad2373b7c976912b56")
+部署bridge
+ubuntu@ip-172-31-22-236:~/klay-servicechain/erc20$ sudo node erc20-deploy.js
+------------------------- erc20-deploy START -------------------------
+info.bridge: 0x4e0C5Bd72820af2815936037343fd4511C49cB04
+info.token: 0x4B2a72a43fd6E07FF3679523023898d91356eeaB
+info.bridge: 0xD3D2f9A31731e6c6a27122f3869547358506f098
+info.token: 0x01EEF0F6661CB84d81701C7D0cD7Cf4E83b2F643
+/home/ubuntu/klay-servicechain/node_modules/caver-js/packages/caver-core-helpers/src/errors.js:87
+        return new Error(`Returned error: ${message}`)
+               ^
 
-
+Error: Returned error: insufficient funds of the sender for value
+    at Object.ErrorResponse (/home/ubuntu/klay-servicechain/node_modules/caver-js/packages/caver-core-helpers/src/errors.js:87:16)
+    at /home/ubuntu/klay-servicechain/node_modules/caver-js/packages/caver-core-requestmanager/src/index.js:155:44
+    at XMLHttpRequest.request.onreadystatechange (/home/ubuntu/klay-servicechain/node_modules/caver-js/packages/caver-core-requestmanager/caver-providers-http/src/index.js:122:13)
+    at XMLHttpRequestEventTarget.dispatchEvent (/home/ubuntu/klay-servicechain/node_modules/xhr2-cookies/dist/xml-http-request-event-target.js:34:22)
+    at XMLHttpRequest._setReadyState (/home/ubuntu/klay-servicechain/node_modules/xhr2-cookies/dist/xml-http-request.js:208:14)
+    at XMLHttpRequest._onHttpResponseEnd (/home/ubuntu/klay-servicechain/node_modules/xhr2-cookies/dist/xml-http-request.js:318:14)
+    at IncomingMessage.<anonymous> (/home/ubuntu/klay-servicechain/node_modules/xhr2-cookies/dist/xml-http-request.js:289:61)
+    at IncomingMessage.emit (node:events:538:35)
+    at endReadableNT (node:internal/streams/readable:1345:12)
+    at processTicksAndRejections (node:internal/process/task_queues:83:21)
