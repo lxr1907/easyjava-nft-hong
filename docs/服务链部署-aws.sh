@@ -49,7 +49,7 @@ sudo ./kscn account import --datadir ~/data ~/homi-output/keys_test/testkey1
 > subbridge.peers.length
 1
 > subbridge.parentOperator
-"0x14a0717d5bb8b42e1a33a8f944d37464be9e6624"  0x4dca18a1d7e4c2a04d8b5d0f4552963624b02abd
+"0x14a0717d5bb8b42e1a33a8f944d37464be9e6624"  0x9c4d8c2a7ba6c3316cb6abad2373b7c976912b56
 > subbridge.childOperator
 "0x56c8cb5daf329fc8613112b51e359b2dbae4fd97"
 > klay.getBalance(subbridge.childOperator)
@@ -58,7 +58,7 @@ sudo ./kscn account import --datadir ~/data ~/homi-output/keys_test/testkey1
 0
 > klay.getBalance("5392fcdc9266cfb605f706bad502d40f242f9160")
 10000000000
-
+klay.getBalance("0xc40b6909eb7085590e1c26cb3becc25368e249e9")
 > subbridge.anchoring(true)
 true
 #该步骤总是结果为0
@@ -126,3 +126,49 @@ Error: Returned error: insufficient funds of the sender for value
     at IncomingMessage.emit (node:events:538:35)
     at endReadableNT (node:internal/streams/readable:1345:12)
     at processTicksAndRejections (node:internal/process/task_queues:83:21)
+
+
+
+ubuntu@ip-172-31-22-236:~/klay-servicechain/erc20$ sudo node erc20-deploy.js
+------------------------- erc20-deploy START -------------------------
+deploy finish
+registerOperator 1
+registerOperator 2
+registerToken 1
+registerToken 2
+transferOwnership 1
+transferOwnership 2
+subbridge.registerBridge("0x4e0C5Bd72820af2815936037343fd4511C49cB04", "0xD3D2f9A31731e6c6a27122f3869547358506f098")
+subbridge.subscribeBridge("0x4e0C5Bd72820af2815936037343fd4511C49cB04", "0xD3D2f9A31731e6c6a27122f3869547358506f098")
+subbridge.registerToken("0x4e0C5Bd72820af2815936037343fd4511C49cB04", "0xD3D2f9A31731e6c6a27122f3869547358506f098", "0x4B2a72a43fd6E07FF3679523023898d91356eeaB", "0x01EEF0F6661CB84d81701C7D0cD7Cf4E83b2F643")
+------------------------- erc20-deploy END -------------------------
+#第一次执行
+ubuntu@ip-172-31-22-236:~/klay-servicechain/erc20$ sudo node erc20-transfer-1step.js
+------------------------- erc20-transfer-1step START -------------------------
+alice balance: 0
+requestValueTransfer..
+alice balance: 0
+#尝试执行以下文档中的命令
+> subbridge.registerBridge("0xCHILD_BRIDGE_ADDR", "0xPARENT_BRIDGE_ADDR")
+null
+> subbridge.subscribeBridge("0xCHILD_BRIDGE_ADDR", "0xPARENT_BRIDGE_ADDR")
+null
+> subbridge.registerToken("0xCHILD_BRIDGE_ADDR", "0xPARENT_BRIDGE_ADDR", "0xCHILD_TOKEN_ADDR", "0XPARENT_TOKEN_ADDR")
+null
+#实际执行命令
+subbridge.registerBridge("0x4e0C5Bd72820af2815936037343fd4511C49cB04", "0xD3D2f9A31731e6c6a27122f3869547358506f098")
+subbridge.subscribeBridge("0x4e0C5Bd72820af2815936037343fd4511C49cB04", "0xD3D2f9A31731e6c6a27122f3869547358506f098")
+subbridge.registerToken("0x4e0C5Bd72820af2815936037343fd4511C49cB04", "0xD3D2f9A31731e6c6a27122f3869547358506f098", "0x4B2a72a43fd6E07FF3679523023898d91356eeaB", "0x01EEF0F6661CB84d81701C7D0cD7Cf4E83b2F643")
+#成功转账token
+ubuntu@ip-172-31-22-236:~/klay-servicechain/erc20$ sudo node erc20-transfer-1step.js
+------------------------- erc20-transfer-1step START -------------------------
+alice balance: 0
+requestValueTransfer..
+alice balance: 100
+------------------------- erc20-transfer-1step END -------------------------
+ubuntu@ip-172-31-22-236:~/klay-servicechain/erc20$ sudo node erc20-transfer-1step.js
+------------------------- erc20-transfer-1step START -------------------------
+alice balance: 100
+requestValueTransfer..
+alice balance: 200
+------------------------- erc20-transfer-1step END -------------------------
