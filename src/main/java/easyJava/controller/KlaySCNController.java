@@ -64,7 +64,7 @@ public class KlaySCNController {
     public static TransactionReceipt.TransactionReceiptData sendingSCN(String cryptoJSON, String pwd, String toAddress, BigInteger value) throws IOException, TransactionException {
         Caver caver = new Caver(MY_SCN_HOST);
         logger.info(cryptoJSON);
-        KeyStore.Crypto crypto = (KeyStore.Crypto) JSON.parse(cryptoJSON);
+        KeyStore.Crypto crypto = JSON.parseObject(cryptoJSON, KeyStore.Crypto.class);
         logger.info(JSON.toJSONString(crypto));
         String fromPrivateKey = "";
         try {
