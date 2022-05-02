@@ -1,6 +1,8 @@
 package easyJava.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
 import com.klaytn.caver.methods.response.Bytes32;
 import com.klaytn.caver.methods.response.TransactionReceipt;
@@ -26,6 +28,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -49,11 +52,23 @@ public class KlaySCNController {
     public static volatile BigInteger gas = BigInteger.valueOf(80000);
     public static final String SCN_CHILD_OPERATOR = "{\"address\":\"56c8cb5daf329fc8613112b51e359b2dbae4fd97\",\"keyring\":[[{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"1a6d4aac70114be5b4eb54bf8cc11c58f23c4e8e97b2235cf6a9d0bfcc478a55\",\"cipherparams\":{\"iv\":\"24a74d100afae38093f7a5267ee17626\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"17ff967beb4c3e98c4d63c3b78c9a721a2fc5906c5d3ab43f81ec0a305c7e4c6\"},\"mac\":\"000d9abe5cd71085e4789abd1a604d77cdc31aef05eae5b1bcfbed364a94fbfb\"}]],\"id\":\"7de1963a-e59d-496b-bf34-029d50b76ab3\",\"version\":4}";
     public static final String SCN_CHILD_OPERATOR_PASSWORD = "cbor{@b9b1__#+#}";
+    public static ObjectMapper mapper = new ObjectMapper();
+
+    public static void main(String[] args) {
+        try {
+            sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD, "0x38bd8d9f0acda0ce533f44adcfd02b403f411de7", new BigInteger("1"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TransactionException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * 发送klay
      *
-     * @param cryptoJSON
+     * @param keyStoreJSON
      * @param pwd
      * @param toAddress
      * @param value
@@ -61,15 +76,17 @@ public class KlaySCNController {
      * @throws CipherException
      * @throws TransactionException
      */
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String cryptoJSON, String pwd, String toAddress, BigInteger value) throws IOException, TransactionException {
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, BigInteger value) throws IOException, TransactionException {
         Caver caver = new Caver(MY_SCN_HOST);
-        logger.info(cryptoJSON);
-        KeyStore.Crypto crypto = JSON.parseObject(cryptoJSON, KeyStore.Crypto.class);
-        logger.info(JSON.toJSONString(crypto));
+        logger.info(keyStoreJSON);
+        KeyStore keyStore = JSON.parseObject(keyStoreJSON, KeyStore.class);
+        logger.info(keyStore.getKeyring().get(0).toString());
+        List<KeyStore.Crypto> crypto = mapper.readValue(keyStore.getKeyring().get(0).toString(), new TypeReference<List<KeyStore.Crypto>>() {
+        });
         String fromPrivateKey = "";
         try {
-            fromPrivateKey = KeyStore.Crypto.decryptCrypto(crypto, pwd);
-
+            fromPrivateKey = KeyStore.Crypto.decryptCrypto(crypto.get(0), pwd);
+            logger.info(fromPrivateKey);
         } catch (CipherException e) {
             logger.error("sendingKLAY 失败 KeyStore.Crypto.decryptCrypto:" + e.getMessage() + ",p:" + fromPrivateKey);
             e.printStackTrace();
