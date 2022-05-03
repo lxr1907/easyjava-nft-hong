@@ -96,7 +96,7 @@ public class KlayController {
     //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
     public static void main(String[] args) {
         try {
-            sendingCHR(SYSTEM_PRIVATE, "0x38bd8d9f0acda0ce533f44adcfd02b403f411de7", BigInteger.valueOf(1));
+            sendingCHR(SYSTEM_PRIVATE, "0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", BigInteger.valueOf(100));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -192,6 +192,28 @@ public class KlayController {
             throw new RuntimeException(e.getMessage());
         }
         logger.info("---------end withDrawCHR,to:" + toAddress + ",amount:" + value + "-----");
+    }
+
+    public static void burnCHR(String fromPrivateKey, BigInteger value) {
+        logger.info("---------start burnCHR,amount:" + value + "-----");
+        Caver caver = new Caver(Klay_HOST);
+        SingleKeyring executor = KeyringFactory.createFromPrivateKey(fromPrivateKey);
+        String fromAddress = executor.toAccount().getAddress();
+        logger.info("--------- burnCHR,from:" + fromAddress + "amount:" + value + "-----");
+        caver.wallet.add(executor);
+        try {
+            Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
+            SendOptions sendOptions = new SendOptions();
+            sendOptions.setFrom(executor.getAddress());
+            sendOptions.setGas(gas.multiply(BigInteger.valueOf(2)));
+            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transferFrom")
+                    .send(Arrays.asList(fromAddress, SYSTEM_ADDRESS, value), sendOptions);
+            logger.info("---------end burnCHR,from:" + fromAddress + ",amount:" + value + "-----ret:" + JSON.toJSONString(receipt));
+        } catch (Exception e) {
+            logger.error("burnCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",val:" + value, e);
+            throw new RuntimeException(e.getMessage());
+        }
+        logger.info("---------end burnCHR,from:" + fromAddress + ",amount:" + value + "-----");
     }
 
     //给某个账户发送klay，测试使用

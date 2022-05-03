@@ -174,7 +174,7 @@ public class KlaySCNController {
             String encrypt_key = useWallet.get("encrypt_key").toString();
             String encrypted_private = useWallet.get("encrypted_private").toString();
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
-            KlayController.withDrawCHR(walletPrivate, KlayController.SYSTEM_ADDRESS, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+            KlayController.burnCHR(walletPrivate, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
             logger.error("sending chr error!", e);
             return new ResponseEntity();
