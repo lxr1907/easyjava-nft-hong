@@ -14,15 +14,19 @@ import com.klaytn.caver.wallet.keyring.KeyStore;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
+import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
+import easyJava.utils.DESUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.web3j.crypto.CipherException;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
@@ -43,7 +47,7 @@ public class KlaySCNController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    public static final String MY_SCN_HOST = "http://13.213.28.145:7551";
+    public static final String MY_SCN_HOST = "http://13.213.28.145:7551";//http://172.31.22.236:7551
     public static final String MY_KLAY_HOST = "http://13.213.28.145:8551";
 
     public static final String KLAY_SCN_ADDRESS = "0xD3CFb75cE8Ed4Cbe10e7E343676a4788eC148d50";
@@ -55,18 +59,20 @@ public class KlaySCNController {
     public static ObjectMapper mapper = new ObjectMapper();
 
     public static void main(String[] args) {
-        try {
-            sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD, "0x38bd8d9f0acda0ce533f44adcfd02b403f411de7", new BigInteger("1"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TransactionException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            //klay.getBalance("0x38bd8d9f0acda0ce533f44adcfd02b403f411de7")
+//            sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD, "0x38bd8d9f0acda0ce533f44adcfd02b403f411de7", new BigInteger("2"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (TransactionException e) {
+//            e.printStackTrace();
+//        }
+        logger.info(JSON.toJSONString(getBalance("0x38bd8d9f0acda0ce533f44adcfd02b403f411de7")));
     }
 
 
     /**
-     * 发送klay
+     * 发送scn
      *
      * @param keyStoreJSON
      * @param pwd
@@ -119,6 +125,71 @@ public class KlaySCNController {
     }
 
 
+    /**
+     * 使用chr购买scn链上的gamecoin
+     *
+     * @param map
+     * @param token
+     * @return
+     */
+    @RequestMapping("/klaySCN/buyGameCoin")
+    public ResponseEntity<?> buyScn(@RequestParam Map<String, Object> map,
+                                    @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("value") == null || map.get("value").toString().length() == 0) {
+            return new ResponseEntity(400, "value不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        map.put("account", user.get("account"));
+
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", UserController.USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        boolean myWallet = false;
+        Map useWallet = null;
+        for (var wallet : userWalletList) {
+            if (wallet.get("address").equals(map.get("address").toString())) {
+                myWallet = true;
+                useWallet = wallet;
+            }
+        }
+        if (!myWallet) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            String encrypt_key = useWallet.get("encrypt_key").toString();
+            String encrypted_private = useWallet.get("encrypted_private").toString();
+            String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
+            KlayController.withDrawCHR(walletPrivate, KlayController.SYSTEM_ADDRESS, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+        } catch (Exception e) {
+            logger.error("sending chr error!", e);
+            return new ResponseEntity();
+        }
+        TransactionReceipt.TransactionReceiptData result = null;
+        try {
+            result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
+                    , map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+        } catch (Exception e) {
+            logger.error("sending scn error!", e);
+        }
+        return new ResponseEntity(result);
+    }
+
+    //给某个账户发送scn，测试使用
     @RequestMapping("/klaySCN/sendSCNTo")
     public ResponseEntity<?> sendKlayTo(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
@@ -137,5 +208,25 @@ public class KlaySCNController {
         return new ResponseEntity(result);
     }
 
+    @RequestMapping("/klaySCN/getBalance")
+    public ResponseEntity<?> getBalance(@RequestParam Map<String, Object> map) {
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        var result = getBalance(map.get("address").toString());
+        return new ResponseEntity(result);
+    }
+
+    public static BigInteger getBalance(String address) {
+        Caver caver = new Caver(MY_SCN_HOST);
+        var request = caver.rpc.klay.getBalance(address, DefaultBlockParameter.valueOf("latest"));
+        BigInteger val = new BigInteger("0");
+        try {
+            val = request.send().getValue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return val;
+    }
 
 }

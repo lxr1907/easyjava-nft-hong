@@ -1,15 +1,6 @@
 package easyJava.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.klaytn.caver.Caver;
-import com.klaytn.caver.methods.response.Bytes32;
-import com.klaytn.caver.methods.response.TransactionReceipt;
-import com.klaytn.caver.transaction.TxPropertyBuilder;
-import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
-import com.klaytn.caver.transaction.response.TransactionReceiptProcessor;
-import com.klaytn.caver.transaction.type.ValueTransfer;
-import com.klaytn.caver.wallet.keyring.KeyringFactory;
-import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
 import easyJava.dao.master.KlayScanDao;
 import easyJava.entity.BaseModel;
@@ -24,10 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.web3j.crypto.CipherException;
-import org.web3j.protocol.exceptions.TransactionException;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -210,48 +198,10 @@ public class KlayScanController {
     }
 
     /**
-     * 发送klay
-     *
-     * @param fromPrivateKey
-     * @param toAddress
-     * @param value
-     * @throws IOException
-     * @throws CipherException
-     * @throws TransactionException
+     * 获取一个地址的klay交易历史记录
+     * @param map
+     * @return
      */
-    public static TransactionReceipt.TransactionReceiptData sendingKLAY(String fromPrivateKey, String
-            toAddress, BigInteger value) throws IOException, TransactionException {
-        Caver caver = new Caver("");
-        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
-        String fromAddress = keyring.toAccount().getAddress();
-        //Add to caver wallet.
-        caver.wallet.add(keyring);
-        //Create a value transfer transaction
-        ValueTransfer valueTransfer = caver.transaction.valueTransfer.create(
-                TxPropertyBuilder.valueTransfer()
-                        .setFrom(keyring.getAddress())
-                        .setTo(toAddress)
-                        .setValue(value)
-                        .setGas(BigInteger.valueOf(50000))
-        );
-        //Sign to the transaction
-        valueTransfer.sign(keyring);
-        //Send a transaction to the klaytn blockchain platform (Klaytn)
-        Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).send();
-        if (result.hasError()) {
-            logger.error("sendingKLAY 失败:" + result.getError().getMessage()
-                    + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
-            throw new RuntimeException(result.getError().getMessage());
-        }
-        logger.info("sendingKLAY :" + result.getResult()
-                + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
-        //Check transaction receipt.
-        TransactionReceiptProcessor transactionReceiptProcessor = new PollingTransactionReceiptProcessor(caver, 1000, 15);
-        TransactionReceipt.TransactionReceiptData transactionReceipt = transactionReceiptProcessor.waitForTransactionReceipt(result.getResult());
-
-        return transactionReceipt;
-    }
-
     @RequestMapping("/klayScan/getAddressTxs")
     public ResponseEntity<?> getAddressTxs(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {

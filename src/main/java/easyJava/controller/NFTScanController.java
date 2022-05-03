@@ -63,6 +63,9 @@ public class NFTScanController {
         logger.debug("-------updateOrderOutOfDate update status to5 count:" + count + "-------");
     }
 
+    /**
+     * 查询usdt的转账记录，判断是否匹配订单，给用户发送chr
+     */
     @Scheduled(cron = "*/30 * * * * ?")
     @Transactional
     public void scanUSDTLogJob() {

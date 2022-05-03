@@ -194,6 +194,7 @@ public class KlayController {
         logger.info("---------end withDrawCHR,to:" + toAddress + ",amount:" + value + "-----");
     }
 
+    //给某个账户发送klay，测试使用
     //    @RequestMapping("/klay/sendKlayTo")
     public ResponseEntity<?> sendKlayTo(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
