@@ -27,6 +27,12 @@ contract CHRToken is ERC20,Ownable {
         receiver.transfer(amount/onePrice);
     }
 
+    function burn(uint256 amount,address  receiver)
+    public onlyOwner{
+        require(balanceOf(receiver)>=amount);
+        _burn(receiver,amount);
+    }
+
     function getBalance()public view
     returns (uint256 balance){
         balance = address(this).balance;

@@ -176,7 +176,7 @@ public class KlaySCNController {
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
             KlayController.burnCHR(walletPrivate, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
-            logger.error("sending chr error!", e);
+            logger.error("burnCHR error!", e);
             return new ResponseEntity();
         }
         TransactionReceipt.TransactionReceiptData result = null;
@@ -184,7 +184,7 @@ public class KlaySCNController {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
                     , map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
-            logger.error("sending scn error!", e);
+            logger.error("send scn error!", e);
         }
         return new ResponseEntity(result);
     }
