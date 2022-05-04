@@ -56,7 +56,7 @@ public class KlayController {
     public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
 
     //合约币chr在klay链的地址
-    public static final String KLAY_CHR_ADDRESS = "0xD3CFb75cE8Ed4Cbe10e7E343676a4788eC148d50";
+    public static final String KLAY_CHR_ADDRESS = "0xf7d5bf1990a88a4a2a7c94f4716ef644bfc8ffb0";//"0xD3CFb75cE8Ed4Cbe10e7E343676a4788eC148d50";
     //usdt-erc20充值地址,ropsten测试链
     public static final String USDT_ADDRESS_ERC20_ROPSTEN = "0xC4f459a93169bbF3CF9Dc3c50D34502473703FB0";
     //usdt-erc20充值地址,rinkeby测试链
@@ -93,15 +93,6 @@ public class KlayController {
         return account.getAddress();
     }
 
-    //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
-    public static void main(String[] args) {
-        try {
-            sendingCHR(SYSTEM_PRIVATE, "0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", BigInteger.valueOf(100));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//        System.out.println(0 + Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000);
-    }
 
     /**
      * 发送klay
@@ -194,26 +185,31 @@ public class KlayController {
         logger.info("---------end withDrawCHR,to:" + toAddress + ",amount:" + value + "-----");
     }
 
-    public static void burnCHR(String fromPrivateKey, BigInteger value) {
+    /**
+     * 用操作员账户，直接扣除burnAddress地址的chr
+     * @param burnAddress
+     * @param value
+     */
+    public static void burnCHR(String burnAddress, BigInteger value) {
         logger.info("---------start burnCHR,amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
-        SingleKeyring executor = KeyringFactory.createFromPrivateKey(fromPrivateKey);
-        String fromAddress = executor.toAccount().getAddress();
-        logger.info("--------- burnCHR,from:" + fromAddress + "amount:" + value + "-----");
+        SingleKeyring executor = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
+        logger.info("--------- burnCHR,from:" + burnAddress + "amount:" + value + "-----");
+        //设置操作人，gas费默认由操作人付款
         caver.wallet.add(executor);
         try {
             Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
             SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(executor.getAddress());
             sendOptions.setGas(gas.multiply(BigInteger.valueOf(2)));
-            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transferFrom")
-                    .send(Arrays.asList(fromAddress, SYSTEM_ADDRESS, value), sendOptions);
-            logger.info("---------end burnCHR,from:" + fromAddress + ",amount:" + value + "-----ret:" + JSON.toJSONString(receipt));
+            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("burn")
+                    .send(Arrays.asList(value, burnAddress), sendOptions);
+            logger.info("---------end burnCHR,from:" + burnAddress + ",amount:" + value + "-----ret:" + JSON.toJSONString(receipt));
         } catch (Exception e) {
-            logger.error("burnCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",val:" + value, e);
+            logger.error("burnCHR 失败:" + e.getMessage() + ",from:" + burnAddress + ",val:" + value, e);
             throw new RuntimeException(e.getMessage());
         }
-        logger.info("---------end burnCHR,from:" + fromAddress + ",amount:" + value + "-----");
+        logger.info("---------end burnCHR,from:" + burnAddress + ",amount:" + value + "-----");
     }
 
     //给某个账户发送klay，测试使用
@@ -283,7 +279,8 @@ public class KlayController {
         return new ResponseEntity();
     }
 
-    @RequestMapping("/klay/sendingCHR")
+    //给某个账户发送chr，测试使用
+    @RequestMapping("/test/klay/sendingCHR")
     public ResponseEntity<?> sendingCHRApi(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
@@ -419,4 +416,45 @@ public class KlayController {
         return new ResponseEntity(retmap, 1, baseModel);
     }
 
+    @RequestMapping("/klaySCN/contractDeploy")
+    public ResponseEntity<?> contractDeploy(@RequestParam Map<String, Object> map) {
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+
+        return new ResponseEntity(contractDeploy());
+    }
+
+    public static String contractDeploy() {
+        Caver caver = new Caver(Klay_HOST);
+        Contract contract = null;
+        try {
+            contract = caver.contract.create(KlayContractController.ABI);
+            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
+            //设置操作人，gas费默认由操作人付款
+            caver.wallet.add(keyring);
+            SendOptions sendOptions = new SendOptions();
+            sendOptions.setFrom(SYSTEM_ADDRESS);
+            sendOptions.setGas(new BigInteger("1500000"));
+            String initialSupply = "10000000";
+            contract.deploy(sendOptions, KlayContractController.contractBinaryData.toString(), initialSupply);
+        } catch (Exception e) {
+            logger.error("contractDeploy error！", e);
+            e.printStackTrace();
+            return null;
+        }
+        return contract.getContractAddress();
+    }
+
+    //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
+    public static void main(String[] args) {
+        try {
+            String address = contractDeploy();
+            logger.info(address);
+//            sendingCHR(SYSTEM_PRIVATE, "0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", BigInteger.valueOf(100));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        System.out.println(0 + Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000);
+    }
 }

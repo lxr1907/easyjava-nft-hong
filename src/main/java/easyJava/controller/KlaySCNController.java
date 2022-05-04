@@ -16,7 +16,6 @@ import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
-import easyJava.utils.DESUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,10 +170,7 @@ public class KlaySCNController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         try {
-            String encrypt_key = useWallet.get("encrypt_key").toString();
-            String encrypted_private = useWallet.get("encrypted_private").toString();
-            String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
-            KlayController.burnCHR(walletPrivate, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+            KlayController.burnCHR(useWallet.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
             return new ResponseEntity();
@@ -190,7 +186,7 @@ public class KlaySCNController {
     }
 
     //给某个账户发送scn，测试使用
-    @RequestMapping("/klaySCN/sendSCNTo")
+    @RequestMapping("/test/klaySCN/sendSCNTo")
     public ResponseEntity<?> sendKlayTo(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");

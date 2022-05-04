@@ -26,7 +26,7 @@ contract CHRToken is ERC20, Ownable {
         _burn(receiver, amount);
         receiver.transfer(amount / onePrice);
     }
-    //todo 该方法还没有部署
+    //消耗掉chr，比如购买game coin时调用
     function burn(uint256 amount, address receiver)
     public onlyOwner {
         require(balanceOf(receiver) >= amount);
