@@ -155,8 +155,11 @@ public class KlayController {
         SingleKeyring executor = KeyringFactory.createFromPrivateKey(privateKey);
         String fromAddress = executor.toAccount().getAddress();
         SingleKeyring feePayer = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
+        String feePayerAddress = executor.toAccount().getAddress();
         caver.wallet.add(executor);
-        caver.wallet.add(feePayer);
+        if (!feePayerAddress.equals(fromAddress)) {
+            caver.wallet.add(feePayer);
+        }
         try {
             Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
 
