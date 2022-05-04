@@ -52,6 +52,7 @@ public class KlayController {
 //    public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
     public static final String SYSTEM_PRIVATE = "55490a18860328954ba2d80eaed84dbe1b7a2c42073b6cec3704cf591990e71f";
     public static final String SYSTEM_ADDRESS = "0x0CcEB89A051711b0af1Afd52855fA76Da8aea265";
+    public static final String SWAP_ADDRESS = "0xC238b2365B3F0CF03B6564fa9D40de3a4563FBbC";
     public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
     public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
 
@@ -137,21 +138,32 @@ public class KlayController {
      *
      * @param toAddress
      * @param value
-     * @throws IOException
-     * @throws CipherException
-     * @throws TransactionException
      */
     public static void sendingCHR(String toAddress, BigInteger value) {
+        sendingCHR(SYSTEM_PRIVATE, toAddress, value);
+    }
+
+    /**
+     * 发送klay链上合约chr币
+     *
+     * @param toAddress
+     * @param value
+     */
+    public static void sendingCHR(String privateKey, String toAddress, BigInteger value) {
         logger.info("---------start sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
-        SingleKeyring executor = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
+        SingleKeyring executor = KeyringFactory.createFromPrivateKey(privateKey);
         String fromAddress = executor.toAccount().getAddress();
+        SingleKeyring feePayer = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
         caver.wallet.add(executor);
+        caver.wallet.add(feePayer);
         try {
             Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
 
             SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(executor.getAddress());
+            sendOptions.setFeeDelegation(true);
+            sendOptions.setFeePayer(SYSTEM_ADDRESS);
             sendOptions.setGas(gas);
             TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transfer")
                     .send(Arrays.asList(toAddress, value), sendOptions);

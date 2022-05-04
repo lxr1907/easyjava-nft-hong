@@ -16,6 +16,7 @@ import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
+import easyJava.utils.DESUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,6 +125,34 @@ public class KlaySCNController {
     }
 
 
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
+        Caver caver = new Caver(MY_SCN_HOST);
+        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
+        String fromAddress = keyring.toAccount().getAddress();
+        //Add to caver wallet.
+        caver.wallet.add(keyring);
+        //Create a value transfer transaction
+        ValueTransfer valueTransfer = caver.transaction.valueTransfer.create(
+                TxPropertyBuilder.valueTransfer()
+                        .setFrom(keyring.getAddress())
+                        .setTo(toAddress).setValue(value)
+                        .setGas(gas));
+        //Sign to the transaction
+        valueTransfer.sign(keyring);
+        //Send a transaction to the klaytn blockchain platform (Klaytn)
+        Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).send();
+        if (result.hasError()) {
+            logger.error("sendingKLAY 失败:" + result.getError().getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
+            throw new RuntimeException(result.getError().getMessage());
+        }
+        logger.info("sendingKLAY :" + result.getResult() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
+        //Check transaction receipt.
+        TransactionReceiptProcessor transactionReceiptProcessor = new PollingTransactionReceiptProcessor(caver, 1000, 15);
+        TransactionReceipt.TransactionReceiptData transactionReceipt = transactionReceiptProcessor.waitForTransactionReceipt(result.getResult());
+
+        return transactionReceipt;
+    }
+
     /**
      * 使用chr购买scn链上的gamecoin
      *
@@ -170,7 +199,10 @@ public class KlaySCNController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         try {
-            KlayController.burnCHR(useWallet.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+            String encrypt_key = useWallet.get("encrypt_key").toString();
+            String encrypted_private = useWallet.get("encrypted_private").toString();
+            String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
+            KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
             return new ResponseEntity();
@@ -181,6 +213,72 @@ public class KlaySCNController {
                     , map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
             logger.error("send scn error!", e);
+        }
+        return new ResponseEntity(result);
+    }
+
+    /**
+     * 使用gamecoin换回chr
+     *
+     * @param map
+     * @param token
+     * @return
+     */
+    @RequestMapping("/klaySCN/withDrawGameCoin")
+    public ResponseEntity<?> withDrawGameCoin(@RequestParam Map<String, Object> map,
+                                              @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("value") == null || map.get("value").toString().length() == 0) {
+            return new ResponseEntity(400, "value不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        map.put("account", user.get("account"));
+
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", UserController.USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        boolean myWallet = false;
+        Map useWallet = null;
+        for (var wallet : userWalletList) {
+            if (wallet.get("address").equals(map.get("address").toString())) {
+                myWallet = true;
+                useWallet = wallet;
+            }
+        }
+        if (!myWallet) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        //先扣除scn
+        TransactionReceipt.TransactionReceiptData result = null;
+        try {
+            String encrypt_key = useWallet.get("encrypt_key").toString();
+            String encrypted_private = useWallet.get("encrypted_private").toString();
+            String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
+            result = sendingSCN(walletPrivate
+                    , KlayController.SWAP_ADDRESS, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+        } catch (Exception e) {
+            logger.error("send scn error!", e);
+        }
+        //再发放chr
+        try {
+            KlayController.sendingCHR(useWallet.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+        } catch (Exception e) {
+            logger.error("burnCHR error!", e);
+            return new ResponseEntity();
         }
         return new ResponseEntity(result);
     }
