@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 @RestController
@@ -324,8 +325,8 @@ public class KlaySCNController {
         return val;
     }
 
-    public static AtomicInteger chrBalance = new AtomicInteger(10000);
-    public static AtomicInteger gameCoinBalance = new AtomicInteger(10000);
+    public static AtomicLong chrBalance = new AtomicLong(10000);
+    public static AtomicLong gameCoinBalance = new AtomicLong(10000);
     public static final long chrGameCoinK;
 
     static {
@@ -345,9 +346,9 @@ public class KlaySCNController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
-        int chrBalanceInt = chrBalance.addAndGet(Integer.parseInt(map.get("value").toString()));
-        int gameCoinMinus = gameCoinBalance.get() - gameCoinBalance.get() / chrBalanceInt;
-        int gameCoinBalanceAfter = gameCoinBalance.addAndGet(gameCoinMinus * (-1));
+        long chrBalanceInt = chrBalance.addAndGet(Long.parseLong(map.get("value").toString()));
+        long gameCoinMinus = gameCoinBalance.get() - chrGameCoinK / chrBalanceInt;
+        long gameCoinBalanceAfter = gameCoinBalance.addAndGet(gameCoinMinus * (-1));
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", chrBalance.get());
         balanceMap.put("gameCoinBalance", gameCoinBalance.get());
@@ -361,9 +362,9 @@ public class KlaySCNController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
-        int gameCoinInt = gameCoinBalance.addAndGet(Integer.parseInt(map.get("value").toString()));
-        int chrMinus = chrBalance.get() - chrBalance.get() / gameCoinInt;
-        int gameCoinBalanceAfter = chrBalance.addAndGet(chrMinus * (-1));
+        long gameCoinInt = gameCoinBalance.addAndGet(Long.parseLong(map.get("value").toString()));
+        long chrMinus = chrBalance.get() - chrGameCoinK / gameCoinInt;
+        long gameCoinBalanceAfter = chrBalance.addAndGet(chrMinus * (-1));
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", chrBalance.get());
         balanceMap.put("gameCoinBalance", gameCoinBalance.get());
