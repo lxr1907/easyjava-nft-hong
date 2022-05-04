@@ -34,7 +34,6 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -341,6 +340,12 @@ public class KlaySCNController {
         return new ResponseEntity(balanceMap);
     }
 
+    /**
+     * 付出一定的chr兑换gameCoin，随着gameCoin的余额减少，同样数量chr兑换的gamecoin会越来越少
+     *
+     * @param map
+     * @return
+     */
     @RequestMapping("/klaySCN/swap/chrToGameCoin")
     public ResponseEntity<?> chrToGameCoin(@RequestParam Map<String, Object> map) {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
@@ -357,6 +362,12 @@ public class KlaySCNController {
         return new ResponseEntity(balanceMap);
     }
 
+    /**
+     * 付出一定的gameCoin兑换chr，随着chr的余额减少，同样数量gameCoin兑换的chr会越来越少
+     *
+     * @param map
+     * @return
+     */
     @RequestMapping("/klaySCN/swap/gameCoinToChr")
     public ResponseEntity<?> gameCoinToChr(@RequestParam Map<String, Object> map) {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
