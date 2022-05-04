@@ -111,7 +111,7 @@ public class NFTScanController {
                     try {
                         logger.debug("-----------sendingKLAY to user chr_address:------"
                                 + address + ",val:" + chrVal);
-                        KlayController.sendingCHR(KlayController.SYSTEM_PRIVATE, address, chrVal);
+                        KlayController.sendingCHR(address, chrVal);
                         //更新订单状态，支付chr完成
                         matchOrder.put("status", 3);
                         baseDao.updateBaseByPrimaryKey(matchOrder);

@@ -56,7 +56,7 @@ public class KlayController {
     public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
 
     //合约币chr在klay链的地址
-    public static final String KLAY_CHR_ADDRESS = "0xf7d5bf1990a88a4a2a7c94f4716ef644bfc8ffb0";//"0xD3CFb75cE8Ed4Cbe10e7E343676a4788eC148d50";
+    public static final String KLAY_CHR_ADDRESS = "0xf8ed8301b4ae2bff0ccee31e06b5f49a2c015fec";//"0xD3CFb75cE8Ed4Cbe10e7E343676a4788eC148d50";
     //usdt-erc20充值地址,ropsten测试链
     public static final String USDT_ADDRESS_ERC20_ROPSTEN = "0xC4f459a93169bbF3CF9Dc3c50D34502473703FB0";
     //usdt-erc20充值地址,rinkeby测试链
@@ -135,17 +135,16 @@ public class KlayController {
     /**
      * 发送klay链上合约chr币
      *
-     * @param fromPrivateKey
      * @param toAddress
      * @param value
      * @throws IOException
      * @throws CipherException
      * @throws TransactionException
      */
-    public static void sendingCHR(String fromPrivateKey, String toAddress, BigInteger value) {
+    public static void sendingCHR(String toAddress, BigInteger value) {
         logger.info("---------start sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
-        SingleKeyring executor = KeyringFactory.createFromPrivateKey(fromPrivateKey);
+        SingleKeyring executor = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
         String fromAddress = executor.toAccount().getAddress();
         caver.wallet.add(executor);
         try {
@@ -187,6 +186,7 @@ public class KlayController {
 
     /**
      * 用操作员账户，直接扣除burnAddress地址的chr
+     *
      * @param burnAddress
      * @param value
      */
@@ -290,7 +290,7 @@ public class KlayController {
         }
         TransactionReceipt.TransactionReceiptData result = null;
         try {
-            sendingCHR(SYSTEM_PRIVATE, map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+            sendingCHR(map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
             logger.error("sendingCHR error！", e);
         }
@@ -435,7 +435,7 @@ public class KlayController {
             caver.wallet.add(keyring);
             SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(SYSTEM_ADDRESS);
-            sendOptions.setGas(new BigInteger("1500000"));
+            sendOptions.setGas(new BigInteger("3000000"));
             String initialSupply = "10000000";
             contract.deploy(sendOptions, KlayContractController.contractBinaryData.toString(), initialSupply);
         } catch (Exception e) {
@@ -449,9 +449,11 @@ public class KlayController {
     //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
     public static void main(String[] args) {
         try {
-            String address = contractDeploy();
-            logger.info(address);
-//            sendingCHR(SYSTEM_PRIVATE, "0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", BigInteger.valueOf(100));
+            //部署合约
+//            String address = contractDeploy();
+//            logger.info(address);
+//            burnCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415",new BigInteger("3"));
+            sendingCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", BigInteger.valueOf(10000));
         } catch (Exception e) {
             e.printStackTrace();
         }
