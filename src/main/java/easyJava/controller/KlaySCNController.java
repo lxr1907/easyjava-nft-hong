@@ -34,6 +34,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @RestController
@@ -323,4 +324,51 @@ public class KlaySCNController {
         return val;
     }
 
+    public static AtomicInteger chrBalance = new AtomicInteger(10000);
+    public static AtomicInteger gameCoinBalance = new AtomicInteger(10000);
+    public static final long chrGameCoinK;
+
+    static {
+        chrGameCoinK = chrBalance.get() * gameCoinBalance.get();
+    }
+
+    @RequestMapping("/klaySCN/swap/getBalance")
+    public ResponseEntity<?> swapGetBalance(@RequestParam Map<String, Object> map) {
+        Map balanceMap = new HashMap();
+        balanceMap.put("chrBalance", chrBalance.get());
+        balanceMap.put("gameCoinBalance", gameCoinBalance.get());
+        return new ResponseEntity(balanceMap);
+    }
+
+    @RequestMapping("/klaySCN/swap/chrToGameCoin")
+    public ResponseEntity<?> chrToGameCoin(@RequestParam Map<String, Object> map) {
+        if (map.get("value") == null || map.get("value").toString().length() == 0) {
+            return new ResponseEntity(400, "value不能为空！");
+        }
+        int chrBalanceInt = chrBalance.addAndGet(Integer.parseInt(map.get("value").toString()));
+        int gameCoinMinus = gameCoinBalance.get() - gameCoinBalance.get() / chrBalanceInt;
+        int gameCoinBalanceAfter = gameCoinBalance.addAndGet(gameCoinMinus * (-1));
+        Map balanceMap = new HashMap();
+        balanceMap.put("chrBalance", chrBalance.get());
+        balanceMap.put("gameCoinBalance", gameCoinBalance.get());
+        balanceMap.put("chrAdd", Integer.parseInt(map.get("value").toString()));
+        balanceMap.put("gameCoinMinus", gameCoinMinus);
+        return new ResponseEntity(balanceMap);
+    }
+
+    @RequestMapping("/klaySCN/swap/gameCoinToChr")
+    public ResponseEntity<?> gameCoinToChr(@RequestParam Map<String, Object> map) {
+        if (map.get("value") == null || map.get("value").toString().length() == 0) {
+            return new ResponseEntity(400, "value不能为空！");
+        }
+        int gameCoinInt = gameCoinBalance.addAndGet(Integer.parseInt(map.get("value").toString()));
+        int chrMinus = chrBalance.get() - chrBalance.get() / gameCoinInt;
+        int gameCoinBalanceAfter = chrBalance.addAndGet(chrMinus * (-1));
+        Map balanceMap = new HashMap();
+        balanceMap.put("chrBalance", chrBalance.get());
+        balanceMap.put("gameCoinBalance", gameCoinBalance.get());
+        balanceMap.put("gameCoinAdd", Integer.parseInt(map.get("value").toString()));
+        balanceMap.put("chrMinus", chrMinus);
+        return new ResponseEntity(balanceMap);
+    }
 }
