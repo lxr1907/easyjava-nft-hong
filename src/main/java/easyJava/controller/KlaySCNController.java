@@ -340,7 +340,7 @@ public class KlaySCNController {
         BigInteger payChrValue = toDecimal18(map.get("value").toString());
         BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
         BigInteger chrBalanceInt = getChrBalance().add(payChrValue);
-        BigInteger gameCoinMinus = getGameCoinBalance().subtract(chrGameCoinK.divide(chrBalanceInt).add(new BigInteger("1")));
+        BigInteger gameCoinMinus = getGameCoinBalance().subtract(chrGameCoinK.divide(chrBalanceInt));
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
@@ -360,8 +360,9 @@ public class KlaySCNController {
         }
         BigInteger payGameCoinValue = toDecimal6(map.get("value").toString());
         BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
+
         BigInteger gameCoinInt = getGameCoinBalance().add(payGameCoinValue);
-        BigInteger chrMinus = getChrBalance().subtract(chrGameCoinK.divide(gameCoinInt).add(new BigInteger("1")));
+        BigInteger chrMinus = getChrBalance().subtract(chrGameCoinK.divide(gameCoinInt));
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
