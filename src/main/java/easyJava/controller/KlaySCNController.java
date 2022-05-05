@@ -170,7 +170,7 @@ public class KlaySCNController {
         if (v.compareTo(Double.valueOf(0.001)) < 1) {
             return new ResponseEntity(400, "value必须大于0.001");
         }
-        BigInteger chrValue = null;
+        Double chrValue = null;
         BigInteger scnValue = null;
         try {
             chrValue = toDecimal18(map.get("value").toString());
@@ -247,7 +247,7 @@ public class KlaySCNController {
         if (Double.valueOf(100000.0).compareTo(v) > 1) {
             return new ResponseEntity(400, "value必须大于等于100000");
         }
-        BigInteger chrValue = null;
+        Double chrValue = null;
         BigInteger scnValue = null;
         try {
             chrValue = toDecimal18(toChr(map.get("value").toString()));
@@ -378,17 +378,17 @@ public class KlaySCNController {
         return new ResponseEntity(balanceMap);
     }
 
-    public static BigInteger getDecimal18(String amountStr) {
+    public static Double getDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 18)));
         String longStr = amount.toPlainString().replaceAll("(0)+$", "");
-        BigInteger ret = BigInteger.valueOf(Long.parseLong(longStr));
+        var ret = Double.parseDouble(longStr);
         return ret;
     }
 
-    public static BigInteger toDecimal18(String amountStr) {
+    public static Double toDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 18)));
         String longStr = amount.toPlainString();
-        BigInteger ret = BigInteger.valueOf(Long.parseLong(longStr));
+        var ret = Double.parseDouble(longStr);
         return ret;
     }
 

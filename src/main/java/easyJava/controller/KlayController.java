@@ -144,13 +144,21 @@ public class KlayController {
         sendingCHR(SYSTEM_PRIVATE, toAddress, value);
     }
 
+    public static void sendingCHR(String toAddress, Double value) {
+        sendingCHR(SYSTEM_PRIVATE, toAddress, value);
+    }
+
+    private static void sendingCHR(String toAddress, Object value) {
+        sendingCHR(SYSTEM_PRIVATE, toAddress, value);
+    }
+
     /**
      * 发送klay链上合约chr币
      *
      * @param toAddress
      * @param value
      */
-    public static void sendingCHR(String privateKey, String toAddress, BigInteger value) {
+    public static void sendingCHR(String privateKey, String toAddress, Object value) {
         logger.info("---------start sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
         SingleKeyring executor = KeyringFactory.createFromPrivateKey(privateKey);
@@ -470,7 +478,7 @@ public class KlayController {
 //            String address = contractDeploy();
 //            logger.info(address);
 //            burnCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415",new BigInteger("3"));
-//            sendingCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", BigInteger.valueOf(10000));
+        sendingCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", Double.parseDouble("100000000000000000000"));
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
