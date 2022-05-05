@@ -139,7 +139,8 @@ public class KlayController {
      * @param toAddress
      * @param value
      */
-    public static void sendingCHR(String toAddress, Object value) {
+
+    public static void sendingCHR(String toAddress, BigInteger value) {
         sendingCHR(SYSTEM_PRIVATE, toAddress, value);
     }
 
@@ -149,7 +150,7 @@ public class KlayController {
      * @param toAddress
      * @param value
      */
-    public static void sendingCHR(String privateKey, String toAddress, Object value) {
+    public static void sendingCHR(String privateKey, String toAddress, BigInteger value) {
         logger.info("---------start sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
         SingleKeyring executor = KeyringFactory.createFromPrivateKey(privateKey);
@@ -303,9 +304,10 @@ public class KlayController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
+        BigInteger value = BigInteger.valueOf(Long.parseLong(map.get("value").toString()));
         TransactionReceipt.TransactionReceiptData result = null;
         try {
-            sendingCHR(map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+            sendingCHR(map.get("address").toString(), value);
         } catch (Exception e) {
             logger.error("sendingCHR error！", e);
         }
@@ -463,15 +465,16 @@ public class KlayController {
 
     //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
     public static void main(String[] args) {
-        try {
-            //部署合约
+//        try {
+        //部署合约
 //            String address = contractDeploy();
 //            logger.info(address);
 //            burnCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415",new BigInteger("3"));
-            sendingCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", BigInteger.valueOf(10000));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//            sendingCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", BigInteger.valueOf(10000));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 //        System.out.println(0 + Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000);
+
     }
 }

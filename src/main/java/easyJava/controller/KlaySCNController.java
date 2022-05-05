@@ -72,8 +72,7 @@ public class KlaySCNController {
      * @throws CipherException
      * @throws TransactionException
      */
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, String value) throws IOException, TransactionException {
-        Caver caver = new Caver(MY_SCN_HOST);
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, BigInteger value) throws IOException, TransactionException {
         logger.info(keyStoreJSON);
         KeyStore keyStore = JSON.parseObject(keyStoreJSON, KeyStore.class);
         logger.info(keyStore.getKeyring().get(0).toString());
@@ -93,7 +92,7 @@ public class KlaySCNController {
     }
 
 
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, String value) throws IOException, TransactionException {
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
         Caver caver = new Caver(MY_SCN_HOST);
         SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
         String fromAddress = keyring.toAccount().getAddress();
@@ -171,8 +170,8 @@ public class KlaySCNController {
         if (v.compareTo(Double.valueOf(0.001)) < 1) {
             return new ResponseEntity(400, "value必须大于0.001");
         }
-        String chrValue = "";
-        String scnValue = "";
+        BigInteger chrValue = null;
+        BigInteger scnValue = null;
         try {
             chrValue = toDecimal18(map.get("value").toString());
             scnValue = toGameCoin(map.get("value").toString());
@@ -245,14 +244,14 @@ public class KlaySCNController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         Double v = Double.parseDouble(map.get("value").toString());
-        if (v.compareTo(Double.valueOf(10000.0)) < 1) {
-            return new ResponseEntity(400, "value必须大于10000");
+        if (v.compareTo(Double.valueOf(100000.0)) < 1) {
+            return new ResponseEntity(400, "value必须大于100000");
         }
-        String chrValue = "";
-        String scnValue = "";
+        BigInteger chrValue = null;
+        BigInteger scnValue = null;
         try {
             chrValue = toDecimal18(toChr(map.get("value").toString()));
-            scnValue = map.get("value").toString();
+            scnValue = BigInteger.valueOf(Long.parseLong(map.get("value").toString()));
         } catch (Exception e) {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
@@ -287,10 +286,11 @@ public class KlaySCNController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
+        BigInteger value = BigInteger.valueOf(Long.parseLong(map.get("value").toString()));
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                    , map.get("address").toString(), map.get("value").toString());
+                    , map.get("address").toString(), value);
         } catch (Exception e) {
             logger.error("发送sending scn失败！", e);
         }
@@ -378,14 +378,18 @@ public class KlaySCNController {
         return new ResponseEntity(balanceMap);
     }
 
-    public static String getDecimal18(String amountStr) {
+    public static BigInteger getDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 18)));
-        return amount.toPlainString().replaceAll("(0)+$", "");
+        String longStr = amount.toPlainString().replaceAll("(0)+$", "");
+        BigInteger ret = BigInteger.valueOf(Long.parseLong(longStr));
+        return ret;
     }
 
-    public static String toDecimal18(String amountStr) {
+    public static BigInteger toDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 18)));
-        return amount.toPlainString();
+        String longStr = amount.toPlainString();
+        BigInteger ret = BigInteger.valueOf(Long.parseLong(longStr));
+        return ret;
     }
 
     /**
@@ -394,15 +398,16 @@ public class KlaySCNController {
      * @param amountStr
      * @return
      */
-    public static String toGameCoin(String amountStr) {
+    public static BigInteger toGameCoin(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 5)));
-        String ret = amount.toPlainString();
-        if (ret.contains(".")) {
-            ret = ret.replaceAll("(0)+$", "");
+        String longStr = amount.toPlainString();
+        if (longStr.contains(".")) {
+            longStr = longStr.replaceAll("(0)+$", "");
         }
-        if (ret.endsWith(".")) {
-            ret = ret.substring(0, ret.length() - 1);
+        if (longStr.endsWith(".")) {
+            longStr = longStr.substring(0, longStr.length() - 1);
         }
+        BigInteger ret = BigInteger.valueOf(Long.parseLong(longStr));
         return ret;
     }
 
@@ -442,7 +447,8 @@ public class KlaySCNController {
 //        if (ret.endsWith(".")) {
 //            ret = ret.substring(0, ret.length() - 1);
 //        }
-        String ret = toDecimal18(toChr("1"));
+//        String ret = toDecimal18(toChr("100000"));
+        String ret = BigInteger.valueOf(10000l).toString();
         logger.debug(ret);
     }
 }
