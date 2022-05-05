@@ -295,7 +295,6 @@ public class KlaySCNController {
             return new ResponseEntity(400, "address不能为空！");
         }
         var result = getBalance(map.get("address").toString()).toString();
-        result = getDecimal5(result);
         return new ResponseEntity(result);
     }
 
@@ -379,11 +378,6 @@ public class KlaySCNController {
     public static String toDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 18)));
         return amount.toPlainString();
-    }
-
-    public static String getDecimal5(String amountStr) {
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 5)));
-        return amount.toPlainString().replaceAll("(0)+$", "");
     }
 
     public static String toDecimal5(String amountStr) {
