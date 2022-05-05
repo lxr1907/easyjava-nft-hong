@@ -244,8 +244,8 @@ public class KlaySCNController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         Double v = Double.parseDouble(map.get("value").toString());
-        if (v.compareTo(Double.valueOf(100000.0)) < 1) {
-            return new ResponseEntity(400, "value必须大于100000");
+        if (Double.valueOf(100000.0).compareTo(v) > 1) {
+            return new ResponseEntity(400, "value必须大于等于100000");
         }
         BigInteger chrValue = null;
         BigInteger scnValue = null;
