@@ -139,7 +139,7 @@ public class KlayController {
      * @param toAddress
      * @param value
      */
-    public static void sendingCHR(String toAddress, BigInteger value) {
+    public static void sendingCHR(String toAddress, Object value) {
         sendingCHR(SYSTEM_PRIVATE, toAddress, value);
     }
 
@@ -149,7 +149,7 @@ public class KlayController {
      * @param toAddress
      * @param value
      */
-    public static void sendingCHR(String privateKey, String toAddress, BigInteger value) {
+    public static void sendingCHR(String privateKey, String toAddress, Object value) {
         logger.info("---------start sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
         SingleKeyring executor = KeyringFactory.createFromPrivateKey(privateKey);

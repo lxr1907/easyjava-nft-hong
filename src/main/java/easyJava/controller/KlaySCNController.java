@@ -68,7 +68,8 @@ public class KlaySCNController {
 //        } catch (TransactionException e) {
 //            e.printStackTrace();
 //        }
-        logger.info(JSON.toJSONString(getBalance("0x38bd8d9f0acda0ce533f44adcfd02b403f411de7")));
+//        logger.info(JSON.toJSONString(getBalance("0x38bd8d9f0acda0ce533f44adcfd02b403f411de7")));
+
     }
 
 
@@ -83,7 +84,7 @@ public class KlaySCNController {
      * @throws CipherException
      * @throws TransactionException
      */
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, BigInteger value) throws IOException, TransactionException {
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, String value) throws IOException, TransactionException {
         Caver caver = new Caver(MY_SCN_HOST);
         logger.info(keyStoreJSON);
         KeyStore keyStore = JSON.parseObject(keyStoreJSON, KeyStore.class);
@@ -126,7 +127,7 @@ public class KlaySCNController {
     }
 
 
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, String value) throws IOException, TransactionException {
         Caver caver = new Caver(MY_SCN_HOST);
         SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
         String fromAddress = keyring.toAccount().getAddress();
@@ -203,7 +204,7 @@ public class KlaySCNController {
             String encrypt_key = useWallet.get("encrypt_key").toString();
             String encrypted_private = useWallet.get("encrypted_private").toString();
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
-            KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+            KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, map.get("value").toString());
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
             return new ResponseEntity();
@@ -211,7 +212,7 @@ public class KlaySCNController {
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                    , map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+                    , map.get("address").toString(), map.get("value").toString());
         } catch (Exception e) {
             logger.error("send scn error!", e);
         }
@@ -270,7 +271,7 @@ public class KlaySCNController {
             String encrypted_private = useWallet.get("encrypted_private").toString();
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
             result = sendingSCN(walletPrivate
-                    , KlayController.SWAP_ADDRESS, BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+                    , KlayController.SWAP_ADDRESS, map.get("value").toString());
         } catch (Exception e) {
             logger.error("send scn error!", e);
         }
@@ -296,7 +297,7 @@ public class KlaySCNController {
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                    , map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
+                    , map.get("address").toString(), map.get("value").toString());
         } catch (Exception e) {
             logger.error("发送sendingKLAY失败！", e);
         }
