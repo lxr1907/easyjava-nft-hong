@@ -392,6 +392,9 @@ public class KlaySCNController {
         if (ret.contains(".")) {
             ret = ret.replaceAll("(0)+$", "");
         }
+        if (ret.endsWith(".")) {
+            ret = ret.replaceAll(".", "");
+        }
         return ret;
     }
 
