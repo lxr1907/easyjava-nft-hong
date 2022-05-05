@@ -167,11 +167,15 @@ public class KlaySCNController {
             return new ResponseEntity(400, "address不属于自己！");
         }
 
+        Double v = Double.parseDouble(map.get("value").toString());
+        if (v.compareTo(Double.valueOf(0.001)) < 1) {
+            return new ResponseEntity(400, "value必须大于0.001");
+        }
         String chrValue = "";
         String scnValue = "";
         try {
             chrValue = toDecimal18(map.get("value").toString());
-            scnValue = toDecimal5(map.get("value").toString());
+            scnValue = toGameCoin(map.get("value").toString());
         } catch (Exception e) {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
@@ -240,11 +244,15 @@ public class KlaySCNController {
         if (!myWallet) {
             return new ResponseEntity(400, "address不属于自己！");
         }
+        Double v = Double.parseDouble(map.get("value").toString());
+        if (v.compareTo(Double.valueOf(10000.0)) < 1) {
+            return new ResponseEntity(400, "value必须大于10000");
+        }
         String chrValue = "";
         String scnValue = "";
         try {
-            chrValue = toDecimal18(map.get("value").toString());
-            scnValue = toDecimal5(map.get("value").toString());
+            chrValue = toDecimal18(toChr(map.get("value").toString()));
+            scnValue = map.get("value").toString();
         } catch (Exception e) {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
@@ -380,8 +388,32 @@ public class KlaySCNController {
         return amount.toPlainString();
     }
 
-    public static String toDecimal5(String amountStr) {
+    /**
+     * 比例1 chr兑换10000个gamecoin
+     *
+     * @param amountStr
+     * @return
+     */
+    public static String toGameCoin(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 5)));
+        String ret = amount.toPlainString();
+        if (ret.contains(".")) {
+            ret = ret.replaceAll("(0)+$", "");
+        }
+        if (ret.endsWith(".")) {
+            ret = ret.substring(0, ret.length() - 1);
+        }
+        return ret;
+    }
+
+    /**
+     * 比例1 chr兑换10000个gamecoin
+     *
+     * @param amountStr
+     * @return
+     */
+    public static String toChr(String amountStr) {
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 5)));
         String ret = amount.toPlainString();
         if (ret.contains(".")) {
             ret = ret.replaceAll("(0)+$", "");
@@ -403,13 +435,14 @@ public class KlaySCNController {
 //        }
 //        logger.info(JSON.toJSONString(getBalance("0x38bd8d9f0acda0ce533f44adcfd02b403f411de7")));
 
-        logger.debug(getDecimal18("1003000000000000000"));
-        logger.debug(toDecimal18("1.00123"));
-        String ret = "10.";
-        logger.debug(ret);
-        if (ret.endsWith(".")) {
-            ret = ret.substring(0, ret.length() - 1);
-        }
+//        logger.debug(getDecimal18("1003000000000000000"));
+//        logger.debug(toDecimal18("1.00123"));
+//        String ret = "10.";
+//        logger.debug(ret);
+//        if (ret.endsWith(".")) {
+//            ret = ret.substring(0, ret.length() - 1);
+//        }
+        String ret = toDecimal18(toChr("1"));
         logger.debug(ret);
     }
 }
