@@ -334,6 +334,9 @@ public class KlaySCNController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
+        if (map.get("value").toString().contains(".")) {
+            return new ResponseEntity(400, "value不能包含小数点");
+        }
         BigInteger payChrValue = toDecimal18(map.get("value").toString());
         BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
         BigInteger chrBalanceInt = getChrBalance().add(payChrValue);
@@ -351,6 +354,9 @@ public class KlaySCNController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
+        if (map.get("value").toString().contains(".")) {
+            return new ResponseEntity(400, "value不能包含小数点");
+        }
         BigInteger payGameCoinValue = toDecimal6(map.get("value").toString());
         BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
         BigInteger gameCoinInt = getGameCoinBalance().add(payGameCoinValue);
@@ -363,6 +369,12 @@ public class KlaySCNController {
         return new ResponseEntity(balanceMap);
     }
 
+    /**
+     * 返回除以10的18次方后，带小数点的字符串
+     *
+     * @param amountStr
+     * @return
+     */
     public static String getDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 18)));
         String longStr = amount.toPlainString().replaceAll("(0)+$", "");
@@ -376,10 +388,8 @@ public class KlaySCNController {
 
 
     public static BigInteger toDecimal18(String amountStr) {
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 18)));
-        String longStr = amount.toPlainString();
-        var ret = new BigInteger(longStr);
-        return ret;
+        BigInteger amount = new BigInteger(amountStr).divide(new BigInteger("1000000000000000000"));
+        return amount;
     }
 
     public static BigInteger getDecimal6(BigInteger amountStr) {
@@ -387,6 +397,12 @@ public class KlaySCNController {
         return amount;
     }
 
+    /**
+     * 返回除以10的6次方后，带小数点的字符串
+     *
+     * @param amountStr
+     * @return
+     */
     public static String getDecimal6(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 6)));
         String longStr = amount.toPlainString();
@@ -400,10 +416,8 @@ public class KlaySCNController {
     }
 
     public static BigInteger toDecimal6(String amountStr) {
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 6)));
-        String longStr = amount.toPlainString();
-        var ret = new BigInteger(longStr);
-        return ret;
+        BigInteger amount = new BigInteger(amountStr).multiply(new BigInteger("1000000"));
+        return amount;
     }
 
     /**
