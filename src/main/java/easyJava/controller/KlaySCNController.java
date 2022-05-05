@@ -322,11 +322,11 @@ public class KlaySCNController {
     }
 
     public static BigInteger getGameCoinBalance() {
-        return getGameCoinBalance(KlayController.SWAP_ADDRESS);
+        return getDecimal6(getGameCoinBalance(KlayController.SWAP_ADDRESS));
     }
 
     public static BigInteger getChrBalance() {
-        return getChrBalance(KlayController.SWAP_ADDRESS);
+        return getDecimal18(getChrBalance(KlayController.SWAP_ADDRESS));
     }
 
     @RequestMapping("/klaySCN/swap/chrToGameCoinPrice")
@@ -338,10 +338,10 @@ public class KlaySCNController {
         BigInteger chrBalanceInt = getChrBalance().add(toDecimal18(map.get("value").toString()));
         BigInteger gameCoinMinus = getGameCoinBalance().subtract(chrGameCoinK.divide(chrBalanceInt).add(new BigInteger("1")));
         Map balanceMap = new HashMap();
-        balanceMap.put("chrBalance", getDecimal18(getChrBalance().toString()));
+        balanceMap.put("chrBalance", getChrBalance());
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
         balanceMap.put("chrAdd", map.get("value").toString());
-        balanceMap.put("gameCoinMinus", gameCoinMinus);
+        balanceMap.put("gameCoinMinus", getDecimal6(gameCoinMinus.toString()));
         return new ResponseEntity(balanceMap);
     }
 
@@ -354,25 +354,45 @@ public class KlaySCNController {
         BigInteger gameCoinInt = getGameCoinBalance().add(new BigInteger(map.get("value").toString()));
         BigInteger chrMinus = getChrBalance().subtract(chrGameCoinK.divide(gameCoinInt).add(new BigInteger("1")));
         Map balanceMap = new HashMap();
-        balanceMap.put("chrBalance", getDecimal18(getChrBalance().toString()));
+        balanceMap.put("chrBalance", getChrBalance());
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
         balanceMap.put("gameCoinAdd", map.get("value").toString());
         balanceMap.put("chrMinus", getDecimal18(chrMinus.toString()));
         return new ResponseEntity(balanceMap);
     }
 
-    public static String getDecimal18(Double d) {
-        BigDecimal amount = BigDecimal.valueOf(d).divide(BigDecimal.valueOf(Math.pow(10, 18)));
+    public static String getDecimal18(String amountStr) {
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 18)));
         String longStr = amount.toPlainString().replaceAll("(0)+$", "");
         return longStr;
     }
 
-    public static String getDecimal18(String amountStr) {
-        return getDecimal18(Double.parseDouble(amountStr));
+    public static BigInteger getDecimal18(BigInteger amountStr) {
+        BigInteger amount = amountStr.divide(new BigInteger("1000000000000000000"));
+        return amount;
     }
+
 
     public static BigInteger toDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 18)));
+        String longStr = amount.toPlainString();
+        var ret = new BigInteger(longStr);
+        return ret;
+    }
+
+    public static BigInteger getDecimal6(BigInteger amountStr) {
+        BigInteger amount = amountStr.divide(new BigInteger("1000000"));
+        return amount;
+    }
+
+    public static String getDecimal6(String amountStr) {
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 6)));
+        String longStr = amount.toPlainString().replaceAll("(0)+$", "");
+        return longStr;
+    }
+
+    public static BigInteger toDecimal6(String amountStr) {
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 6)));
         String longStr = amount.toPlainString();
         var ret = new BigInteger(longStr);
         return ret;
