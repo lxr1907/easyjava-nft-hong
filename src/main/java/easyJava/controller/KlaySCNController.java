@@ -346,6 +346,7 @@ public class KlaySCNController {
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
         balanceMap.put("chrAdd", map.get("value").toString());
         balanceMap.put("gameCoinMinus", getDecimal6(gameCoinMinus.toString()));
+        balanceMap.put("chrGameCoinK", chrGameCoinK.toString());
         return new ResponseEntity(balanceMap);
     }
 
@@ -366,6 +367,7 @@ public class KlaySCNController {
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
         balanceMap.put("gameCoinAdd", map.get("value").toString());
         balanceMap.put("chrMinus", getDecimal18(chrMinus.toString()));
+        balanceMap.put("chrGameCoinK", chrGameCoinK.toString());
         return new ResponseEntity(balanceMap);
     }
 
@@ -388,7 +390,7 @@ public class KlaySCNController {
 
 
     public static BigInteger toDecimal18(String amountStr) {
-        BigInteger amount = new BigInteger(amountStr).divide(new BigInteger("1000000000000000000"));
+        BigInteger amount = new BigInteger(amountStr).multiply(new BigInteger("1000000000000000000"));
         return amount;
     }
 
