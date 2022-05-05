@@ -338,15 +338,14 @@ public class KlaySCNController {
             return new ResponseEntity(400, "value不能包含小数点");
         }
         BigInteger payChrValue = toDecimal18(map.get("value").toString());
-        BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
-        BigInteger chrBalanceInt = getChrBalance().add(payChrValue);
-        BigInteger gameCoinMinus = getGameCoinBalance().subtract(chrGameCoinK.divide(chrBalanceInt));
+        BigInteger chrBalance = getChrBalance();
+        BigInteger gameCoinBalance = getGameCoinBalance();
+        String gameCoinMinus = abSwap(chrBalance, gameCoinBalance, payChrValue);
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
         balanceMap.put("chrAdd", map.get("value").toString());
-        balanceMap.put("gameCoinMinus", getDecimal6(gameCoinMinus.toString()));
-        balanceMap.put("chrGameCoinK", chrGameCoinK.toString());
+        balanceMap.put("gameCoinMinus", gameCoinMinus);
         return new ResponseEntity(balanceMap);
     }
 
@@ -359,17 +358,25 @@ public class KlaySCNController {
             return new ResponseEntity(400, "value不能包含小数点");
         }
         BigInteger payGameCoinValue = toDecimal6(map.get("value").toString());
-        BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
+        BigInteger chrBalance = getChrBalance();
+        BigInteger gameCoinBalance = getGameCoinBalance();
 
-        BigInteger gameCoinInt = getGameCoinBalance().add(payGameCoinValue);
-        BigInteger chrMinus = getChrBalance().subtract(chrGameCoinK.divide(gameCoinInt));
+        String chrMinus = abSwap(gameCoinBalance, chrBalance, payGameCoinValue);
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
         balanceMap.put("gameCoinAdd", map.get("value").toString());
-        balanceMap.put("chrMinus", getDecimal18(chrMinus.toString()));
-        balanceMap.put("chrGameCoinK", chrGameCoinK.toString());
+        balanceMap.put("chrMinus", chrMinus);
         return new ResponseEntity(balanceMap);
+    }
+
+    public static String abSwap(BigInteger a, BigInteger b, BigInteger payAValue) {
+        BigInteger k = a.multiply(b);
+        BigInteger aAfterAdd = a.add(payAValue);
+        BigInteger divided = k.divide(aAfterAdd).add(new BigInteger("1"));
+        BigInteger bMinus = b.subtract(divided);
+        logger.info("k:" + k + "," + "aAfterAdd:" + aAfterAdd + "," + "divided:" + divided + "," + "bMinus:" + bMinus + ",");
+        return bMinus.toString();
     }
 
     /**
@@ -479,7 +486,9 @@ public class KlaySCNController {
 //            ret = ret.substring(0, ret.length() - 1);
 //        }
 //        String ret = toDecimal18(toChr("100000"));
-        String ret = BigInteger.valueOf(10000l).toString();
+        String ret = abSwap(new BigInteger("268407048"), new BigInteger("72339069039"), new BigInteger("1"));
+        logger.debug(ret);
+        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
         logger.debug(ret);
     }
 }
