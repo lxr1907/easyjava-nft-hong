@@ -393,7 +393,7 @@ public class KlaySCNController {
             ret = ret.replaceAll("(0)+$", "");
         }
         if (ret.endsWith(".")) {
-            ret = ret.replaceAll(".", "");
+            ret = ret.substring(0, ret.length() - 1);
         }
         return ret;
     }
@@ -411,6 +411,11 @@ public class KlaySCNController {
 
         logger.debug(getDecimal18("1003000000000000000"));
         logger.debug(toDecimal18("1.00123"));
-        logger.debug("a".contains(".") + "");
+        String ret = "10.";
+        logger.debug(ret);
+        if (ret.endsWith(".")) {
+            ret = ret.substring(0, ret.length() - 1);
+        }
+        logger.debug(ret);
     }
 }
