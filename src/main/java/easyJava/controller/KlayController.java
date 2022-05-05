@@ -2,6 +2,7 @@ package easyJava.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.klaytn.caver.Caver;
+import com.klaytn.caver.abi.datatypes.Type;
 import com.klaytn.caver.account.Account;
 import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.SendOptions;
@@ -30,6 +31,7 @@ import org.web3j.crypto.CipherException;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -144,21 +146,13 @@ public class KlayController {
         sendingCHR(SYSTEM_PRIVATE, toAddress, value);
     }
 
-    public static void sendingCHR(String toAddress, Double value) {
-        sendingCHR(SYSTEM_PRIVATE, toAddress, value);
-    }
-
-    private static void sendingCHR(String toAddress, Object value) {
-        sendingCHR(SYSTEM_PRIVATE, toAddress, value);
-    }
-
     /**
      * 发送klay链上合约chr币
      *
      * @param toAddress
      * @param value
      */
-    public static void sendingCHR(String privateKey, String toAddress, Object value) {
+    public static void sendingCHR(String privateKey, String toAddress, BigInteger value) {
         logger.info("---------start sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
         SingleKeyring executor = KeyringFactory.createFromPrivateKey(privateKey);
@@ -185,6 +179,24 @@ public class KlayController {
             throw new RuntimeException(e.getMessage());
         }
         logger.info("---------end sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
+    }
+
+    public static BigInteger balanceOfCHR(String toAddress) {
+        logger.info("---------  start balanceOfCHR,to:" + toAddress + "  -----");
+        Caver caver = new Caver(Klay_HOST);
+        SingleKeyring feePayer = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
+        caver.wallet.add(feePayer);
+        List<Type> receipt = null;
+        try {
+            Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
+            receipt = contract.getMethod("balanceOf")
+                    .call(Arrays.asList(toAddress));
+            logger.info("------balanceOfCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + "------");
+        } catch (Exception e) {
+            logger.error("balanceOfCHR 失败:" + e.getMessage() + ",to:" + toAddress, e);
+            throw new RuntimeException(e.getMessage());
+        }
+        return (BigInteger) receipt.get(0).getValue();
     }
 
     public static void withDrawCHR(String fromPrivateKey, String toAddress, BigInteger value) {
@@ -478,11 +490,12 @@ public class KlayController {
 //            String address = contractDeploy();
 //            logger.info(address);
 //            burnCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415",new BigInteger("3"));
-        sendingCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", Double.parseDouble("100000000000000000000"));
+//        sendingCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", Double.parseDouble("100000000000000000000"));
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
 //        System.out.println(0 + Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000);
-
+        BigInteger d = balanceOfCHR(SYSTEM_ADDRESS);
+        logger.info(d.toString());
     }
 }

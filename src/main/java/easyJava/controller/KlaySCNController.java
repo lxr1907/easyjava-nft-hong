@@ -35,7 +35,6 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 
 @RestController
@@ -170,7 +169,7 @@ public class KlaySCNController {
         if (v.compareTo(Double.valueOf(0.001)) < 1) {
             return new ResponseEntity(400, "value必须大于0.001");
         }
-        Double chrValue = null;
+        BigInteger chrValue = null;
         BigInteger scnValue = null;
         try {
             chrValue = toDecimal18(map.get("value").toString());
@@ -247,7 +246,7 @@ public class KlaySCNController {
         if (Double.valueOf(100000.0).compareTo(v) > 1) {
             return new ResponseEntity(400, "value必须大于等于100000");
         }
-        Double chrValue = null;
+        BigInteger chrValue = null;
         BigInteger scnValue = null;
         try {
             chrValue = toDecimal18(toChr(map.get("value").toString()));
@@ -302,11 +301,11 @@ public class KlaySCNController {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
-        var result = getBalance(map.get("address").toString()).toString();
+        var result = getGameCoinBalance(map.get("address").toString());
         return new ResponseEntity(result);
     }
 
-    public static BigInteger getBalance(String address) {
+    public static BigInteger getGameCoinBalance(String address) {
         Caver caver = new Caver(MY_SCN_HOST);
         var request = caver.rpc.klay.getBalance(address, DefaultBlockParameter.valueOf("latest"));
         BigInteger val = new BigInteger("0");
@@ -318,77 +317,61 @@ public class KlaySCNController {
         return val;
     }
 
-    public static AtomicLong chrBalance = new AtomicLong(10000);
-    public static AtomicLong gameCoinBalance = new AtomicLong(10000);
-    public static final long chrGameCoinK;
-
-    static {
-        chrGameCoinK = chrBalance.get() * gameCoinBalance.get();
+    public static BigInteger getChrBalance(String address) {
+        return KlayController.balanceOfCHR(address);
     }
 
-    @RequestMapping("/klaySCN/swap/getBalance")
-    public ResponseEntity<?> swapGetBalance(@RequestParam Map<String, Object> map) {
-        Map balanceMap = new HashMap();
-        balanceMap.put("chrBalance", chrBalance.get());
-        balanceMap.put("gameCoinBalance", gameCoinBalance.get());
-        return new ResponseEntity(balanceMap);
+    public static BigInteger getGameCoinBalance() {
+        return getGameCoinBalance(KlayController.SWAP_ADDRESS);
     }
 
-    /**
-     * 付出一定的chr兑换gameCoin，随着gameCoin的余额减少，同样数量chr兑换的gamecoin会越来越少
-     *
-     * @param map
-     * @return
-     */
-    @RequestMapping("/klaySCN/swap/chrToGameCoin")
-    public ResponseEntity<?> chrToGameCoin(@RequestParam Map<String, Object> map) {
+    public static BigInteger getChrBalance() {
+        return getChrBalance(KlayController.SWAP_ADDRESS);
+    }
+
+    @RequestMapping("/klaySCN/swap/chrToGameCoinPrice")
+    public ResponseEntity<?> chrToGameCoinPrice(@RequestParam Map<String, Object> map) {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
-        long chrBalanceInt = chrBalance.addAndGet(Long.parseLong(map.get("value").toString()));
-        long gameCoinMinus = gameCoinBalance.get() - chrGameCoinK / chrBalanceInt;
-        long gameCoinBalanceAfter = gameCoinBalance.addAndGet(gameCoinMinus * (-1));
+        BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
+        BigInteger chrBalanceInt = getChrBalance().add(new BigInteger(map.get("value").toString()));
+        BigInteger gameCoinMinus = getGameCoinBalance().subtract(chrGameCoinK.divide(chrBalanceInt));
         Map balanceMap = new HashMap();
-        balanceMap.put("chrBalance", chrBalance.get());
-        balanceMap.put("gameCoinBalance", gameCoinBalance.get());
-        balanceMap.put("chrAdd", Integer.parseInt(map.get("value").toString()));
+        balanceMap.put("chrBalance", getChrBalance());
+        balanceMap.put("gameCoinBalance", getGameCoinBalance());
+        balanceMap.put("chrAdd", new BigInteger(map.get("value").toString()));
         balanceMap.put("gameCoinMinus", gameCoinMinus);
         return new ResponseEntity(balanceMap);
     }
 
-    /**
-     * 付出一定的gameCoin兑换chr，随着chr的余额减少，同样数量gameCoin兑换的chr会越来越少
-     *
-     * @param map
-     * @return
-     */
-    @RequestMapping("/klaySCN/swap/gameCoinToChr")
-    public ResponseEntity<?> gameCoinToChr(@RequestParam Map<String, Object> map) {
+    @RequestMapping("/klaySCN/swap/gameCoinToChrPrice")
+    public ResponseEntity<?> gameCoinToChrPrice(@RequestParam Map<String, Object> map) {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
-        long gameCoinInt = gameCoinBalance.addAndGet(Long.parseLong(map.get("value").toString()));
-        long chrMinus = chrBalance.get() - chrGameCoinK / gameCoinInt;
-        long gameCoinBalanceAfter = chrBalance.addAndGet(chrMinus * (-1));
+        BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
+        BigInteger gameCoinInt = getGameCoinBalance().add(new BigInteger(map.get("value").toString()));
+        BigInteger chrMinus = getChrBalance().subtract(chrGameCoinK.divide(gameCoinInt));
         Map balanceMap = new HashMap();
-        balanceMap.put("chrBalance", chrBalance.get());
-        balanceMap.put("gameCoinBalance", gameCoinBalance.get());
+        balanceMap.put("chrBalance", getChrBalance());
+        balanceMap.put("gameCoinBalance", getGameCoinBalance());
         balanceMap.put("gameCoinAdd", Integer.parseInt(map.get("value").toString()));
         balanceMap.put("chrMinus", chrMinus);
         return new ResponseEntity(balanceMap);
     }
 
-    public static Double getDecimal18(String amountStr) {
+    public static BigInteger getDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 18)));
         String longStr = amount.toPlainString().replaceAll("(0)+$", "");
-        var ret = Double.parseDouble(longStr);
+        var ret = new BigInteger(longStr);
         return ret;
     }
 
-    public static Double toDecimal18(String amountStr) {
+    public static BigInteger toDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 18)));
         String longStr = amount.toPlainString();
-        var ret = Double.parseDouble(longStr);
+        var ret = new BigInteger(longStr);
         return ret;
     }
 
