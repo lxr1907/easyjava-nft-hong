@@ -334,8 +334,9 @@ public class KlaySCNController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
+        BigInteger payChrValue = toDecimal18(map.get("value").toString());
         BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
-        BigInteger chrBalanceInt = getChrBalance().add(toDecimal18(map.get("value").toString()));
+        BigInteger chrBalanceInt = getChrBalance().add(payChrValue);
         BigInteger gameCoinMinus = getGameCoinBalance().subtract(chrGameCoinK.divide(chrBalanceInt).add(new BigInteger("1")));
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
@@ -350,8 +351,9 @@ public class KlaySCNController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
+        BigInteger payGameCoinValue = toDecimal6(map.get("value").toString());
         BigInteger chrGameCoinK = getChrBalance().multiply(getGameCoinBalance());
-        BigInteger gameCoinInt = getGameCoinBalance().add(new BigInteger(map.get("value").toString()));
+        BigInteger gameCoinInt = getGameCoinBalance().add(payGameCoinValue);
         BigInteger chrMinus = getChrBalance().subtract(chrGameCoinK.divide(gameCoinInt).add(new BigInteger("1")));
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
