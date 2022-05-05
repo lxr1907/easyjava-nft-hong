@@ -388,7 +388,11 @@ public class KlaySCNController {
 
     public static String toDecimal5(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 5)));
-        return amount.toPlainString();
+        String ret = amount.toPlainString();
+        if (ret.contains(".")) {
+            ret = ret.replaceAll("(0)+$", "");
+        }
+        return ret;
     }
 
     public static void main(String[] args) {
@@ -404,5 +408,6 @@ public class KlaySCNController {
 
         logger.debug(getDecimal18("1003000000000000000"));
         logger.debug(toDecimal18("1.00123"));
+        logger.debug("a".contains(".") + "");
     }
 }
