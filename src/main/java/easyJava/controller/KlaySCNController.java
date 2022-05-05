@@ -387,7 +387,13 @@ public class KlaySCNController {
 
     public static String getDecimal6(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 6)));
-        String longStr = amount.toPlainString().replaceAll("(0)+$", "");
+        String longStr = amount.toPlainString();
+        if (longStr.contains(".")) {
+            longStr = longStr.replaceAll("(0)+$", "");
+        }
+        if (longStr.endsWith(".")) {
+            longStr = longStr.substring(0, longStr.length() - 1);
+        }
         return longStr;
     }
 
