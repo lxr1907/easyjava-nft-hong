@@ -340,7 +340,7 @@ public class KlaySCNController {
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getDecimal18(getChrBalance().toString()));
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
-        balanceMap.put("chrAdd", new BigInteger(map.get("value").toString()));
+        balanceMap.put("chrAdd", map.get("value").toString());
         balanceMap.put("gameCoinMinus", gameCoinMinus);
         return new ResponseEntity(balanceMap);
     }
@@ -356,19 +356,18 @@ public class KlaySCNController {
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getDecimal18(getChrBalance().toString()));
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
-        balanceMap.put("gameCoinAdd", Integer.parseInt(map.get("value").toString()));
+        balanceMap.put("gameCoinAdd", map.get("value").toString());
         balanceMap.put("chrMinus", getDecimal18(chrMinus.toString()));
         return new ResponseEntity(balanceMap);
     }
 
-    public static BigInteger getDecimal18(Double d) {
+    public static String getDecimal18(Double d) {
         BigDecimal amount = BigDecimal.valueOf(d).divide(BigDecimal.valueOf(Math.pow(10, 18)));
         String longStr = amount.toPlainString().replaceAll("(0)+$", "");
-        var ret = new BigInteger(longStr);
-        return ret;
+        return longStr;
     }
 
-    public static BigInteger getDecimal18(String amountStr) {
+    public static String getDecimal18(String amountStr) {
         return getDecimal18(Double.parseDouble(amountStr));
     }
 
