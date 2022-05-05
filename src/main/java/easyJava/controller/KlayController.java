@@ -157,7 +157,7 @@ public class KlayController {
         SingleKeyring feePayer = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
         String feePayerAddress = executor.toAccount().getAddress();
         caver.wallet.add(executor);
-        if (!feePayerAddress.equals(fromAddress)) {
+        if (!caver.wallet.isExisted(feePayerAddress)) {
             caver.wallet.add(feePayer);
         }
         try {
