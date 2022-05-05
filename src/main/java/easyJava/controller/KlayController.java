@@ -157,16 +157,16 @@ public class KlayController {
         SingleKeyring feePayer = KeyringFactory.createFromPrivateKey(SYSTEM_PRIVATE);
         String feePayerAddress = executor.toAccount().getAddress();
         caver.wallet.add(executor);
+        SendOptions sendOptions = new SendOptions();
         if (!privateKey.equals(SYSTEM_PRIVATE)) {
             caver.wallet.add(feePayer);
+            sendOptions.setFeeDelegation(true);
+            sendOptions.setFeePayer(SYSTEM_ADDRESS);
         }
         try {
             Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
 
-            SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(executor.getAddress());
-            sendOptions.setFeeDelegation(true);
-            sendOptions.setFeePayer(SYSTEM_ADDRESS);
             sendOptions.setGas(gas);
             TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transfer")
                     .send(Arrays.asList(toAddress, value), sendOptions);
