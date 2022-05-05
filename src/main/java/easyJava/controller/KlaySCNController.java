@@ -110,10 +110,10 @@ public class KlaySCNController {
         //Send a transaction to the klaytn blockchain platform (Klaytn)
         Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).send();
         if (result.hasError()) {
-            logger.error("sendingKLAY 失败:" + result.getError().getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
+            logger.error("sendingSCN 失败:" + result.getError().getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
             throw new RuntimeException(result.getError().getMessage());
         }
-        logger.info("sendingKLAY :" + result.getResult() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
+        logger.info("sendingSCN :" + result.getResult() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
         //Check transaction receipt.
         TransactionReceiptProcessor transactionReceiptProcessor = new PollingTransactionReceiptProcessor(caver, 1000, 15);
         TransactionReceipt.TransactionReceiptData transactionReceipt = transactionReceiptProcessor.waitForTransactionReceipt(result.getResult());
@@ -167,9 +167,11 @@ public class KlaySCNController {
             return new ResponseEntity(400, "address不属于自己！");
         }
 
-        String value = "";
+        String chrValue = "";
+        String scnValue = "";
         try {
-            value = toDecimal18(map.get("value").toString());
+            chrValue = toDecimal18(map.get("value").toString());
+            scnValue = toDecimal5(map.get("value").toString());
         } catch (Exception e) {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
@@ -178,7 +180,7 @@ public class KlaySCNController {
             String encrypt_key = useWallet.get("encrypt_key").toString();
             String encrypted_private = useWallet.get("encrypted_private").toString();
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
-            KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, value);
+            KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, chrValue);
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
             return new ResponseEntity();
@@ -186,7 +188,7 @@ public class KlaySCNController {
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                    , map.get("address").toString(), value);
+                    , map.get("address").toString(), scnValue);
         } catch (Exception e) {
             logger.error("send scn error!", e);
         }
@@ -238,9 +240,11 @@ public class KlaySCNController {
         if (!myWallet) {
             return new ResponseEntity(400, "address不属于自己！");
         }
-        String value = "";
+        String chrValue = "";
+        String scnValue = "";
         try {
-            value = toDecimal18(map.get("value").toString());
+            chrValue = toDecimal18(map.get("value").toString());
+            scnValue = toDecimal5(map.get("value").toString());
         } catch (Exception e) {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
@@ -252,13 +256,13 @@ public class KlaySCNController {
             String encrypted_private = useWallet.get("encrypted_private").toString();
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
             result = sendingSCN(walletPrivate
-                    , KlayController.SWAP_ADDRESS, value);
+                    , KlayController.SWAP_ADDRESS, scnValue);
         } catch (Exception e) {
             logger.error("send scn error!", e);
         }
         //再发放chr
         try {
-            KlayController.sendingCHR(useWallet.get("address").toString(), value);
+            KlayController.sendingCHR(useWallet.get("address").toString(), chrValue);
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
             return new ResponseEntity();
@@ -280,7 +284,7 @@ public class KlaySCNController {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
                     , map.get("address").toString(), map.get("value").toString());
         } catch (Exception e) {
-            logger.error("发送sendingKLAY失败！", e);
+            logger.error("发送sending scn失败！", e);
         }
         return new ResponseEntity(result);
     }
@@ -290,7 +294,8 @@ public class KlaySCNController {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
-        var result = getBalance(map.get("address").toString());
+        var result = getBalance(map.get("address").toString()).toString();
+        result = getDecimal5(result);
         return new ResponseEntity(result);
     }
 
@@ -373,6 +378,16 @@ public class KlaySCNController {
 
     public static String toDecimal18(String amountStr) {
         BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 18)));
+        return amount.toPlainString();
+    }
+
+    public static String getDecimal5(String amountStr) {
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 5)));
+        return amount.toPlainString().replaceAll("(0)+$", "");
+    }
+
+    public static String toDecimal5(String amountStr) {
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 5)));
         return amount.toPlainString();
     }
 
