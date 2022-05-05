@@ -337,7 +337,7 @@ public class KlaySCNController {
         if (map.get("value").toString().contains(".")) {
             return new ResponseEntity(400, "value不能包含小数点");
         }
-        BigInteger payChrValue = toDecimal18(map.get("value").toString());
+        BigInteger payChrValue = new BigInteger(map.get("value").toString());
         BigInteger chrBalance = getChrBalance();
         BigInteger gameCoinBalance = getGameCoinBalance();
         String gameCoinMinus = abSwap(chrBalance, gameCoinBalance, payChrValue);
@@ -357,7 +357,7 @@ public class KlaySCNController {
         if (map.get("value").toString().contains(".")) {
             return new ResponseEntity(400, "value不能包含小数点");
         }
-        BigInteger payGameCoinValue = toDecimal6(map.get("value").toString());
+        BigInteger payGameCoinValue = new BigInteger(map.get("value").toString());
         BigInteger chrBalance = getChrBalance();
         BigInteger gameCoinBalance = getGameCoinBalance();
 
@@ -407,23 +407,6 @@ public class KlaySCNController {
         return amount;
     }
 
-    /**
-     * 返回除以10的6次方后，带小数点的字符串
-     *
-     * @param amountStr
-     * @return
-     */
-    public static String getDecimal6(String amountStr) {
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 6)));
-        String longStr = amount.toPlainString();
-        if (longStr.contains(".")) {
-            longStr = longStr.replaceAll("(0)+$", "");
-        }
-        if (longStr.endsWith(".")) {
-            longStr = longStr.substring(0, longStr.length() - 1);
-        }
-        return longStr;
-    }
 
     public static BigInteger toDecimal6(String amountStr) {
         BigInteger amount = new BigInteger(amountStr).multiply(new BigInteger("1000000"));
