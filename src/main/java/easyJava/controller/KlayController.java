@@ -31,7 +31,6 @@ import org.web3j.crypto.CipherException;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -152,7 +151,7 @@ public class KlayController {
      * @param toAddress
      * @param value
      */
-    public static void sendingCHR(String privateKey, String toAddress, BigInteger value) {
+    public static TransactionReceipt.TransactionReceiptData sendingCHR(String privateKey, String toAddress, BigInteger value) {
         logger.info("---------start sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
         Caver caver = new Caver(Klay_HOST);
         SingleKeyring executor = KeyringFactory.createFromPrivateKey(privateKey);
@@ -166,12 +165,13 @@ public class KlayController {
             sendOptions.setFeeDelegation(true);
             sendOptions.setFeePayer(SYSTEM_ADDRESS);
         }
+        TransactionReceipt.TransactionReceiptData receipt = null;
         try {
             Contract contract = new Contract(caver, KlayContractController.ABI, KLAY_CHR_ADDRESS);
 
             sendOptions.setFrom(executor.getAddress());
             sendOptions.setGas(gas);
-            TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("transfer")
+            receipt = contract.getMethod("transfer")
                     .send(Arrays.asList(toAddress, value), sendOptions);
             logger.info("------sendingCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
         } catch (Exception e) {
@@ -179,6 +179,7 @@ public class KlayController {
             throw new RuntimeException(e.getMessage());
         }
         logger.info("---------end sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
+        return receipt;
     }
 
     public static BigInteger balanceOfCHR(String toAddress) {

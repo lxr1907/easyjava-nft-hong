@@ -189,10 +189,11 @@ public class KlaySCNController {
             String encrypt_key = useWallet.get("encrypt_key").toString();
             String encrypted_private = useWallet.get("encrypted_private").toString();
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
-            KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, chrValue);
+            var chrResult =
+                    KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, chrValue);
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
-            return new ResponseEntity();
+            return new ResponseEntity(400, "chr支付失败：" + e.getMessage());
         }
         TransactionReceipt.TransactionReceiptData result = null;
         try {
@@ -200,6 +201,7 @@ public class KlaySCNController {
                     , map.get("address").toString(), gamecoinValue);
         } catch (Exception e) {
             logger.error("send scn error!", e);
+            return new ResponseEntity(400, "chr支付后，发送gamecoin失败：" + e.getMessage());
         }
         return new ResponseEntity(result);
     }
@@ -279,14 +281,15 @@ public class KlaySCNController {
             result = sendingSCN(walletPrivate
                     , KlayController.SWAP_ADDRESS, scnValue);
         } catch (Exception e) {
-            logger.error("send scn error!", e);
+            logger.error("send gamecoin error!", e);
+            return new ResponseEntity(400, "gamecoin支付，提现失败:" + e.getMessage());
         }
         //再发放chr
         try {
             KlayController.sendingCHR(useWallet.get("address").toString(), chrValue);
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
-            return new ResponseEntity();
+            return new ResponseEntity(400, "gamecoin支付后，发送chr失败:" + e.getMessage());
         }
         return new ResponseEntity(result);
     }
