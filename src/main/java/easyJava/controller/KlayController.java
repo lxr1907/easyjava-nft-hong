@@ -173,9 +173,15 @@ public class KlayController {
             sendOptions.setGas(gas);
             receipt = contract.getMethod("transfer")
                     .send(Arrays.asList(toAddress, value), sendOptions);
-            logger.info("------sendingCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
+            String error = receipt.getTxError();
+            if (error == null) {
+                logger.info("------sendingCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
+            } else {
+                logger.error("------sendingCHR ret error:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
+                throw new RuntimeException("sendingCHR ret error");
+            }
         } catch (Exception e) {
-            logger.error("sendingCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
+            logger.error("sendingCHR ret error:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
             throw new RuntimeException(e.getMessage());
         }
         logger.info("---------end sendingCHR,to:" + toAddress + ",amount:" + value + "-----");
