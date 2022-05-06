@@ -164,16 +164,23 @@ public class KlaySCNController {
         if (!myWallet) {
             return new ResponseEntity(400, "address不属于自己！");
         }
-
-        Double v = Double.parseDouble(map.get("value").toString());
-        if (v.compareTo(Double.valueOf(0.001)) < 1) {
-            return new ResponseEntity(400, "value必须大于0.001");
+        BigInteger v = BigInteger.ZERO;
+        try {
+            v = new BigInteger(map.get("value").toString());
+        } catch (Exception e) {
+            return new ResponseEntity(400, "value不合法，必须是整数");
+        }
+        if (v.compareTo(new BigInteger("1")) < 0) {
+            return new ResponseEntity(400, "value必须大于等于1");
         }
         BigInteger chrValue = null;
-        BigInteger scnValue = null;
+        BigInteger gamecoinValue = null;
         try {
-            chrValue = toDecimal18(map.get("value").toString());
-            scnValue = toGameCoin(map.get("value").toString());
+            chrValue = toDecimal18(v);
+            gamecoinValue = chrToGameCoinPrice(v);
+            if (gamecoinValue.compareTo(new BigInteger("1")) < 0) {
+                return new ResponseEntity(400, "能兑换到的gamecoin小于1");
+            }
         } catch (Exception e) {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
@@ -190,7 +197,7 @@ public class KlaySCNController {
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                    , map.get("address").toString(), scnValue);
+                    , map.get("address").toString(), gamecoinValue);
         } catch (Exception e) {
             logger.error("send scn error!", e);
         }
@@ -242,20 +249,28 @@ public class KlaySCNController {
         if (!myWallet) {
             return new ResponseEntity(400, "address不属于自己！");
         }
-        Double v = Double.parseDouble(map.get("value").toString());
-        if (Double.valueOf(100000.0).compareTo(v) > 1) {
-            return new ResponseEntity(400, "value必须大于等于100000");
+        BigInteger v = BigInteger.ZERO;
+        try {
+            v = new BigInteger(map.get("value").toString());
+        } catch (Exception e) {
+            return new ResponseEntity(400, "value不合法，必须是整数");
+        }
+        if (v.compareTo(new BigInteger("1")) < 0) {
+            return new ResponseEntity(400, "value必须大于等于1");
         }
         BigInteger chrValue = null;
         BigInteger scnValue = null;
         try {
-            chrValue = toDecimal18(toChr(map.get("value").toString()));
-            scnValue = BigInteger.valueOf(Long.parseLong(map.get("value").toString()));
+            chrValue = toDecimal18(gameCoinToChrPrice(v));
+            if (chrValue.compareTo(new BigInteger("1")) < 0) {
+                return new ResponseEntity(400, "能兑换到的chr小于1");
+            }
+            scnValue = v;
         } catch (Exception e) {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
         }
-        //先扣除scn
+        //先扣除gamecoin
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             String encrypt_key = useWallet.get("encrypt_key").toString();
@@ -338,9 +353,7 @@ public class KlaySCNController {
             return new ResponseEntity(400, "value不能包含小数点");
         }
         BigInteger payChrValue = new BigInteger(map.get("value").toString());
-        BigInteger chrBalance = getChrBalance();
-        BigInteger gameCoinBalance = getGameCoinBalance();
-        String gameCoinMinus = abSwap(chrBalance, gameCoinBalance, payChrValue);
+        BigInteger gameCoinMinus = chrToGameCoinPrice(payChrValue);
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
@@ -358,10 +371,8 @@ public class KlaySCNController {
             return new ResponseEntity(400, "value不能包含小数点");
         }
         BigInteger payGameCoinValue = new BigInteger(map.get("value").toString());
-        BigInteger chrBalance = getChrBalance();
-        BigInteger gameCoinBalance = getGameCoinBalance();
 
-        String chrMinus = abSwap(gameCoinBalance, chrBalance, payGameCoinValue);
+        BigInteger chrMinus = gameCoinToChrPrice(payGameCoinValue);
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
         balanceMap.put("gameCoinBalance", getGameCoinBalance());
@@ -370,13 +381,25 @@ public class KlaySCNController {
         return new ResponseEntity(balanceMap);
     }
 
-    public static String abSwap(BigInteger a, BigInteger b, BigInteger payAValue) {
+    public static BigInteger chrToGameCoinPrice(BigInteger value) {
+        BigInteger chrBalance = getChrBalance();
+        BigInteger gameCoinBalance = getGameCoinBalance();
+        return abSwap(chrBalance, gameCoinBalance, value);
+    }
+
+    public static BigInteger gameCoinToChrPrice(BigInteger value) {
+        BigInteger chrBalance = getChrBalance();
+        BigInteger gameCoinBalance = getGameCoinBalance();
+        return abSwap(gameCoinBalance, chrBalance, value);
+    }
+
+    public static BigInteger abSwap(BigInteger a, BigInteger b, BigInteger payAValue) {
         BigInteger k = a.multiply(b);
         BigInteger aAfterAdd = a.add(payAValue);
         BigInteger divided = k.divide(aAfterAdd).add(new BigInteger("1"));
         BigInteger bMinus = b.subtract(divided);
         logger.info("k:" + k + "," + "aAfterAdd:" + aAfterAdd + "," + "divided:" + divided + "," + "bMinus:" + bMinus + ",");
-        return bMinus.toString();
+        return bMinus;
     }
 
     /**
@@ -402,6 +425,11 @@ public class KlaySCNController {
         return amount;
     }
 
+    public static BigInteger toDecimal18(BigInteger amountStr) {
+        BigInteger amount = amountStr.multiply(new BigInteger("1000000000000000000"));
+        return amount;
+    }
+
     public static BigInteger getDecimal6(BigInteger amountStr) {
         BigInteger amount = amountStr.divide(new BigInteger("1000000"));
         return amount;
@@ -413,42 +441,6 @@ public class KlaySCNController {
         return amount;
     }
 
-    /**
-     * 比例1 chr兑换10000个gamecoin
-     *
-     * @param amountStr
-     * @return
-     */
-    public static BigInteger toGameCoin(String amountStr) {
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).multiply(BigDecimal.valueOf(Math.pow(10, 5)));
-        String longStr = amount.toPlainString();
-        if (longStr.contains(".")) {
-            longStr = longStr.replaceAll("(0)+$", "");
-        }
-        if (longStr.endsWith(".")) {
-            longStr = longStr.substring(0, longStr.length() - 1);
-        }
-        BigInteger ret = BigInteger.valueOf(Long.parseLong(longStr));
-        return ret;
-    }
-
-    /**
-     * 比例1 chr兑换10000个gamecoin
-     *
-     * @param amountStr
-     * @return
-     */
-    public static String toChr(String amountStr) {
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(amountStr)).divide(BigDecimal.valueOf(Math.pow(10, 5)));
-        String ret = amount.toPlainString();
-        if (ret.contains(".")) {
-            ret = ret.replaceAll("(0)+$", "");
-        }
-        if (ret.endsWith(".")) {
-            ret = ret.substring(0, ret.length() - 1);
-        }
-        return ret;
-    }
 
     public static void main(String[] args) {
 //        try {
@@ -469,9 +461,14 @@ public class KlaySCNController {
 //            ret = ret.substring(0, ret.length() - 1);
 //        }
 //        String ret = toDecimal18(toChr("100000"));
-        String ret = abSwap(new BigInteger("268407048"), new BigInteger("72339069039"), new BigInteger("1"));
-        logger.debug(ret);
-        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
-        logger.debug(ret);
+//        BigInteger ret = abSwap(new BigInteger("268407048"), new BigInteger("72339069039"), new BigInteger("1"));
+//        logger.debug(ret.toString());
+//        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
+//        logger.debug(ret.toString());
+        try {
+            new BigInteger("0.1");
+        } catch (Exception e) {
+            logger.error("", e);
+        }
     }
 }
