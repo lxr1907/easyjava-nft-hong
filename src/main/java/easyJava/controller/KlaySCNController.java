@@ -48,7 +48,8 @@ public class KlaySCNController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    public static final String MY_SCN_HOST = "http://13.213.28.145:7551";//http://172.31.22.236:7551
+    public static final String MY_SCN_HOST = "http://13.213.28.145:7551";
+    public static final String MY_SCN_WS_HOST = "ws://13.213.28.145:7552";//http://172.31.22.236:7551
     public static final String MY_KLAY_HOST = "http://13.213.28.145:8551";
 
     public static final String KLAY_SCN_ADDRESS = "0xD3CFb75cE8Ed4Cbe10e7E343676a4788eC148d50";
