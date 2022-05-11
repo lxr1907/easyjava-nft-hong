@@ -257,7 +257,23 @@ public class KlaySCNExploreController {
         }
         return val;
     }
-
+    @RequestMapping("/scnExplore/scanManual")
+    public ResponseEntity<?> scanManual(@RequestParam Map<String, Object> map) {
+        if (map.get("blockNum") == null || map.get("blockNum").toString().length() == 0) {
+            return new ResponseEntity(400, "blockNum不能为空！");
+        }
+        if (map.get("endBlock") == null || map.get("endBlock").toString().length() == 0) {
+            return new ResponseEntity(400, "endBlock不能为空！");
+        }
+        var retList = doScanSCN(Long.parseLong(map.get("blockNum").toString()),
+                Long.parseLong(map.get("endBlock").toString()));
+        logger.info("retList size: " + retList.size());
+        retList.forEach(entity -> {
+            entity.put("tableName", SNC_TX_TABLE);
+            baseDao.insertIgnoreBase(entity);
+        });
+        return new ResponseEntity(retList);
+    }
     public static final String SNC_TX_TABLE = "scn_scan_tx";
 
     @Scheduled(cron = "*/30 * * * * ?")
@@ -288,7 +304,7 @@ public class KlaySCNExploreController {
         return new ResponseEntity();
     }
 
-    public synchronized List<Map> doScanSCN(long blockNum, long endBlock) {
+    public static synchronized List<Map> doScanSCN(long blockNum, long endBlock) {
         List<Map> list = new ArrayList<>();
         for (long block = blockNum; block < endBlock; block++) {
             int count = getTransactionCountByNumber(block);
@@ -342,8 +358,8 @@ public class KlaySCNExploreController {
 //                if (trans != null)
 //                    logger.info(JSON.toJSONString(trans));
 //            });
-
-            var rest = getTransactionByBlockNumberAndIndex(1297882, 0);
+            var rest = doScanSCN(1361141, 1361142);
+//            var rest = getTransactionByBlockNumberAndIndex(1297882, 0);
             logger.info(JSON.toJSONString(rest));
         } catch (Exception e) {
             logger.error("", e);
