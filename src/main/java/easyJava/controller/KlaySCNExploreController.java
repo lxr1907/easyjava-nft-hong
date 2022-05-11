@@ -109,9 +109,6 @@ public class KlaySCNExploreController {
 
     @RequestMapping("/scnExplore/info")
     public ResponseEntity<?> info(@RequestParam Map<String, Object> map) {
-        if (map.get("address") == null || map.get("address").toString().length() == 0) {
-            return new ResponseEntity(400, "address不能为空！");
-        }
         var result = getScnInfo();
         return new ResponseEntity(result);
     }
