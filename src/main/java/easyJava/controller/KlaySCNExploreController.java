@@ -17,6 +17,7 @@ import com.klaytn.caver.wallet.keyring.KeyStore;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
+import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,6 +258,7 @@ public class KlaySCNExploreController {
         }
         return val;
     }
+
     @RequestMapping("/scnExplore/scanManual")
     public ResponseEntity<?> scanManual(@RequestParam Map<String, Object> map) {
         if (map.get("blockNum") == null || map.get("blockNum").toString().length() == 0) {
@@ -274,6 +276,24 @@ public class KlaySCNExploreController {
         });
         return new ResponseEntity(retList);
     }
+
+    @RequestMapping("/scnExplore/transactions")
+    public ResponseEntity<?> transactions(@RequestParam Map<String, Object> map) {
+        if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
+            return new ResponseEntity(400, "pageSize不能为空！");
+        }
+        if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
+            return new ResponseEntity(400, "pageNo不能为空！");
+        }
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
+        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        Map param = new HashMap<>();
+        param.put("tableName", SNC_TX_TABLE);
+        var retList = baseDao.selectBaseList(param, baseModel);
+        return new ResponseEntity(retList);
+    }
+
     public static final String SNC_TX_TABLE = "scn_scan_tx";
 
     @Scheduled(cron = "*/30 * * * * ?")
