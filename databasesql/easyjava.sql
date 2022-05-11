@@ -110,3 +110,29 @@ CREATE TABLE `user_log` (
   `type` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+-- 查询服务链的交易，定期保存入库
+CREATE TABLE nft.scn_scan_tx (
+	hash varchar(200) NOT NULL,
+	blockHash varchar(200) NULL,
+	blockNumber varchar(100) NULL,
+	codeFormat varchar(100) NULL,
+	feePayer varchar(100) NULL,
+	feeRatio varchar(100) NULL,
+	`from` varchar(100) NULL,
+	gas varchar(100) NULL,
+	gasPrice varchar(100) NULL,
+	`key` varchar(100) NULL,
+	`input` varchar(100) NULL,
+	nonce varchar(100) NULL,
+	senderTxHash varchar(100) NULL,
+	`to` varchar(100) NULL,
+	transactionIndex varchar(100) NULL,
+	`type` varchar(100) NULL,
+	typeInt varchar(100) NULL,
+	value varchar(100) NULL,
+	chainID varchar(100) NULL,
+	CONSTRAINT scn_scan_tx_PK PRIMARY KEY (hash)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_bin;

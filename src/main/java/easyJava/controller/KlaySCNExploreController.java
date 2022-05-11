@@ -79,11 +79,7 @@ public class KlaySCNExploreController {
         //Add to caver wallet.
         caver.wallet.add(keyring);
         //Create a value transfer transaction
-        ValueTransfer valueTransfer = caver.transaction.valueTransfer.create(
-                TxPropertyBuilder.valueTransfer()
-                        .setFrom(keyring.getAddress())
-                        .setTo(toAddress).setValue(value)
-                        .setGas(KlaySCNController.gas));
+        ValueTransfer valueTransfer = caver.transaction.valueTransfer.create(TxPropertyBuilder.valueTransfer().setFrom(keyring.getAddress()).setTo(toAddress).setValue(value).setGas(KlaySCNController.gas));
         //Sign to the transaction
         valueTransfer.sign(keyring);
         //Send a transaction to the klaytn blockchain platform (Klaytn)
@@ -127,8 +123,7 @@ public class KlaySCNExploreController {
         if (map.get("index") == null || map.get("index").toString().length() == 0) {
             return new ResponseEntity(400, "index不能为空！");
         }
-        var result = getTransactionByBlockNumberAndIndex(Long.parseLong(map.get("blockNumber").toString()),
-                Long.parseLong(map.get("index").toString()));
+        var result = getTransactionByBlockNumberAndIndex(Long.parseLong(map.get("blockNumber").toString()), Long.parseLong(map.get("index").toString()));
         return new ResponseEntity(result);
     }
 
@@ -269,23 +264,50 @@ public class KlaySCNExploreController {
     public ResponseEntity<?> scanSCN() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
 
-        List<Map> retList = doScanSCN();
+        logger.info("scanSCN begin ");
+
+        Long blockNum = (Long) redisTemplate.opsForValue().get(SNC_TX_TABLE + ":block");
+        if (blockNum == null) {
+            blockNum = 0L;
+        } else {
+            logger.info("doScanSCN blockNum in redis :" + blockNum);
+        }
+        long blockNumNow = getBlockNumberNow();
+        long endBlock = blockNum + 100;
+        if (blockNumNow < endBlock) {
+            endBlock = blockNumNow;
+        }
+        List<Map> retList = doScanSCN(blockNum, endBlock);
+        logger.info("retList size: " + retList.size());
         retList.forEach(map -> {
             map.put("tableName", SNC_TX_TABLE);
             baseDao.insertIgnoreBase(map);
         });
+        logger.info("doScanSCN blockNum save to redis :" + endBlock);
+        redisTemplate.opsForValue().set(SNC_TX_TABLE + ":block", endBlock);
         return new ResponseEntity();
     }
 
-    public List<Map> doScanSCN() {
+    public synchronized List<Map> doScanSCN(long blockNum, long endBlock) {
         List<Map> list = new ArrayList<>();
-        Integer blockNum = (Integer) redisTemplate.opsForValue().get(SNC_TX_TABLE + ":block");
-        if (blockNum == null) {
-            blockNum = 0;
-        }
-        int count = getTransactionCountByNumber(blockNum);
-        if (count != 0) {
-            var rest = getTransactionByBlockNumberAndIndex(blockNum, 0);
+        for (long block = blockNum; block < endBlock; block++) {
+            int count = getTransactionCountByNumber(block);
+            if (count != 0) {
+                for (int i = 0; i < count; i++) {
+                    var rest = getTransactionByBlockNumberAndIndex(blockNum, i);
+                    Transaction.TransactionData data = rest.getResult();
+                    String json = JSON.toJSONString(data);
+                    Map row = JSON.parseObject(json);
+                    row.remove("feePayerSignatures");
+                    row.remove("maxPriorityFeePerGas");
+                    row.remove("maxFeePerGas");
+                    row.remove("humanReadable");
+                    row.remove("signatures");
+                    row.remove("accessList");
+                    logger.info("doScanSCN add row :" + json);
+                    list.add(row);
+                }
+            }
         }
         return list;
     }
