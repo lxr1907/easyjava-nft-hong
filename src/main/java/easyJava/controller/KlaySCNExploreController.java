@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +32,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ public class KlaySCNExploreController {
     BaseDao baseDao;
     @Autowired
     UserController userController;
+    public static Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -137,7 +140,6 @@ public class KlaySCNExploreController {
 
     public static Map getTransactionLatestExist() {
         Map retMap = new HashMap();
-        Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
         var blockNumberReq = caver.rpc.klay.getBlockNumber();
         BigInteger blockNumberNow = new BigInteger("0");
         try {
@@ -169,7 +171,6 @@ public class KlaySCNExploreController {
 
     public static Transaction getTransactionByBlockNumberAndIndex(long blockNumber, long index) {
         Transaction ret = new Transaction();
-        Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
         var getTransactionByBlockNumberAndIndex = caver.rpc.klay.getTransactionByBlockNumberAndIndex(blockNumber, index);
         try {
             ret = getTransactionByBlockNumberAndIndex.send();
@@ -177,6 +178,28 @@ public class KlaySCNExploreController {
             e.printStackTrace();
         }
         return ret;
+    }
+
+    public static int getTransactionCountByNumber(long blockNumber) {
+        BigInteger ret = new BigInteger("0");
+        var getTransactionCountByNumber = caver.rpc.klay.getTransactionCountByNumber(blockNumber);
+        try {
+            ret = getTransactionCountByNumber.send().getValue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ret.intValue();
+    }
+
+    public static long getBlockNumberNow() {
+        var blockNumberReq = caver.rpc.klay.getBlockNumber();
+        BigInteger blockNumberNow = new BigInteger("0");
+        try {
+            blockNumberNow = blockNumberReq.send().getValue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return blockNumberNow.longValue();
     }
 
     public static Map getScnInfo() {
@@ -189,35 +212,16 @@ public class KlaySCNExploreController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        var blockNumberReq = caver.rpc.klay.getBlockNumber();
-        BigInteger blockNumberNow = new BigInteger("0");
-        try {
-            blockNumberNow = blockNumberReq.send().getValue();
-            retMap.put("blockNumber", blockNumberNow);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        var blockNumberNow = getBlockNumberNow();
+        retMap.put("blockNumber", blockNumberNow);
 
-        var getGasPrice = caver.rpc.klay.getGasPrice();
-        try {
-            var val = getGasPrice.send().getValue();
-            retMap.put("getGasPrice", val);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        var getTransactionCountByNumber = getTransactionCountByNumber(blockNumberNow);
+        retMap.put("getTransactionCountByNumber", getTransactionCountByNumber);
 
-        var getTransactionCountByNumber = caver.rpc.klay.getTransactionCountByNumber(blockNumberNow.longValue());
+        var getBlockByNumber = caver.rpc.klay.getBlockByNumber(blockNumberNow);
         try {
-            var val = getTransactionCountByNumber.send().getValue();
-            retMap.put("getTransactionCountByNumber", val);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        var getTransactionByBlockNumberAndIndex = caver.rpc.klay.getBlockByNumber(blockNumberNow.longValue());
-        try {
-            var val = getTransactionByBlockNumberAndIndex.send();
-            retMap.put("getTransactionByBlockNumberAndIndex", JSON.toJSONString(val));
+            var val = getBlockByNumber.send();
+            retMap.put("getBlockByNumber", JSON.toJSONString(val));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -259,6 +263,32 @@ public class KlaySCNExploreController {
         return val;
     }
 
+    public static final String SNC_TX_TABLE = "scn_scan_tx";
+
+    @Scheduled(cron = "*/30 * * * * ?")
+    public ResponseEntity<?> scanSCN() {
+        //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
+
+        List<Map> retList = doScanSCN();
+        retList.forEach(map -> {
+            map.put("tableName", SNC_TX_TABLE);
+            baseDao.insertIgnoreBase(map);
+        });
+        return new ResponseEntity();
+    }
+
+    public List<Map> doScanSCN() {
+        List<Map> list = new ArrayList<>();
+        Integer blockNum = (Integer) redisTemplate.opsForValue().get(SNC_TX_TABLE + ":block");
+        if (blockNum == null) {
+            blockNum = 0;
+        }
+        int count = getTransactionCountByNumber(blockNum);
+        if (count != 0) {
+            var rest = getTransactionByBlockNumberAndIndex(blockNum, 0);
+        }
+        return list;
+    }
 
     public static void main(String[] args) {
 //
