@@ -327,7 +327,7 @@ public class KlaySCNExploreController {
             int count = getTransactionCountByNumber(block);
             if (count != 0) {
                 for (int i = 0; i < count; i++) {
-                    var rest = getTransactionByBlockNumberAndIndex(blockNum, i);
+                    var rest = getTransactionByBlockNumberAndIndex(block, i);
                     if (rest.hasError()) {
                         logger.error(JSON.toJSONString(rest.getError()));
                     }
