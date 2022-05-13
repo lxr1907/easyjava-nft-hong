@@ -293,7 +293,7 @@ public class KlaySCNExploreController {
 
     public static final String SNC_TX_TABLE = "scn_scan_tx";
 
-    @Scheduled(cron = "*/30 * * * * ?")
+    @Scheduled(cron = "*/5 * * * * ?")
     public ResponseEntity<?> scanSCN() {
         //这个方法要在代码里写个定时器， 每隔 5或10秒 扫一次
 
