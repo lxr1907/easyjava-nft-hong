@@ -469,6 +469,10 @@ public class KlayController {
         return new ResponseEntity(contractDeploy());
     }
 
+    /**
+     * 部署合约
+     * @return
+     */
     public static String contractDeploy() {
         Caver caver = new Caver(Klay_HOST);
         Contract contract = null;
