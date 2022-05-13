@@ -329,21 +329,18 @@ public class KlaySCNExploreController {
                 for (int i = 0; i < count; i++) {
                     var rest = getTransactionByBlockNumberAndIndex(blockNum, i);
                     Transaction.TransactionData data = rest.getResult();
+                    if (data == null) {
+                        break;
+                    }
                     String json = JSON.toJSONString(data);
                     logger.info("doScanSCN add row :" + json);
                     Map<String, Object> row = JSON.parseObject(json, HashMap.class);
-                    if (row.containsKey("feePayerSignatures"))
-                        row.remove("feePayerSignatures");
-                    if (row.containsKey("maxPriorityFeePerGas"))
-                        row.remove("maxPriorityFeePerGas");
-                    if (row.containsKey("maxFeePerGas"))
-                        row.remove("maxFeePerGas");
-                    if (row.containsKey("humanReadable"))
-                        row.remove("humanReadable");
-                    if (row.containsKey("signatures"))
-                        row.remove("signatures");
-                    if (row.containsKey("accessList"))
-                        row.remove("accessList");
+                    row.remove("feePayerSignatures");
+                    row.remove("maxPriorityFeePerGas");
+                    row.remove("maxFeePerGas");
+                    row.remove("humanReadable");
+                    row.remove("signatures");
+                    row.remove("accessList");
                     list.add(row);
                 }
             }
