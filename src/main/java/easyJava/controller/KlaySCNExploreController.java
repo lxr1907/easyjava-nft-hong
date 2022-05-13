@@ -323,11 +323,14 @@ public class KlaySCNExploreController {
 
     public static synchronized List<Map> doScanSCN(long blockNum, long endBlock) {
         List<Map> list = new ArrayList<>();
-        for (long block = blockNum; block < endBlock; block++) {
+        for (long block = blockNum; block <= endBlock; block++) {
             int count = getTransactionCountByNumber(block);
             if (count != 0) {
                 for (int i = 0; i < count; i++) {
                     var rest = getTransactionByBlockNumberAndIndex(blockNum, i);
+                    if (rest.hasError()) {
+                        logger.error(JSON.toJSONString(rest.getError()));
+                    }
                     Transaction.TransactionData data = rest.getResult();
                     if (data == null) {
                         break;
