@@ -33,10 +33,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -344,6 +341,8 @@ public class KlaySCNExploreController {
                     row.remove("humanReadable");
                     row.remove("signatures");
                     row.remove("accessList");
+
+                    row.put("create_time", new Date());
                     list.add(row);
                 }
             }
