@@ -79,9 +79,14 @@ public class ScanServiceImpl implements ScanService {
         map.put("apikey", apiKey);
 
         String responseStr = HttpClientUtil.httpGet(url, map, null);
-        EventList response = JSON.parseObject(responseStr, EventList.class);
+        if (responseStr.startsWith("{")) {
+            EventList response = JSON.parseObject(responseStr, EventList.class);
+            return response;
+        } else {
+            logger.error(responseStr);
+        }
+        return null;
 
-        return response;
     }
 
 
