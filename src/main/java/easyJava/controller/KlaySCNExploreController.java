@@ -305,10 +305,10 @@ public class KlaySCNExploreController {
         long blockNumNow = getBlockNumberNow();
         long endBlock = blockNum + 100;
         if (blockNumNow < endBlock) {
-            endBlock = blockNumNow-1;
+            endBlock = blockNumNow-100;
         }
         if (blockNum > blockNumNow) {
-            blockNum = blockNumNow-2;
+            blockNum = blockNumNow-100;
         }
         List<Map> retList = doScanSCN(blockNum, endBlock);
         logger.info("retList size: " + retList.size());
