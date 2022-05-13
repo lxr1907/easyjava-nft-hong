@@ -331,12 +331,18 @@ public class KlaySCNExploreController {
                     Transaction.TransactionData data = rest.getResult();
                     String json = JSON.toJSONString(data);
                     Map row = JSON.parseObject(json);
-                    row.remove("feePayerSignatures");
-                    row.remove("maxPriorityFeePerGas");
-                    row.remove("maxFeePerGas");
-                    row.remove("humanReadable");
-                    row.remove("signatures");
-                    row.remove("accessList");
+                    if (row.containsKey("feePayerSignatures"))
+                        row.remove("feePayerSignatures");
+                    if (row.containsKey("maxPriorityFeePerGas"))
+                        row.remove("maxPriorityFeePerGas");
+                    if (row.containsKey("maxFeePerGas"))
+                        row.remove("maxFeePerGas");
+                    if (row.containsKey("humanReadable"))
+                        row.remove("humanReadable");
+                    if (row.containsKey("signatures"))
+                        row.remove("signatures");
+                    if (row.containsKey("accessList"))
+                        row.remove("accessList");
                     logger.info("doScanSCN add row :" + json);
                     list.add(row);
                 }
