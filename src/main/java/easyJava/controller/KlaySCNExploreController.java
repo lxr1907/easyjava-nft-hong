@@ -17,6 +17,7 @@ import com.klaytn.caver.wallet.keyring.KeyStore;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
+import easyJava.dao.master.ScnDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import org.slf4j.Logger;
@@ -41,6 +42,8 @@ public class KlaySCNExploreController {
     private static final Logger logger = LoggerFactory.getLogger(KlaySCNExploreController.class);
     @Autowired
     BaseDao baseDao;
+    @Autowired
+    ScnDao scnDao;
     @Autowired
     UserController userController;
     public static Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
@@ -282,9 +285,8 @@ public class KlaySCNExploreController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
-        Map param = new HashMap<>();
-        param.put("tableName", SNC_TX_TABLE);
-        var retList = baseDao.selectBaseList(param, baseModel);
+        map.put("tableName", SNC_TX_TABLE);
+        var retList = scnDao.selectBaseListOr(map, baseModel);
         return new ResponseEntity(retList);
     }
 
