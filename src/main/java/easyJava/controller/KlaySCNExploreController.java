@@ -330,7 +330,8 @@ public class KlaySCNExploreController {
                     var rest = getTransactionByBlockNumberAndIndex(blockNum, i);
                     Transaction.TransactionData data = rest.getResult();
                     String json = JSON.toJSONString(data);
-                    Map row = JSON.parseObject(json);
+                    logger.info("doScanSCN add row :" + json);
+                    Map<String, Object> row = JSON.parseObject(json, HashMap.class);
                     if (row.containsKey("feePayerSignatures"))
                         row.remove("feePayerSignatures");
                     if (row.containsKey("maxPriorityFeePerGas"))
@@ -343,7 +344,6 @@ public class KlaySCNExploreController {
                         row.remove("signatures");
                     if (row.containsKey("accessList"))
                         row.remove("accessList");
-                    logger.info("doScanSCN add row :" + json);
                     list.add(row);
                 }
             }
