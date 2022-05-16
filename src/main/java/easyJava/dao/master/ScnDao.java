@@ -9,6 +9,7 @@ import java.util.Map;
 public interface ScnDao {
 
     List<Map> selectBaseListOr(@Param("map") Map map, @Param("baseModel") BaseModel baseModel);
+    Long selectBaseCountOr(@Param("map") Map map);
 
 
 }

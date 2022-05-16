@@ -18,5 +18,19 @@
         limit #{baseModel.pageSize} OFFSET #{baseModel.fromRec}
     </select>
 
+    <!--根据实体参数查询 -->
+    <select id="selectBaseCountOr" resultType="java.lang.Long">
+        select
+        count(1)
+        from ${map.tableName}
+        <where>
+            <foreach collection="map" index="key" item="value">
+                <if
+                        test="key != 'tableName' and key != 'pageSize' and key != 'pageNo' ">
+                    or `${key}` =#{value}
+                </if>
+            </foreach>
+        </where>
+    </select>
 
 </mapper>

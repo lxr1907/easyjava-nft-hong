@@ -296,6 +296,8 @@ public class KlaySCNExploreController {
             retMap.put("balance", getGameCoinBalance(map.get("to").toString()));
         }
 
+        var totalTx = scnDao.selectBaseCountOr(map);
+        retMap.put("totalTx", totalTx);
         return new ResponseEntity(retMap);
     }
 
