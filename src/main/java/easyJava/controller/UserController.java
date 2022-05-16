@@ -314,13 +314,6 @@ public class UserController {
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
-
-//        if (map.get("code") == null || map.get("code").toString().length() == 0) {
-//            return new ResponseEntity(400, "验证码不能为空！");
-//        }
-//        if (checkEmailCode(map) == 0) {
-//            return new ResponseEntity(400, "验证码错误！");
-//        }
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
@@ -343,6 +336,45 @@ public class UserController {
             wallet.remove("encrypted_private");
         });
         return new ResponseEntity(user);
+
+    }
+
+    /**
+     * 获取我邀请进来的人列表
+     */
+    @RequestMapping("/user/getMyInvites")
+    public ResponseEntity getMyInvites(@RequestHeader("token") String token, @RequestParam Map<String, Object> map) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
+            return new ResponseEntity(400, "pageSize不能为空！");
+        }
+        if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
+            return new ResponseEntity(400, "pageNo不能为空！");
+        }
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageSize(1);
+        baseModel.setPageNo(1);
+        map.clear();
+        map.put("tableName", USER_TABLE);
+        map.put("id", user.get("id"));
+        List<Map> list = baseDao.selectBaseList(map, baseModel);
+        if (list == null || list.size() == 0) {
+            return new ResponseEntity(400, "账号错误！");
+        }
+        user.remove("password");
+        Map inviteMap = new HashMap<>();
+        inviteMap.put("tableName", USER_TABLE);
+        inviteMap.put("invite_code", user.get("my_invite_code"));
+        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
+        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        List<Map> userList = baseDao.selectBaseList(inviteMap, baseModel);
+        return new ResponseEntity(userList);
 
     }
 
