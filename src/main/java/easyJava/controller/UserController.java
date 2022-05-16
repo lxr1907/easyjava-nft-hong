@@ -54,7 +54,7 @@ public class UserController {
         map.put("tableName", USER_TABLE);
         map.put("password", DigestUtils.md5Hex(map.get("password").toString()));
         map.put("my_invite_code", GenerateUtils.getRandomNickname(8));
-
+        map.put("create_time", new Date());
         try {
             Map countMap = new HashMap<>();
             countMap.put("tableName", USER_TABLE);
@@ -374,6 +374,9 @@ public class UserController {
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
         List<Map> userList = baseDao.selectBaseList(inviteMap, baseModel);
+        userList.forEach(userM -> {
+            userM.remove("password");
+        });
         return new ResponseEntity(userList);
 
     }
