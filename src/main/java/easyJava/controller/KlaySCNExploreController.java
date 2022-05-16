@@ -289,10 +289,10 @@ public class KlaySCNExploreController {
         var retList = scnDao.selectBaseListOr(map, baseModel);
         Map retMap = new HashMap();
         retMap.put("list", retList);
-        if (map.get("from") != null && map.get("from").toString().length() == 0) {
+        if (map.get("from") != null && map.get("from").toString().length() != 0) {
             retMap.put("balance", getGameCoinBalance(map.get("from").toString()));
         }
-        if (map.get("to") != null && map.get("to").toString().length() == 0) {
+        if (map.get("to") != null && map.get("to").toString().length() != 0) {
             retMap.put("balance", getGameCoinBalance(map.get("to").toString()));
         }
 
