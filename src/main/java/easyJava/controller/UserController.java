@@ -363,7 +363,7 @@ public class UserController {
         Map userQueryMap = new HashMap();
         userQueryMap.put("tableName", USER_TABLE);
         userQueryMap.put("id", user.get("id"));
-        List<Map> list = baseDao.selectBaseList(map, baseModel);
+        List<Map> list = baseDao.selectBaseList(userQueryMap, baseModel);
         if (list == null || list.size() == 0) {
             return new ResponseEntity(400, "账号错误！");
         }
