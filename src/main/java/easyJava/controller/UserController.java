@@ -360,9 +360,9 @@ public class UserController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageSize(1);
         baseModel.setPageNo(1);
-        map.clear();
-        map.put("tableName", USER_TABLE);
-        map.put("id", user.get("id"));
+        Map userQueryMap = new HashMap();
+        userQueryMap.put("tableName", USER_TABLE);
+        userQueryMap.put("id", user.get("id"));
         List<Map> list = baseDao.selectBaseList(map, baseModel);
         if (list == null || list.size() == 0) {
             return new ResponseEntity(400, "账号错误！");
