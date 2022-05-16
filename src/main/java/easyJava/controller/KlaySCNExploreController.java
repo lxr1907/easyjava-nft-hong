@@ -296,7 +296,7 @@ public class KlaySCNExploreController {
             retMap.put("balance", getGameCoinBalance(map.get("to").toString()));
         }
 
-        return new ResponseEntity(retList);
+        return new ResponseEntity(retMap);
     }
 
     public static final String SNC_TX_TABLE = "scn_scan_tx";
