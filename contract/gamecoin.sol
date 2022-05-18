@@ -21,10 +21,12 @@ contract GameCoin is ERC20, Ownable {
         address sender;
     }
     OrderEntity cheapOrder;
-    //创建所有账户余额数组
-    OrderEntity [] public   ordersArray;
-    function getOrders() public view returns (uint arr){
-        arr= ordersArray.length;
+    //出售gamecoin数组
+    OrderEntity [] public   saleOrdersArray;
+    //购买gamecoin数组
+    OrderEntity [] public   buyOrdersArray;
+    function getSaleOrders() public view returns (uint arr){
+        arr= saleOrdersArray.length;
     }
     constructor(uint256 initialSupply) ERC20("GameCoin", "gamecoin") {
         _mint(msg.sender, initialSupply * (10 ** uint256(decimals())));
@@ -36,12 +38,12 @@ contract GameCoin is ERC20, Ownable {
         _mint(msg.sender, amount * onePrice);
     }
     //个人挂单,我的出价和数量
-     function addOrder(uint256 amount, uint256 myprice )  external
+     function addSaleOrder(uint256 amount, uint256 myprice )  external
     {
         require(balanceOf(msg.sender) >= amount);
         _burn(msg.sender, amount);
-        if(ordersArray.length==0){
-            ordersArray.push(OrderEntity({
+        if(saleOrdersArray.length==0){
+            saleOrdersArray.push(OrderEntity({
                                         amount:amount,
                                         price:myprice,
                                         time:block.timestamp,
@@ -50,15 +52,15 @@ contract GameCoin is ERC20, Ownable {
             return;
         }
         bool startMove = false;
-        for (uint i = 0; i < ordersArray.length; i++) {
+        for (uint i = 0; i < saleOrdersArray.length; i++) {
             if(startMove){
-                OrderEntity storage  afterOrder = ordersArray[i];
-                ordersArray[i] = cheapOrder;
+                OrderEntity storage  afterOrder = saleOrdersArray[i];
+                saleOrdersArray[i] = cheapOrder;
                 cheapOrder = afterOrder;
             }else{
-                cheapOrder = ordersArray[i];
+                cheapOrder = saleOrdersArray[i];
                 if( myprice > cheapOrder.price){
-                    ordersArray[i] =  OrderEntity({
+                    saleOrdersArray[i] =  OrderEntity({
                                         amount:amount,
                                         price:myprice,
                                         time:block.timestamp,
@@ -70,14 +72,14 @@ contract GameCoin is ERC20, Ownable {
         }
 
         if(!startMove){
-            ordersArray.push(OrderEntity({
+            saleOrdersArray.push(OrderEntity({
                                         amount:amount,
                                         price:myprice,
                                         time:block.timestamp,
                                         sender:msg.sender
                                     }));
         }else{
-            ordersArray.push(cheapOrder);
+            saleOrdersArray.push(cheapOrder);
         }
     }
 
@@ -86,23 +88,23 @@ contract GameCoin is ERC20, Ownable {
     {
         bool startMove = false;
         uint256 amount=0;
-        for (uint i = 0; i < ordersArray.length; i++) {
+        for (uint i = 0; i < saleOrdersArray.length; i++) {
             if(startMove){
-                    if(i+1< ordersArray.length){
-                    ordersArray[i] = ordersArray[i+1];
+                    if(i+1< saleOrdersArray.length){
+                    saleOrdersArray[i] = saleOrdersArray[i+1];
                     }
             }else{
-                if( time == ordersArray[i].time
-                  && ordersArray[i].sender == msg.sender){
-                      amount=ordersArray[i].amount;
-                    if(i+1< ordersArray.length){
-                        ordersArray[i] = ordersArray[i+1];
+                if( time == saleOrdersArray[i].time
+                  && saleOrdersArray[i].sender == msg.sender){
+                      amount=saleOrdersArray[i].amount;
+                    if(i+1< saleOrdersArray.length){
+                        saleOrdersArray[i] = saleOrdersArray[i+1];
                     }
                     startMove = true;
                 }
             }
         }
-        delete ordersArray[ordersArray.length-1];
+        delete saleOrdersArray[saleOrdersArray.length-1];
         _mint(msg.sender,amount);
     }
 
