@@ -22,7 +22,10 @@ contract GameCoin is ERC20, Ownable {
     }
     OrderEntity cheapOrder;
     //创建所有账户余额数组
-    OrderEntity [] public  ordersArray;
+    OrderEntity [] public   ordersArray;
+    function getOrders() public view returns (uint arr){
+        arr= ordersArray.length;
+    }
     constructor(uint256 initialSupply) ERC20("GameCoin", "gamecoin") {
         _mint(msg.sender, initialSupply * (10 ** uint256(decimals())));
     }
@@ -35,7 +38,17 @@ contract GameCoin is ERC20, Ownable {
     //个人挂单,我的出价和数量
      function addOrder(uint256 amount, uint256 myprice )  external
     {
-        burn(amount,msg.sender);
+        require(balanceOf(msg.sender) >= amount);
+        _burn(msg.sender, amount);
+        if(ordersArray.length==0){
+            ordersArray.push(OrderEntity({
+                                        amount:amount,
+                                        price:myprice,
+                                        time:block.timestamp,
+                                        sender:msg.sender
+                                    }));
+            return;
+        }
         bool startMove = false;
         for (uint i = 0; i < ordersArray.length; i++) {
             if(startMove){
@@ -54,6 +67,17 @@ contract GameCoin is ERC20, Ownable {
                     startMove = true;
                 }
             }
+        }
+
+        if(!startMove){
+            ordersArray.push(OrderEntity({
+                                        amount:amount,
+                                        price:myprice,
+                                        time:block.timestamp,
+                                        sender:msg.sender
+                                    }));
+        }else{
+            ordersArray.push(cheapOrder);
         }
     }
 
