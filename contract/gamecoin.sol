@@ -29,7 +29,6 @@ contract GameCoin is ERC20, Ownable {
     //购买gamecoin数组
     OrderEntity [] public   buyOrdersArray;
     OrderEntity [] public arrTop;
-
     function getSaleOrders() public view returns (OrderEntity [] memory ){
         return saleOrdersArray;
     }
@@ -47,7 +46,7 @@ contract GameCoin is ERC20, Ownable {
         _mint(msg.sender, amount * onePrice);
     }
     //个人挂单,出售gamecoin
-    function addSaleOrder(uint256 amount, uint256 myprice )  external
+    function addSaleOrder(uint256 amount, uint256 myprice )  public payable
     {
         require(amount>0 && myprice>0);
         require(balanceOf(msg.sender) >= amount);
@@ -61,30 +60,28 @@ contract GameCoin is ERC20, Ownable {
         });
         if(saleOrdersArray.length==0){
             saleOrdersArray.push(newOrder);
-            return;
-        }
-        bool startMove = false;
-        for (uint i = 0; i < saleOrdersArray.length; i++) {
-            if(startMove){
-                OrderEntity storage  afterOrder = saleOrdersArray[i];
-                saleOrdersArray[i] = cheapOrder;
-                cheapOrder = afterOrder;
-            }else{
-                cheapOrder = saleOrdersArray[i];
-                if( myprice > cheapOrder.price){
-                    saleOrdersArray[i] =  newOrder;
-                    startMove = true;
+        }else{
+            bool startMove = false;
+            for (uint i = 0; i < saleOrdersArray.length; i++) {
+                if(startMove){
+                    OrderEntity storage  afterOrder = saleOrdersArray[i];
+                    saleOrdersArray[i] = cheapOrder;
+                    cheapOrder = afterOrder;
+                }else{
+                    cheapOrder = saleOrdersArray[i];
+                    if( myprice > cheapOrder.price){
+                        saleOrdersArray[i] =  newOrder;
+                        startMove = true;
+                    }
                 }
             }
-        }
 
-        if(!startMove){
-            saleOrdersArray.push(newOrder);
-        }else{
-            saleOrdersArray.push(cheapOrder);
+            if(!startMove){
+                saleOrdersArray.push(newOrder);
+            }else{
+                saleOrdersArray.push(cheapOrder);
+            }
         }
-
-        matchSaleOrder();
     }
     //取消挂单，出售gamecoin
     function cancelSaleOrder(uint256 time)  public
@@ -127,29 +124,28 @@ contract GameCoin is ERC20, Ownable {
         });
         if(buyOrdersArray.length==0){
             buyOrdersArray.push(newOrder);
-            return;
-        }
-        bool startMove = false;
-        for (uint i = 0; i < buyOrdersArray.length; i++) {
-            if(startMove){
-                OrderEntity storage  afterOrder = buyOrdersArray[i];
-                buyOrdersArray[i] = buyHighOrder;
-                buyHighOrder = afterOrder;
-            }else{
-                buyHighOrder = buyOrdersArray[i];
-                if( myprice < buyHighOrder.price){
-                    buyOrdersArray[i] =  newOrder;
-                    startMove = true;
+        }else{
+            bool startMove = false;
+            for (uint i = 0; i < buyOrdersArray.length; i++) {
+                if(startMove){
+                    OrderEntity storage  afterOrder = buyOrdersArray[i];
+                    buyOrdersArray[i] = buyHighOrder;
+                    buyHighOrder = afterOrder;
+                }else{
+                    buyHighOrder = buyOrdersArray[i];
+                    if( myprice < buyHighOrder.price){
+                        buyOrdersArray[i] =  newOrder;
+                        startMove = true;
+                    }
                 }
             }
-        }
 
-        if(!startMove){
-            buyOrdersArray.push(newOrder);
-        }else{
-            buyOrdersArray.push(buyHighOrder);
+            if(!startMove){
+                buyOrdersArray.push(newOrder);
+            }else{
+                buyOrdersArray.push(buyHighOrder);
+            }
         }
-        matchBuyOrder();
     }
 
     //取消挂单，购买gamecoin
@@ -182,12 +178,12 @@ contract GameCoin is ERC20, Ownable {
 
 
     //撮合出售gamecoin挂单
-    function matchSaleOrder()  private
+    function matchSaleOrder()  public  payable
     {
         uint256 gamecoinPayed=saleOrdersArray[0].amount;
         uint256 price=saleOrdersArray[0].price;
 
-        for (uint i = 0; i < buyOrdersArray.length; i++) {
+        for (uint i = 0; i < buyOrdersArray.length &&i>=0; i++) {
             if(price<buyOrdersArray[i].price){
                 //出价小于订单价则无法成交
                 break;
@@ -209,7 +205,9 @@ contract GameCoin is ERC20, Ownable {
                 uint256 chrGet=gamecoinAmount.div(buyOrdersArray[i].price);
                 //删除消耗掉的这个订单
                 deleteOne(buyOrdersArray,i);
-                i=i-1;
+                if(i!=0){
+                    i=i-1;
+                }
                 //加chr
                 payable(msg.sender).transfer(chrGet);
             }
@@ -223,11 +221,11 @@ contract GameCoin is ERC20, Ownable {
         }
     }
     //撮合购买gamecoin挂单
-    function matchBuyOrder()  private
+    function matchBuyOrder()   public  payable
     {
         uint256 gamecoinWant = buyOrdersArray[0].amount;
         uint256 price = buyOrdersArray[0].price;
-        for (uint i = 0; i < saleOrdersArray.length; i++) {
+        for (uint i = 0; i < saleOrdersArray.length &&i>=0; i++) {
             if(price>saleOrdersArray[i].price){
                 //出价大于订单价则无法成交
                 break;
@@ -248,7 +246,9 @@ contract GameCoin is ERC20, Ownable {
                 uint256 gamecoinGet=saleOrdersArray[i].amount;
                 //删除消耗掉的这个订单
                 deleteOne(saleOrdersArray,i);
-                i=i-1;
+                if(i!=0){
+                    i=i-1;
+                }
                 //加gamecoin
                 _mint(msg.sender,gamecoinGet);
             }
@@ -263,15 +263,12 @@ contract GameCoin is ERC20, Ownable {
     }
     function deleteOne(OrderEntity [] storage arr,uint index) private
     {
-        for (uint i = index; i < arr.length; i++) {
-            if(i+1< arr.length){
-                arr[i] = arr[i+1];
-            }
+        if (index >= arr.length) return;
+        for (uint i = index; i < arr.length-1; i++) {
+            arr[i] = arr[i+1];
         }
         arr.pop();
     }
-
-
 
     //个人市价,出售gamecoin
     function saleOrderNoPrice(uint256 gamecoinPayed)  public
