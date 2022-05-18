@@ -28,8 +28,14 @@ contract GameCoin is ERC20, Ownable {
     OrderEntity [] public   saleOrdersArray;
     //购买gamecoin数组
     OrderEntity [] public   buyOrdersArray;
-    function getSaleOrders() public view returns (uint arr){
-        arr= saleOrdersArray.length;
+    OrderEntity [] public arrTop;
+
+    function getSaleOrders() public view returns (OrderEntity [] memory ){
+        return saleOrdersArray;
+    }
+
+    function getBuyOrders() public view returns (OrderEntity [] memory ){
+        return buyOrdersArray;
     }
     constructor(uint256 initialSupply) ERC20("GameCoin", "gamecoin") {
         _mint(msg.sender, initialSupply * (10 ** uint256(decimals())));
@@ -47,13 +53,14 @@ contract GameCoin is ERC20, Ownable {
         require(balanceOf(msg.sender) >= amount);
         //先扣gamecoin，取消订单加回去
         _burn(msg.sender, amount);
+        OrderEntity memory newOrder = OrderEntity({
+        amount:amount,
+        price:myprice,
+        time:block.timestamp,
+        sender:msg.sender
+        });
         if(saleOrdersArray.length==0){
-            saleOrdersArray.push(OrderEntity({
-            amount:amount,
-            price:myprice,
-            time:block.timestamp,
-            sender:msg.sender
-            }));
+            saleOrdersArray.push(newOrder);
             return;
         }
         bool startMove = false;
@@ -65,24 +72,14 @@ contract GameCoin is ERC20, Ownable {
             }else{
                 cheapOrder = saleOrdersArray[i];
                 if( myprice > cheapOrder.price){
-                    saleOrdersArray[i] =  OrderEntity({
-                    amount:amount,
-                    price:myprice,
-                    time:block.timestamp,
-                    sender:msg.sender
-                    });
+                    saleOrdersArray[i] =  newOrder;
                     startMove = true;
                 }
             }
         }
 
         if(!startMove){
-            saleOrdersArray.push(OrderEntity({
-            amount:amount,
-            price:myprice,
-            time:block.timestamp,
-            sender:msg.sender
-            }));
+            saleOrdersArray.push(newOrder);
         }else{
             saleOrdersArray.push(cheapOrder);
         }
@@ -211,7 +208,7 @@ contract GameCoin is ERC20, Ownable {
                 gamecoinPayed = gamecoinPayed.sub(gamecoinAmount);
                 uint256 chrGet=gamecoinAmount.div(buyOrdersArray[i].price);
                 //删除消耗掉的这个订单
-                delete buyOrdersArray[i];
+                deleteOne(buyOrdersArray,i);
                 i=i-1;
                 //加chr
                 payable(msg.sender).transfer(chrGet);
@@ -222,7 +219,7 @@ contract GameCoin is ERC20, Ownable {
             saleOrdersArray[0].amount=gamecoinPayed;
         }else{
             //剩余的金额为0，则删除
-            delete saleOrdersArray[0];
+            deleteOne(saleOrdersArray,0);
         }
     }
     //撮合购买gamecoin挂单
@@ -250,7 +247,7 @@ contract GameCoin is ERC20, Ownable {
                 gamecoinWant = gamecoinWant.sub(gamecoinAmount);
                 uint256 gamecoinGet=saleOrdersArray[i].amount;
                 //删除消耗掉的这个订单
-                delete saleOrdersArray[i];
+                deleteOne(saleOrdersArray,i);
                 i=i-1;
                 //加gamecoin
                 _mint(msg.sender,gamecoinGet);
@@ -261,10 +258,18 @@ contract GameCoin is ERC20, Ownable {
             buyOrdersArray[0].amount=gamecoinWant;
         }else{
             //剩余的金额为0，则删除
-            delete buyOrdersArray[0];
+            deleteOne(buyOrdersArray,0);
         }
     }
-
+    function deleteOne(OrderEntity [] storage arr,uint index) private
+    {
+        for (uint i = index; i < arr.length; i++) {
+            if(i+1< arr.length){
+                arr[i] = arr[i+1];
+            }
+        }
+        arr.pop();
+    }
 
 
 
