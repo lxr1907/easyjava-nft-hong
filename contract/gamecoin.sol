@@ -39,18 +39,19 @@ contract GameCoin is ERC20, Ownable {
         _mint(msg.sender, amount * onePrice);
     }
     //个人挂单,出售gamecoin
-     function addSaleOrder(uint256 amount, uint256 myprice )  external
+    function addSaleOrder(uint256 amount, uint256 myprice )  external
     {
+        require(amount>0 && myprice>0);
         require(balanceOf(msg.sender) >= amount);
         //先扣gamecoin，取消订单加回去
         _burn(msg.sender, amount);
         if(saleOrdersArray.length==0){
             saleOrdersArray.push(OrderEntity({
-                                        amount:amount,
-                                        price:myprice,
-                                        time:block.timestamp,
-                                        sender:msg.sender
-                                    }));
+            amount:amount,
+            price:myprice,
+            time:block.timestamp,
+            sender:msg.sender
+            }));
             return;
         }
         bool startMove = false;
@@ -63,11 +64,11 @@ contract GameCoin is ERC20, Ownable {
                 cheapOrder = saleOrdersArray[i];
                 if( myprice > cheapOrder.price){
                     saleOrdersArray[i] =  OrderEntity({
-                                        amount:amount,
-                                        price:myprice,
-                                        time:block.timestamp,
-                                        sender:msg.sender
-                                    });
+                    amount:amount,
+                    price:myprice,
+                    time:block.timestamp,
+                    sender:msg.sender
+                    });
                     startMove = true;
                 }
             }
@@ -75,30 +76,30 @@ contract GameCoin is ERC20, Ownable {
 
         if(!startMove){
             saleOrdersArray.push(OrderEntity({
-                                        amount:amount,
-                                        price:myprice,
-                                        time:block.timestamp,
-                                        sender:msg.sender
-                                    }));
+            amount:amount,
+            price:myprice,
+            time:block.timestamp,
+            sender:msg.sender
+            }));
         }else{
             saleOrdersArray.push(cheapOrder);
         }
     }
 
-      //取消挂单，出售gamecoin
-     function cancelSaleOrder(uint256 time)  external
+    //取消挂单，出售gamecoin
+    function cancelSaleOrder(uint256 time)  external
     {
         bool startMove = false;
         uint256 amount=0;
         for (uint i = 0; i < saleOrdersArray.length; i++) {
             if(startMove){
-                    if(i+1< saleOrdersArray.length){
+                if(i+1< saleOrdersArray.length){
                     saleOrdersArray[i] = saleOrdersArray[i+1];
-                    }
+                }
             }else{
                 if( time == saleOrdersArray[i].time
-                  && saleOrdersArray[i].sender == msg.sender){
-                      amount=saleOrdersArray[i].amount;
+                    && saleOrdersArray[i].sender == msg.sender){
+                    amount=saleOrdersArray[i].amount;
                     if(i+1< saleOrdersArray.length){
                         saleOrdersArray[i] = saleOrdersArray[i+1];
                     }
@@ -111,17 +112,18 @@ contract GameCoin is ERC20, Ownable {
         _mint(msg.sender,amount);
     }
 
- //个人挂单,购买gamecoin
-     function addBuyOrder(uint256 myprice )  external payable
+    //个人挂单,购买gamecoin
+    function addBuyOrder(uint256 myprice )  external payable
     {
         uint256 amount = msg.value;
+        require(msg.value>0 && myprice>0);
         if(buyOrdersArray.length==0){
             buyOrdersArray.push(OrderEntity({
-                                        amount:amount,
-                                        price:myprice,
-                                        time:block.timestamp,
-                                        sender:msg.sender
-                                    }));
+            amount:amount,
+            price:myprice,
+            time:block.timestamp,
+            sender:msg.sender
+            }));
             return;
         }
         bool startMove = false;
@@ -134,11 +136,11 @@ contract GameCoin is ERC20, Ownable {
                 buyHighOrder = buyOrdersArray[i];
                 if( myprice < buyHighOrder.price){
                     buyOrdersArray[i] =  OrderEntity({
-                                        amount:amount,
-                                        price:myprice,
-                                        time:block.timestamp,
-                                        sender:msg.sender
-                                    });
+                    amount:amount,
+                    price:myprice,
+                    time:block.timestamp,
+                    sender:msg.sender
+                    });
                     startMove = true;
                 }
             }
@@ -146,30 +148,30 @@ contract GameCoin is ERC20, Ownable {
 
         if(!startMove){
             buyOrdersArray.push(OrderEntity({
-                                        amount:amount,
-                                        price:myprice,
-                                        time:block.timestamp,
-                                        sender:msg.sender
-                                    }));
+            amount:amount,
+            price:myprice,
+            time:block.timestamp,
+            sender:msg.sender
+            }));
         }else{
             buyOrdersArray.push(buyHighOrder);
         }
     }
 
-      //取消挂单，购买gamecoin
-     function cancelBuyOrder(uint256 time)  external
+    //取消挂单，购买gamecoin
+    function cancelBuyOrder(uint256 time)  external
     {
         bool startMove = false;
         uint256 amount=0;
         for (uint i = 0; i < buyOrdersArray.length; i++) {
             if(startMove){
-                    if(i+1< buyOrdersArray.length){
+                if(i+1< buyOrdersArray.length){
                     buyOrdersArray[i] = buyOrdersArray[i+1];
-                    }
+                }
             }else{
                 if( time == buyOrdersArray[i].time
-                  && buyOrdersArray[i].sender == msg.sender){
-                      amount=buyOrdersArray[i].amount;
+                    && buyOrdersArray[i].sender == msg.sender){
+                    amount=buyOrdersArray[i].amount;
                     if(i+1< saleOrdersArray.length){
                         buyOrdersArray[i] = buyOrdersArray[i+1];
                     }
@@ -178,7 +180,8 @@ contract GameCoin is ERC20, Ownable {
             }
         }
         delete buyOrdersArray[buyOrdersArray.length-1];
-        msg.sender.transfer(amount);
+        address payable receiver= payable(msg.sender);
+        receiver.transfer(amount);
     }
 
 
