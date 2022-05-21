@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
+import com.klaytn.caver.abi.datatypes.Type;
 import com.klaytn.caver.contract.Contract;
+import com.klaytn.caver.contract.ContractMethod;
 import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.methods.response.Bytes32;
 import com.klaytn.caver.methods.response.TransactionReceipt;
@@ -34,6 +36,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +54,7 @@ public class SCNController {
     private RedisTemplate<String, Object> redisTemplate;
 
     public static final String MY_SCN_HOST = "http://13.213.135.231:7551";
-    public static final String MY_SCN_WS_HOST = "ws://13.213.135.231:7552";//http://172.31.22.236:7551
-    public static final String MY_KLAY_HOST = "http://13.213.135.231:8551";
+    public static final String MY_SCN_WS_HOST = "ws://13.213.135.231:7552";
 
     public static final String KLAY_SCN_ADDRESS = "0xD3CFb75cE8Ed4Cbe10e7E343676a4788eC148d50";
     public static final int USDT_ERC20_PRICE = 10;
@@ -61,7 +63,7 @@ public class SCNController {
     public static final String SCN_CHILD_OPERATOR = "{\"address\":\"56c8cb5daf329fc8613112b51e359b2dbae4fd97\",\"keyring\":[[{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"1a6d4aac70114be5b4eb54bf8cc11c58f23c4e8e97b2235cf6a9d0bfcc478a55\",\"cipherparams\":{\"iv\":\"24a74d100afae38093f7a5267ee17626\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"17ff967beb4c3e98c4d63c3b78c9a721a2fc5906c5d3ab43f81ec0a305c7e4c6\"},\"mac\":\"000d9abe5cd71085e4789abd1a604d77cdc31aef05eae5b1bcfbed364a94fbfb\"}]],\"id\":\"7de1963a-e59d-496b-bf34-029d50b76ab3\",\"version\":4}";
     public static final String SCN_CHILD_OPERATOR_PASSWORD = "cbor{@b9b1__#+#}";
     public static final String SCN_CHILD_OPERATOR_ADDRESS = "0x56c8cb5daf329fc8613112b51e359b2dbae4fd97";
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xc59c9dfbd8111e2ed5d830dfcf8bb35ed70ff629";
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xf0385e4dd297d8c439e7c5f186ecd5fddb6318d7";
 
 
     public static ObjectMapper mapper = new ObjectMapper();
@@ -483,7 +485,10 @@ public class SCNController {
 //        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
 //        logger.debug(ret.toString());
         try {
-            gameCoinContractDeploy();
+            balanceOf();
+            addSaleOrder();
+            getSaleOrders();
+//            gameCoinContractDeploy();
         } catch (Exception e) {
             logger.error("", e);
         }
@@ -509,5 +514,73 @@ public class SCNController {
             return null;
         }
         return contract.getContractAddress();
+    }
+
+    public static TransactionReceipt.TransactionReceiptData addSaleOrder() {
+        Caver caver = new Caver(MY_SCN_HOST);
+        Contract contract = null;
+        TransactionReceipt.TransactionReceiptData ret = null;
+        try {
+            contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
+            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
+                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            //设置操作人，gas费默认由操作人付款
+            caver.wallet.add(keyring);
+            List<Object> params = new ArrayList<>();
+            params.add(1);
+            params.add(2);
+            SendOptions sendOptions = new SendOptions();
+            sendOptions.setFrom(keyring.getAddress());
+            sendOptions.setGas(gas);
+            ContractMethod method = contract.getMethod("addSaleOrder");
+            ret = method.send(params, sendOptions);
+            logger.info("addSaleOrder :", JSON.toJSONString(ret));
+        } catch (Exception e) {
+            logger.error("addSaleOrder error！", e);
+            e.printStackTrace();
+            return null;
+        }
+        return ret;
+    }
+
+    public static List<Type> getSaleOrders() {
+        Caver caver = new Caver(MY_SCN_HOST);
+        Contract contract = null;
+        List<Type> ret = null;
+        try {
+            contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
+            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
+                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            //设置操作人，gas费默认由操作人付款
+            caver.wallet.add(keyring);
+            ContractMethod method = contract.getMethod("getSaleOrders");
+            List<Object> params = new ArrayList<>();
+            ret = method.call(params);
+            logger.info("getSaleOrders :", JSON.toJSONString(ret));
+        } catch (Exception e) {
+            logger.error("getSaleOrders error！", e);
+            e.printStackTrace();
+            return null;
+        }
+        return ret;
+    }
+
+    public static List<Type> balanceOf() {
+        Caver caver = new Caver(MY_SCN_HOST);
+        Contract contract = null;
+        List<Type> ret = null;
+        try {
+            contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
+            ContractMethod method = contract.getMethod("balanceOf");
+            List<Object> params = new ArrayList<>();
+            params.add(SCN_CHILD_OPERATOR_ADDRESS);
+            ret = method.call(params);
+            logger.info("balanceOf :", JSON.toJSONString(ret));
+        } catch (Exception e) {
+            logger.error("balanceOf error！", e);
+            e.printStackTrace();
+            return null;
+        }
+        return ret;
     }
 }
