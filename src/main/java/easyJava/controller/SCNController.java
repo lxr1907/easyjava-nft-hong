@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
+import com.klaytn.caver.contract.Contract;
+import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.methods.response.Bytes32;
 import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.transaction.TxPropertyBuilder;
@@ -38,8 +40,8 @@ import java.util.Map;
 
 
 @RestController
-public class KlaySCNController {
-    private static final Logger logger = LoggerFactory.getLogger(KlaySCNController.class);
+public class SCNController {
+    private static final Logger logger = LoggerFactory.getLogger(SCNController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired
@@ -58,6 +60,10 @@ public class KlaySCNController {
     public static volatile BigInteger gas = BigInteger.valueOf(80000);
     public static final String SCN_CHILD_OPERATOR = "{\"address\":\"56c8cb5daf329fc8613112b51e359b2dbae4fd97\",\"keyring\":[[{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"1a6d4aac70114be5b4eb54bf8cc11c58f23c4e8e97b2235cf6a9d0bfcc478a55\",\"cipherparams\":{\"iv\":\"24a74d100afae38093f7a5267ee17626\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"17ff967beb4c3e98c4d63c3b78c9a721a2fc5906c5d3ab43f81ec0a305c7e4c6\"},\"mac\":\"000d9abe5cd71085e4789abd1a604d77cdc31aef05eae5b1bcfbed364a94fbfb\"}]],\"id\":\"7de1963a-e59d-496b-bf34-029d50b76ab3\",\"version\":4}";
     public static final String SCN_CHILD_OPERATOR_PASSWORD = "cbor{@b9b1__#+#}";
+    public static final String SCN_CHILD_OPERATOR_ADDRESS = "0x56c8cb5daf329fc8613112b51e359b2dbae4fd97";
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xc59c9dfbd8111e2ed5d830dfcf8bb35ed70ff629";
+
+
     public static ObjectMapper mapper = new ObjectMapper();
 
 
@@ -72,27 +78,34 @@ public class KlaySCNController {
      * @throws CipherException
      * @throws TransactionException
      */
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, BigInteger value) throws IOException, TransactionException {
-        logger.info(keyStoreJSON);
-        KeyStore keyStore = JSON.parseObject(keyStoreJSON, KeyStore.class);
-        logger.info(keyStore.getKeyring().get(0).toString());
-        List<KeyStore.Crypto> crypto = mapper.readValue(keyStore.getKeyring().get(0).toString(), new TypeReference<List<KeyStore.Crypto>>() {
-        });
-        String fromPrivateKey = "";
-        try {
-            fromPrivateKey = KeyStore.Crypto.decryptCrypto(crypto.get(0), pwd);
-            logger.info(fromPrivateKey);
-        } catch (CipherException e) {
-            logger.error("sendingSCN 失败 KeyStore.Crypto.decryptCrypto:" + e.getMessage() + ",p:" + fromPrivateKey);
-            e.printStackTrace();
-            return null;
-        }
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, BigInteger value) throws TransactionException, IOException {
+        String fromPrivateKey = getPrivateKeyFromJson(keyStoreJSON, pwd);
         var transactionReceipt = sendingSCN(fromPrivateKey, toAddress, value);
         return transactionReceipt;
     }
 
+    public static String getPrivateKeyFromJson(String keyStoreJSON, String pwd) {
+        String fromPrivateKey = "";
+        try {
+            logger.info(keyStoreJSON);
+            KeyStore keyStore = JSON.parseObject(keyStoreJSON, KeyStore.class);
+            logger.info(keyStore.getKeyring().get(0).toString());
+            List<KeyStore.Crypto> crypto = mapper.readValue(keyStore.getKeyring().get(0).toString(), new TypeReference<List<KeyStore.Crypto>>() {
+            });
+            fromPrivateKey = KeyStore.Crypto.decryptCrypto(crypto.get(0), pwd);
+            logger.info(fromPrivateKey);
+        } catch (Exception e) {
+            logger.error("sendingSCN 失败 KeyStore.Crypto.decryptCrypto:" + e.getMessage() + ",p:" + fromPrivateKey);
+            e.printStackTrace();
+            return null;
+        }
+        return fromPrivateKey;
+    }
 
     public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
+        if (fromPrivateKey == null) {
+            return null;
+        }
         Caver caver = new Caver(MY_SCN_HOST);
         SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
         String fromAddress = keyring.toAccount().getAddress();
@@ -470,9 +483,31 @@ public class KlaySCNController {
 //        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
 //        logger.debug(ret.toString());
         try {
-            new BigInteger("0.1");
+            gameCoinContractDeploy();
         } catch (Exception e) {
             logger.error("", e);
         }
+    }
+
+    public static String gameCoinContractDeploy() {
+        Caver caver = new Caver(MY_SCN_HOST);
+        Contract contract = null;
+        try {
+            contract = caver.contract.create(SCNContractController.ABI);
+            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
+                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            //设置操作人，gas费默认由操作人付款
+            caver.wallet.add(keyring);
+            SendOptions sendOptions = new SendOptions();
+            sendOptions.setFrom(SCN_CHILD_OPERATOR_ADDRESS);
+            sendOptions.setGas(new BigInteger("3000000"));
+            String initialSupply = "10000000";
+            contract.deploy(sendOptions, SCNContractController.contractBinaryData.toString(), initialSupply);
+        } catch (Exception e) {
+            logger.error("gameCoinContractDeploy error！", e);
+            e.printStackTrace();
+            return null;
+        }
+        return contract.getContractAddress();
     }
 }

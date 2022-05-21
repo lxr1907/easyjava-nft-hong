@@ -38,15 +38,15 @@ import java.util.*;
 
 
 @RestController
-public class KlaySCNExploreController {
-    private static final Logger logger = LoggerFactory.getLogger(KlaySCNExploreController.class);
+public class SCNExploreController {
+    private static final Logger logger = LoggerFactory.getLogger(SCNExploreController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired
     ScnDao scnDao;
     @Autowired
     UserController userController;
-    public static Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
+    public static Caver caver = new Caver(SCNController.MY_SCN_HOST);
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -74,13 +74,13 @@ public class KlaySCNExploreController {
 
 
     public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
-        Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
+        Caver caver = new Caver(SCNController.MY_SCN_HOST);
         SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
         String fromAddress = keyring.toAccount().getAddress();
         //Add to caver wallet.
         caver.wallet.add(keyring);
         //Create a value transfer transaction
-        ValueTransfer valueTransfer = caver.transaction.valueTransfer.create(TxPropertyBuilder.valueTransfer().setFrom(keyring.getAddress()).setTo(toAddress).setValue(value).setGas(KlaySCNController.gas));
+        ValueTransfer valueTransfer = caver.transaction.valueTransfer.create(TxPropertyBuilder.valueTransfer().setFrom(keyring.getAddress()).setTo(toAddress).setValue(value).setGas(SCNController.gas));
         //Sign to the transaction
         valueTransfer.sign(keyring);
         //Send a transaction to the klaytn blockchain platform (Klaytn)
@@ -197,7 +197,7 @@ public class KlaySCNExploreController {
 
     public static Map getScnInfo() {
         Map retMap = new HashMap();
-        Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
+        Caver caver = new Caver(SCNController.MY_SCN_HOST);
         var request = caver.rpc.klay.getChainID();
         try {
             var val = request.send().getValue();
@@ -222,7 +222,7 @@ public class KlaySCNExploreController {
     }
 
     public static BigInteger getGameCoinBalance(String address) {
-        Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
+        Caver caver = new Caver(SCNController.MY_SCN_HOST);
         var request = caver.rpc.klay.getBalance(address, DefaultBlockParameter.valueOf("latest"));
         BigInteger val = new BigInteger("0");
         try {
@@ -234,7 +234,7 @@ public class KlaySCNExploreController {
     }
 
     public static KlayLogs getGameCoinTxLogs(String address, BigInteger toBlock) {
-        Caver caver = new Caver(KlaySCNController.MY_SCN_HOST);
+        Caver caver = new Caver(SCNController.MY_SCN_HOST);
         KlayLogFilter filter = new KlayLogFilter();
         filter.setAddress(address);
         if (toBlock == null) {
