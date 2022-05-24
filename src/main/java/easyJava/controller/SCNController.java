@@ -485,10 +485,10 @@ public class SCNController {
 //        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
 //        logger.debug(ret.toString());
         try {
-            balanceOf();
-            addSaleOrder();
-            getSaleOrders();
-//            gameCoinContractDeploy();
+//            balanceOf();
+//            addSaleOrder();
+//            getSaleOrders();
+            gameCoinContractDeploy();
         } catch (Exception e) {
             logger.error("", e);
         }
@@ -505,9 +505,11 @@ public class SCNController {
             caver.wallet.add(keyring);
             SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(SCN_CHILD_OPERATOR_ADDRESS);
-            sendOptions.setGas(new BigInteger("3000000"));
-            String initialSupply = "10000000";
+            sendOptions.setGas(new BigInteger("300000000"));
+            BigInteger initialSupply = new BigInteger("10000000");
             contract.deploy(sendOptions, SCNContractController.contractBinaryData.toString(), initialSupply);
+            logger.info("gameCoinContractDeploy address:" + contract.getContractAddress());
+            addBuyOrder(contract);
         } catch (Exception e) {
             logger.error("gameCoinContractDeploy error！", e);
             e.printStackTrace();
@@ -516,12 +518,18 @@ public class SCNController {
         return contract.getContractAddress();
     }
 
-    public static TransactionReceipt.TransactionReceiptData addSaleOrder() {
+    public static Contract getGameCoinContract() throws IOException {
         Caver caver = new Caver(MY_SCN_HOST);
         Contract contract = null;
+        contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
+        return contract;
+    }
+
+    public static TransactionReceipt.TransactionReceiptData addSaleOrder() {
+        Caver caver = new Caver(MY_SCN_HOST);
         TransactionReceipt.TransactionReceiptData ret = null;
         try {
-            contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
+            Contract contract = getGameCoinContract();
             SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
                     getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
@@ -543,12 +551,36 @@ public class SCNController {
         return ret;
     }
 
+    public static TransactionReceipt.TransactionReceiptData addBuyOrder(Contract contract) {
+        Caver caver = new Caver(MY_SCN_HOST);
+        TransactionReceipt.TransactionReceiptData ret = null;
+        try {
+            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
+                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            //设置操作人，gas费默认由操作人付款
+            caver.wallet.add(keyring);
+            List<Object> params = new ArrayList<>();
+            params.add(10);
+            SendOptions sendOptions = new SendOptions();
+            sendOptions.setFrom(keyring.getAddress());
+            sendOptions.setGas(gas);
+            sendOptions.setValue(new BigInteger("1"));
+            ContractMethod method = contract.getMethod("addBuyOrder");
+            ret = method.send(params, sendOptions);
+            logger.info("addBuyOrder :", JSON.toJSONString(ret));
+        } catch (Exception e) {
+            logger.error("addBuyOrder error！", e);
+            e.printStackTrace();
+            return null;
+        }
+        return ret;
+    }
+
     public static List<Type> getSaleOrders() {
         Caver caver = new Caver(MY_SCN_HOST);
-        Contract contract = null;
         List<Type> ret = null;
         try {
-            contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
+            Contract contract = getGameCoinContract();
             SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
                     getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
@@ -567,10 +599,9 @@ public class SCNController {
 
     public static List<Type> balanceOf() {
         Caver caver = new Caver(MY_SCN_HOST);
-        Contract contract = null;
         List<Type> ret = null;
         try {
-            contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
+            Contract contract = getGameCoinContract();
             ContractMethod method = contract.getMethod("balanceOf");
             List<Object> params = new ArrayList<>();
             params.add(SCN_CHILD_OPERATOR_ADDRESS);
