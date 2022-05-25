@@ -310,12 +310,13 @@ public class SCNExploreController {
         logger.info("scanSCN begin ");
 
         Long blockNum = (Long) redisTemplate.opsForValue().get(SNC_TX_TABLE + ":block");
-        if (blockNum == null) {
-            blockNum = 0L;
+        if (blockNum == null || blockNum < 76420L) {
+            blockNum = 2176420L;
         } else {
             logger.info("doScanSCN blockNum in redis :" + blockNum);
         }
         long blockNumNow = getBlockNumberNow();
+        logger.info("doScanSCN blockNum blockNumNow :" + blockNumNow);
         long endBlock = blockNum + 100;
         if (blockNumNow < endBlock) {
             endBlock = blockNumNow - 101;
@@ -330,6 +331,10 @@ public class SCNExploreController {
             baseDao.insertIgnoreBase(map);
         });
         logger.info("doScanSCN blockNum save to redis :" + endBlock);
+        if (endBlock < 0) {
+            endBlock = 2176420;
+        }
+
         redisTemplate.opsForValue().set(SNC_TX_TABLE + ":block", endBlock);
         return new ResponseEntity();
     }
@@ -396,9 +401,10 @@ public class SCNExploreController {
 //                if (trans != null)
 //                    logger.info(JSON.toJSONString(trans));
 //            });
-            var rest = doScanSCN(1361141, 1361142);
+//            var rest = doScanSCN(1361141, 1361142);
 //            var rest = getTransactionByBlockNumberAndIndex(1297882, 0);
-            logger.info(JSON.toJSONString(rest));
+
+            logger.info(JSON.toJSONString(getBlockNumberNow()));
         } catch (Exception e) {
             logger.error("", e);
         }
