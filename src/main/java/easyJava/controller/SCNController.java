@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
+import com.klaytn.caver.abi.datatypes.DynamicArray;
 import com.klaytn.caver.abi.datatypes.Type;
 import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.ContractMethod;
@@ -485,9 +486,11 @@ public class SCNController {
 //        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
 //        logger.debug(ret.toString());
         try {
-            balanceOf();
+//            balanceOf();
 //            addSaleOrder();
 //            getSaleOrders();
+//            addBuyOrder(new BigInteger("1"), new BigInteger("10"));
+            getBuyOrders();
 //            gameCoinContractDeploy();
         } catch (Exception e) {
             logger.error("", e);
@@ -518,18 +521,12 @@ public class SCNController {
         return contract.getContractAddress();
     }
 
-    public static Contract getGameCoinContract() throws IOException {
-        Caver caver = new Caver(MY_SCN_HOST);
-        Contract contract = null;
-        contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
-        return contract;
-    }
 
     public static TransactionReceipt.TransactionReceiptData addSaleOrder() {
         Caver caver = new Caver(MY_SCN_HOST);
         TransactionReceipt.TransactionReceiptData ret = null;
         try {
-            Contract contract = getGameCoinContract();
+            Contract contract = caver.contract.create(SCNContractController.ABI);
             SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
                     getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
@@ -542,7 +539,7 @@ public class SCNController {
             sendOptions.setGas(gas);
             ContractMethod method = contract.getMethod("addSaleOrder");
             ret = method.send(params, sendOptions);
-            logger.info("addSaleOrder :", JSON.toJSONString(ret));
+            logger.info("addSaleOrder :" + JSON.toJSONString(ret));
         } catch (Exception e) {
             logger.error("addSaleOrder error！", e);
             e.printStackTrace();
@@ -551,7 +548,7 @@ public class SCNController {
         return ret;
     }
 
-    public static TransactionReceipt.TransactionReceiptData addBuyOrder(Contract contract) {
+    public static TransactionReceipt.TransactionReceiptData addBuyOrder(BigInteger value, BigInteger price) {
         Caver caver = new Caver(MY_SCN_HOST);
         TransactionReceipt.TransactionReceiptData ret = null;
         try {
@@ -560,14 +557,15 @@ public class SCNController {
             //设置操作人，gas费默认由操作人付款
             caver.wallet.add(keyring);
             List<Object> params = new ArrayList<>();
-            params.add(10);
+            params.add(price);
             SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(keyring.getAddress());
             sendOptions.setGas(gas);
-            sendOptions.setValue(new BigInteger("1"));
-            ContractMethod method = contract.getMethod("addBuyOrder");
+            sendOptions.setValue(value);
+            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS)
+                    .getMethod("addBuyOrder");
             ret = method.send(params, sendOptions);
-            logger.info("addBuyOrder :", JSON.toJSONString(ret));
+            logger.info("addBuyOrder :" + JSON.toJSONString(ret));
         } catch (Exception e) {
             logger.error("addBuyOrder error！", e);
             e.printStackTrace();
@@ -580,7 +578,7 @@ public class SCNController {
         Caver caver = new Caver(MY_SCN_HOST);
         List<Type> ret = null;
         try {
-            Contract contract = getGameCoinContract();
+            Contract contract = caver.contract.create(SCNContractController.ABI);
             SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
                     getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
@@ -588,7 +586,12 @@ public class SCNController {
             ContractMethod method = contract.getMethod("getSaleOrders");
             List<Object> params = new ArrayList<>();
             ret = method.call(params);
-            logger.info("getSaleOrders :", JSON.toJSONString(ret));
+            if (ret.size() != 0) {
+                DynamicArray arr = (DynamicArray) ret.get(0).getValue();
+                if (arr.getValue().size() != 0) {
+                    logger.info("getSaleOrders :" + JSON.toJSONString(arr.getValue()));
+                }
+            }
         } catch (Exception e) {
             logger.error("getSaleOrders error！", e);
             e.printStackTrace();
@@ -596,12 +599,36 @@ public class SCNController {
         }
         return ret;
     }
-
+    public static List<Type> getBuyOrders() {
+        Caver caver = new Caver(MY_SCN_HOST);
+        List<Type> ret = null;
+        try {
+            Contract contract = caver.contract.create(SCNContractController.ABI);
+            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
+                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            //设置操作人，gas费默认由操作人付款
+            caver.wallet.add(keyring);
+            ContractMethod method = contract.getMethod("getBuyOrders");
+            List<Object> params = new ArrayList<>();
+            ret = method.call(params);
+            if (ret.size() != 0) {
+                DynamicArray arr = (DynamicArray) ret.get(0).getValue();
+                if (arr.getValue().size() != 0) {
+                    logger.info("getBuyOrders :" + JSON.toJSONString(arr.getValue()));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("getBuyOrders error！", e);
+            e.printStackTrace();
+            return null;
+        }
+        return ret;
+    }
     public static List<Type> balanceOf() {
         Caver caver = new Caver(MY_SCN_HOST);
         List<Type> ret = null;
         try {
-            Contract contract = getGameCoinContract();
+            Contract contract = caver.contract.create(SCNContractController.ABI);
             ContractMethod method = contract.getMethod("balanceOf");
             List<Object> params = new ArrayList<>();
             params.add(SCN_CHILD_OPERATOR_ADDRESS);
