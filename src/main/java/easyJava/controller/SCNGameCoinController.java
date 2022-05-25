@@ -166,7 +166,7 @@ public class SCNGameCoinController {
     public ResponseEntity<?> getOrders(@RequestParam Map<String, Object> map,
                                        @PathParam(value = "methodName") String methodName
     ) {
-        if (map.get("methodName") == null || map.get("methodName").toString().length() == 0) {
+        if (methodName == null || methodName.length() == 0) {
             return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
         }
         return new ResponseEntity(getOrders(map.get("methodName").toString()));
