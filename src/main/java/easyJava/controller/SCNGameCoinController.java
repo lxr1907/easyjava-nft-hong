@@ -21,12 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.websocket.server.PathParam;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -164,7 +160,7 @@ public class SCNGameCoinController {
      */
     @RequestMapping("/gameCoin/getOrders/{methodName}")
     public ResponseEntity<?> getOrders(@RequestParam Map<String, Object> map,
-                                       @PathParam(value = "methodName") String methodName
+                                       @PathVariable String methodName
     ) {
         if (methodName == null || methodName.length() == 0) {
             return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
