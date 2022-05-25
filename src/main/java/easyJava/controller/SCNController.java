@@ -4,10 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
-import com.klaytn.caver.abi.datatypes.Type;
-import com.klaytn.caver.contract.Contract;
-import com.klaytn.caver.contract.ContractMethod;
-import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.methods.response.Bytes32;
 import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.transaction.TxPropertyBuilder;
@@ -36,7 +32,6 @@ import org.web3j.protocol.exceptions.TransactionException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +57,6 @@ public class SCNController {
     public static volatile BigInteger gas = BigInteger.valueOf(8000000);
     public static final String SCN_CHILD_OPERATOR = "{\"address\":\"56c8cb5daf329fc8613112b51e359b2dbae4fd97\",\"keyring\":[[{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"1a6d4aac70114be5b4eb54bf8cc11c58f23c4e8e97b2235cf6a9d0bfcc478a55\",\"cipherparams\":{\"iv\":\"24a74d100afae38093f7a5267ee17626\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"17ff967beb4c3e98c4d63c3b78c9a721a2fc5906c5d3ab43f81ec0a305c7e4c6\"},\"mac\":\"000d9abe5cd71085e4789abd1a604d77cdc31aef05eae5b1bcfbed364a94fbfb\"}]],\"id\":\"7de1963a-e59d-496b-bf34-029d50b76ab3\",\"version\":4}";
     public static final String SCN_CHILD_OPERATOR_PASSWORD = "cbor{@b9b1__#+#}";
-    public static final String SCN_CHILD_OPERATOR_ADDRESS = "0x56c8cb5daf329fc8613112b51e359b2dbae4fd97";
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xb2434172cdb18c35473e1931da69549a7bdc304d";
-
 
     public static ObjectMapper mapper = new ObjectMapper();
 
@@ -136,13 +128,14 @@ public class SCNController {
     }
 
     /**
-     * 使用chr购买scn链上的gamecoin
+     * 使用chr购买scn链上的chrToken
      *
      * @param map
      * @param token
      * @return
      */
-    @RequestMapping("/klaySCN/buyGameCoin")
+//    @RequestMapping("/klaySCN/buychrToken")
+    @RequestMapping("/klaySCN/buyChrToken")
     public ResponseEntity<?> buyScn(@RequestParam Map<String, Object> map,
                                     @RequestHeader("token") String token
     ) {
@@ -190,12 +183,12 @@ public class SCNController {
             return new ResponseEntity(400, "value必须大于等于1");
         }
         BigInteger chrValue = null;
-        BigInteger gamecoinValue = null;
+        BigInteger chrTokenValue = null;
         try {
             chrValue = toDecimal18(v);
-            gamecoinValue = chrToGameCoinPrice(v);
-            if (gamecoinValue.compareTo(new BigInteger("1")) < 0) {
-                return new ResponseEntity(400, "能兑换到的gamecoin小于1");
+            chrTokenValue = chrTochrTokenPrice(v);
+            if (chrTokenValue.compareTo(new BigInteger("1")) < 0) {
+                return new ResponseEntity(400, "能兑换到的chrToken小于1");
             }
         } catch (Exception e) {
             logger.error("value解析失败!", e);
@@ -214,23 +207,23 @@ public class SCNController {
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                    , map.get("address").toString(), gamecoinValue);
+                    , map.get("address").toString(), chrTokenValue);
         } catch (Exception e) {
             logger.error("send scn error!", e);
-            return new ResponseEntity(400, "chr支付后，发送gamecoin失败：" + e.getMessage());
+            return new ResponseEntity(400, "chr支付后，发送chrToken失败：" + e.getMessage());
         }
         return new ResponseEntity(result);
     }
 
     /**
-     * 使用gamecoin换回chr
+     * 使用chrToken换回chr
      *
      * @param map
      * @param token
      * @return
      */
-    @RequestMapping("/klaySCN/withDrawGameCoin")
-    public ResponseEntity<?> withDrawGameCoin(@RequestParam Map<String, Object> map,
+    @RequestMapping("/klaySCN/withDrawChrToken")
+    public ResponseEntity<?> withDrawchrToken(@RequestParam Map<String, Object> map,
                                               @RequestHeader("token") String token
     ) {
         if (token == null || token.length() == 0) {
@@ -279,7 +272,7 @@ public class SCNController {
         BigInteger chrValue = null;
         BigInteger scnValue = null;
         try {
-            chrValue = toDecimal18(gameCoinToChrPrice(v));
+            chrValue = toDecimal18(chrTokenToChrPrice(v));
             if (chrValue.compareTo(new BigInteger("1")) < 0) {
                 return new ResponseEntity(400, "能兑换到的chr小于1");
             }
@@ -288,7 +281,7 @@ public class SCNController {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
         }
-        //先扣除gamecoin
+        //先扣除chrToken
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             String encrypt_key = useWallet.get("encrypt_key").toString();
@@ -297,21 +290,21 @@ public class SCNController {
             result = sendingSCN(walletPrivate
                     , KlayController.SWAP_ADDRESS, scnValue);
         } catch (Exception e) {
-            logger.error("send gamecoin error!", e);
-            return new ResponseEntity(400, "gamecoin支付，提现失败:" + e.getMessage());
+            logger.error("send chrToken error!", e);
+            return new ResponseEntity(400, "chrToken支付，提现失败:" + e.getMessage());
         }
         //再发放chr
         try {
             KlayController.sendingCHR(useWallet.get("address").toString(), chrValue);
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
-            return new ResponseEntity(400, "gamecoin支付后，发送chr失败:" + e.getMessage());
+            return new ResponseEntity(400, "chrToken支付后，发送chr失败:" + e.getMessage());
         }
         return new ResponseEntity(result);
     }
 
     //给某个账户发送scn，测试使用
-    @RequestMapping("/test/klaySCN/sendSCNTo")
+    @RequestMapping("/test/klaySCN/sendChrTokenTo")
     public ResponseEntity<?> sendKlayTo(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
@@ -335,11 +328,11 @@ public class SCNController {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
-        var result = getGameCoinBalance(map.get("address").toString());
+        var result = getchrTokenBalance(map.get("address").toString());
         return new ResponseEntity(result);
     }
 
-    public static BigInteger getGameCoinBalance(String address) {
+    public static BigInteger getchrTokenBalance(String address) {
         Caver caver = new Caver(MY_SCN_HOST);
         var request = caver.rpc.klay.getBalance(address, DefaultBlockParameter.valueOf("latest"));
         BigInteger val = new BigInteger("0");
@@ -355,16 +348,16 @@ public class SCNController {
         return KlayController.balanceOfCHR(address);
     }
 
-    public static BigInteger getGameCoinBalance() {
-        return getDecimal6(getGameCoinBalance(KlayController.SWAP_ADDRESS));
+    public static BigInteger getChrTokenBalance() {
+        return getDecimal6(getchrTokenBalance(KlayController.SWAP_ADDRESS));
     }
 
     public static BigInteger getChrBalance() {
         return getDecimal18(getChrBalance(KlayController.SWAP_ADDRESS));
     }
 
-    @RequestMapping("/klaySCN/swap/chrToGameCoinPrice")
-    public ResponseEntity<?> chrToGameCoinPrice(@RequestParam Map<String, Object> map) {
+    //    @RequestMapping("/klaySCN/swap/chrTochrTokenPrice")
+    public ResponseEntity<?> chrTochrTokenPrice(@RequestParam Map<String, Object> map) {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
@@ -372,44 +365,44 @@ public class SCNController {
             return new ResponseEntity(400, "value不能包含小数点");
         }
         BigInteger payChrValue = new BigInteger(map.get("value").toString());
-        BigInteger gameCoinMinus = chrToGameCoinPrice(payChrValue);
+        BigInteger chrTokenMinus = chrTochrTokenPrice(payChrValue);
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
-        balanceMap.put("gameCoinBalance", getGameCoinBalance());
+        balanceMap.put("chrTokenBalance", getChrTokenBalance());
         balanceMap.put("chrAdd", map.get("value").toString());
-        balanceMap.put("gameCoinMinus", gameCoinMinus);
+        balanceMap.put("chrTokenMinus", chrTokenMinus);
         return new ResponseEntity(balanceMap);
     }
 
-    @RequestMapping("/klaySCN/swap/gameCoinToChrPrice")
-    public ResponseEntity<?> gameCoinToChrPrice(@RequestParam Map<String, Object> map) {
+    //    @RequestMapping("/klaySCN/swap/chrTokenToChrPrice")
+    public ResponseEntity<?> chrTokenToChrPrice(@RequestParam Map<String, Object> map) {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
         if (map.get("value").toString().contains(".")) {
             return new ResponseEntity(400, "value不能包含小数点");
         }
-        BigInteger payGameCoinValue = new BigInteger(map.get("value").toString());
+        BigInteger paychrTokenValue = new BigInteger(map.get("value").toString());
 
-        BigInteger chrMinus = gameCoinToChrPrice(payGameCoinValue);
+        BigInteger chrMinus = chrTokenToChrPrice(paychrTokenValue);
         Map balanceMap = new HashMap();
         balanceMap.put("chrBalance", getChrBalance());
-        balanceMap.put("gameCoinBalance", getGameCoinBalance());
-        balanceMap.put("gameCoinAdd", map.get("value").toString());
+        balanceMap.put("chrTokenBalance", getChrTokenBalance());
+        balanceMap.put("chrTokenAdd", map.get("value").toString());
         balanceMap.put("chrMinus", chrMinus);
         return new ResponseEntity(balanceMap);
     }
 
-    public static BigInteger chrToGameCoinPrice(BigInteger value) {
+    public static BigInteger chrTochrTokenPrice(BigInteger value) {
         BigInteger chrBalance = getChrBalance();
-        BigInteger gameCoinBalance = getGameCoinBalance();
-        return abSwap(chrBalance, gameCoinBalance, value);
+        BigInteger chrTokenBalance = getChrTokenBalance();
+        return abSwap(chrBalance, chrTokenBalance, value);
     }
 
-    public static BigInteger gameCoinToChrPrice(BigInteger value) {
+    public static BigInteger chrTokenToChrPrice(BigInteger value) {
         BigInteger chrBalance = getChrBalance();
-        BigInteger gameCoinBalance = getGameCoinBalance();
-        return abSwap(gameCoinBalance, chrBalance, value);
+        BigInteger chrTokenBalance = getChrTokenBalance();
+        return abSwap(chrTokenBalance, chrBalance, value);
     }
 
     public static BigInteger abSwap(BigInteger a, BigInteger b, BigInteger payAValue) {
@@ -462,159 +455,10 @@ public class SCNController {
 
 
     public static void main(String[] args) {
-//        try {
-//            //klay.getBalance("0x38bd8d9f0acda0ce533f44adcfd02b403f411de7")
-//            sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD, "0x38bd8d9f0acda0ce533f44adcfd02b403f411de7", new BigInteger("2"));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (TransactionException e) {
-//            e.printStackTrace();
-//        }
-//        logger.info(JSON.toJSONString(getBalance("0x38bd8d9f0acda0ce533f44adcfd02b403f411de7")));
-
-//        logger.debug(getDecimal18("1003000000000000000"));
-//        logger.debug(toDecimal18("1.00123"));
-//        String ret = "10.";
-//        logger.debug(ret);
-//        if (ret.endsWith(".")) {
-//            ret = ret.substring(0, ret.length() - 1);
-//        }
-//        String ret = toDecimal18(toChr("100000"));
-//        BigInteger ret = abSwap(new BigInteger("268407048"), new BigInteger("72339069039"), new BigInteger("1"));
-//        logger.debug(ret.toString());
-//        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
-//        logger.debug(ret.toString());
         try {
-//            balanceOf();
-            addSaleOrder(new BigInteger("1"), new BigInteger("9"));
-            addBuyOrder(new BigInteger("1"), new BigInteger("11"));
-//            getOrders("getBuyOrders");
-//            getOrders("getSaleOrders");
-//            gameCoinContractDeploy();
         } catch (Exception e) {
             logger.error("", e);
         }
     }
 
-    public static String gameCoinContractDeploy() {
-        Caver caver = new Caver(MY_SCN_HOST);
-        Contract contract = null;
-        try {
-            contract = caver.contract.create(SCNContractController.ABI);
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-            //设置操作人，gas费默认由操作人付款
-            caver.wallet.add(keyring);
-            SendOptions sendOptions = new SendOptions();
-            sendOptions.setFrom(SCN_CHILD_OPERATOR_ADDRESS);
-            sendOptions.setGas(new BigInteger("300000000"));
-            BigInteger initialSupply = new BigInteger("10000000");
-            PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
-            contract.deploy(sendOptions, processor, SCNContractController.contractBinaryData.toString(), initialSupply);
-            logger.info("gameCoinContractDeploy address:" + contract.getContractAddress());
-        } catch (Exception e) {
-            logger.error("gameCoinContractDeploy error！", e);
-            e.printStackTrace();
-            return null;
-        }
-        return contract.getContractAddress();
-    }
-
-
-    public static TransactionReceipt.TransactionReceiptData addSaleOrder(BigInteger amount, BigInteger price) {
-        Caver caver = new Caver(MY_SCN_HOST);
-        TransactionReceipt.TransactionReceiptData ret = null;
-        try {
-            Contract contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-            //设置操作人，gas费默认由操作人付款
-            caver.wallet.add(keyring);
-            List<Object> params = new ArrayList<>();
-            params.add(amount);
-            params.add(price);
-            SendOptions sendOptions = new SendOptions();
-            sendOptions.setFrom(keyring.getAddress());
-            sendOptions.setGas(gas);
-            ContractMethod method = contract.getMethod("addSaleOrder");
-            PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
-            ret = method.send(params, sendOptions, processor);
-            logger.info("addSaleOrder :" + JSON.toJSONString(ret));
-        } catch (Exception e) {
-            logger.error("addSaleOrder error！", e);
-            e.printStackTrace();
-            return null;
-        }
-        return ret;
-    }
-
-    public static TransactionReceipt.TransactionReceiptData addBuyOrder(BigInteger amount, BigInteger price) {
-        Caver caver = new Caver(MY_SCN_HOST);
-        TransactionReceipt.TransactionReceiptData ret = null;
-        try {
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-            //设置操作人，gas费默认由操作人付款
-            caver.wallet.add(keyring);
-            List<Object> params = new ArrayList<>();
-            params.add(price);
-            SendOptions sendOptions = new SendOptions();
-            sendOptions.setFrom(keyring.getAddress());
-            sendOptions.setGas(gas);
-            sendOptions.setValue(amount);
-            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS)
-                    .getMethod("addBuyOrder");
-            PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
-            ret = method.send(params, sendOptions, processor);
-            logger.info("addBuyOrder :" + JSON.toJSONString(ret));
-        } catch (Exception e) {
-            logger.error("addBuyOrder error！", e);
-            e.printStackTrace();
-            return null;
-        }
-        return ret;
-    }
-
-
-    public static ArrayList getOrders(String methodName) {
-        Caver caver = new Caver(MY_SCN_HOST);
-        ArrayList arr = null;
-        try {
-            Contract contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-            //设置操作人，gas费默认由操作人付款
-            caver.wallet.add(keyring);
-            ContractMethod method = contract.getMethod(methodName);
-            List<Object> params = new ArrayList<>();
-            var ret = method.call(params);
-            if (ret.size() != 0) {
-                arr = (ArrayList) ret.get(0).getValue();
-                logger.info(methodName + " :" + JSON.toJSONString(arr));
-            }
-        } catch (Exception e) {
-            logger.error(methodName + " error！", e);
-            e.printStackTrace();
-            return null;
-        }
-        return arr;
-    }
-
-    public static List<Type> balanceOf() {
-        Caver caver = new Caver(MY_SCN_HOST);
-        List<Type> ret = null;
-        try {
-            Contract contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
-            ContractMethod method = contract.getMethod("balanceOf");
-            List<Object> params = new ArrayList<>();
-            params.add(SCN_CHILD_OPERATOR_ADDRESS);
-            ret = method.call(params);
-            logger.info("balanceOf :" + ret.get(0).getValue().toString());
-        } catch (Exception e) {
-            logger.error("balanceOf error！", e);
-            e.printStackTrace();
-            return null;
-        }
-        return ret;
-    }
 }
