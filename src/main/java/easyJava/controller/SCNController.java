@@ -63,7 +63,7 @@ public class SCNController {
     public static final String SCN_CHILD_OPERATOR = "{\"address\":\"56c8cb5daf329fc8613112b51e359b2dbae4fd97\",\"keyring\":[[{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"1a6d4aac70114be5b4eb54bf8cc11c58f23c4e8e97b2235cf6a9d0bfcc478a55\",\"cipherparams\":{\"iv\":\"24a74d100afae38093f7a5267ee17626\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"17ff967beb4c3e98c4d63c3b78c9a721a2fc5906c5d3ab43f81ec0a305c7e4c6\"},\"mac\":\"000d9abe5cd71085e4789abd1a604d77cdc31aef05eae5b1bcfbed364a94fbfb\"}]],\"id\":\"7de1963a-e59d-496b-bf34-029d50b76ab3\",\"version\":4}";
     public static final String SCN_CHILD_OPERATOR_PASSWORD = "cbor{@b9b1__#+#}";
     public static final String SCN_CHILD_OPERATOR_ADDRESS = "0x56c8cb5daf329fc8613112b51e359b2dbae4fd97";
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xf0385e4dd297d8c439e7c5f186ecd5fddb6318d7";
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xb2434172cdb18c35473e1931da69549a7bdc304d";
 
 
     public static ObjectMapper mapper = new ObjectMapper();
@@ -485,10 +485,10 @@ public class SCNController {
 //        ret = abSwap(new BigInteger("72339069039"), new BigInteger("268407048"), new BigInteger("269"));
 //        logger.debug(ret.toString());
         try {
-//            balanceOf();
+            balanceOf();
 //            addSaleOrder();
 //            getSaleOrders();
-            gameCoinContractDeploy();
+//            gameCoinContractDeploy();
         } catch (Exception e) {
             logger.error("", e);
         }
@@ -507,9 +507,9 @@ public class SCNController {
             sendOptions.setFrom(SCN_CHILD_OPERATOR_ADDRESS);
             sendOptions.setGas(new BigInteger("300000000"));
             BigInteger initialSupply = new BigInteger("10000000");
-            contract.deploy(sendOptions, SCNContractController.contractBinaryData.toString(), initialSupply);
+            PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
+            contract.deploy(sendOptions, processor, SCNContractController.contractBinaryData.toString(), initialSupply);
             logger.info("gameCoinContractDeploy address:" + contract.getContractAddress());
-            addBuyOrder(contract);
         } catch (Exception e) {
             logger.error("gameCoinContractDeploy error！", e);
             e.printStackTrace();
@@ -606,7 +606,7 @@ public class SCNController {
             List<Object> params = new ArrayList<>();
             params.add(SCN_CHILD_OPERATOR_ADDRESS);
             ret = method.call(params);
-            logger.info("balanceOf :", JSON.toJSONString(ret));
+            logger.info("balanceOf :" + ret.get(0).getValue().toString());
         } catch (Exception e) {
             logger.error("balanceOf error！", e);
             e.printStackTrace();
