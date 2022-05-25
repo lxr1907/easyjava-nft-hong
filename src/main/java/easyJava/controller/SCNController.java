@@ -399,15 +399,17 @@ public class SCNController {
     }
 
     public static BigInteger chrTochrTokenPrice(BigInteger value) {
-        BigInteger chrBalance = getChrBalance();
-        BigInteger chrTokenBalance = getChrTokenBalance();
-        return abSwap(chrBalance, chrTokenBalance, value);
+        return value;
+//        BigInteger chrBalance = getChrBalance();
+//        BigInteger chrTokenBalance = getChrTokenBalance();
+//        return abSwap(chrBalance, chrTokenBalance, value);
     }
 
     public static BigInteger chrTokenToChrPrice(BigInteger value) {
-        BigInteger chrBalance = getChrBalance();
-        BigInteger chrTokenBalance = getChrTokenBalance();
-        return abSwap(chrTokenBalance, chrBalance, value);
+        return value;
+//        BigInteger chrBalance = getChrBalance();
+//        BigInteger chrTokenBalance = getChrTokenBalance();
+//        return abSwap(chrTokenBalance, chrBalance, value);
     }
 
     public static BigInteger abSwap(BigInteger a, BigInteger b, BigInteger payAValue) {
