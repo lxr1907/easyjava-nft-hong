@@ -165,7 +165,7 @@ public class SCNGameCoinController {
         if (methodName == null || methodName.length() == 0) {
             return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
         }
-        return new ResponseEntity(getOrders(map.get("methodName").toString()));
+        return new ResponseEntity(getOrders(methodName));
     }
 
     /**
