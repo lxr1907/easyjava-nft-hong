@@ -8,17 +8,15 @@ import com.klaytn.caver.abi.datatypes.Type;
 import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.ContractMethod;
 import com.klaytn.caver.contract.SendOptions;
-import com.klaytn.caver.methods.response.Bytes32;
 import com.klaytn.caver.methods.response.TransactionReceipt;
-import com.klaytn.caver.transaction.TxPropertyBuilder;
 import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
-import com.klaytn.caver.transaction.response.TransactionReceiptProcessor;
-import com.klaytn.caver.transaction.type.ValueTransfer;
 import com.klaytn.caver.wallet.keyring.KeyStore;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.dao.master.BaseDao;
+import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
+import easyJava.utils.DESUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +25,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.web3j.crypto.CipherException;
-import org.web3j.protocol.exceptions.TransactionException;
 
 import javax.websocket.server.PathParam;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,24 +54,6 @@ public class SCNGameCoinController {
 
     public static ObjectMapper mapper = new ObjectMapper();
 
-
-    /**
-     * 发送scn
-     *
-     * @param keyStoreJSON
-     * @param pwd
-     * @param toAddress
-     * @param value
-     * @throws IOException
-     * @throws CipherException
-     * @throws TransactionException
-     */
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, BigInteger value) throws TransactionException, IOException {
-        String fromPrivateKey = getPrivateKeyFromJson(keyStoreJSON, pwd);
-        var transactionReceipt = sendingSCN(fromPrivateKey, toAddress, value);
-        return transactionReceipt;
-    }
-
     public static String getPrivateKeyFromJson(String keyStoreJSON, String pwd) {
         String fromPrivateKey = "";
         try {
@@ -93,37 +70,6 @@ public class SCNGameCoinController {
             return null;
         }
         return fromPrivateKey;
-    }
-
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
-        if (fromPrivateKey == null) {
-            return null;
-        }
-        Caver caver = new Caver(MY_SCN_HOST);
-        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(fromPrivateKey);
-        String fromAddress = keyring.toAccount().getAddress();
-        //Add to caver wallet.
-        caver.wallet.add(keyring);
-        //Create a value transfer transaction
-        ValueTransfer valueTransfer = caver.transaction.valueTransfer.create(
-                TxPropertyBuilder.valueTransfer()
-                        .setFrom(keyring.getAddress())
-                        .setTo(toAddress).setValue(value)
-                        .setGas(gas));
-        //Sign to the transaction
-        valueTransfer.sign(keyring);
-        //Send a transaction to the klaytn blockchain platform (Klaytn)
-        Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).send();
-        if (result.hasError()) {
-            logger.error("sendingSCN 失败:" + result.getError().getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
-            throw new RuntimeException(result.getError().getMessage());
-        }
-        logger.info("sendingSCN :" + result.getResult() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
-        //Check transaction receipt.
-        TransactionReceiptProcessor transactionReceiptProcessor = new PollingTransactionReceiptProcessor(caver, 1000, 15);
-        TransactionReceipt.TransactionReceiptData transactionReceipt = transactionReceiptProcessor.waitForTransactionReceipt(result.getResult());
-
-        return transactionReceipt;
     }
 
     /**
@@ -175,12 +121,39 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "address不能为空！");
         }
         Map user = (Map) redisTemplate.opsForValue().get(token);
-
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
-        return new ResponseEntity(addSaleOrder(new BigInteger(map.get("amount").toString()),
-                new BigInteger(map.get("price").toString())));
+        Map useWallet = getUserWallet(user, map.get("address").toString());
+
+        if (useWallet == null) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
+                    new BigInteger(map.get("price").toString()));
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("addSaleOrder error!", e);
+            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+        }
+    }
+
+    public Map getUserWallet(Map user, String address) {
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", UserController.USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        Map useWallet = null;
+        for (var wallet : userWalletList) {
+            if (wallet.get("address").equals(address)) {
+                useWallet = wallet;
+            }
+        }
+        return useWallet;
     }
 
     /**
@@ -227,15 +200,33 @@ public class SCNGameCoinController {
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
         }
-        return new ResponseEntity(addBuyOrder(new BigInteger(map.get("amount").toString()),
-                new BigInteger(map.get("price").toString())));
+        Map useWallet = getUserWallet(user, map.get("address").toString());
+
+        if (useWallet == null) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
+                    new BigInteger(map.get("price").toString()));
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("addSaleOrder error!", e);
+            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+        }
+    }
+
+    public static String getUserWalletPrivate(Map useWallet) {
+        String encrypt_key = useWallet.get("encrypt_key").toString();
+        String encrypted_private = useWallet.get("encrypted_private").toString();
+        String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
+        return walletPrivate;
     }
 
     public static void main(String[] args) {
         try {
 //            balanceOf();
-            addSaleOrder(new BigInteger("1"), new BigInteger("9"));
-            addBuyOrder(new BigInteger("1"), new BigInteger("11"));
+            addSaleOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("9"));
+            addBuyOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("11"));
 //            getOrders("getBuyOrders");
 //            getOrders("getSaleOrders");
 //            gameCoinContractDeploy();
@@ -268,61 +259,66 @@ public class SCNGameCoinController {
         return contract.getContractAddress();
     }
 
-
-    public static TransactionReceipt.TransactionReceiptData addSaleOrder(BigInteger amount, BigInteger price) {
-        Caver caver = new Caver(MY_SCN_HOST);
-        TransactionReceipt.TransactionReceiptData ret = null;
-        try {
-            Contract contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-            //设置操作人，gas费默认由操作人付款
-            caver.wallet.add(keyring);
-            List<Object> params = new ArrayList<>();
-            params.add(amount);
-            params.add(price);
-            SendOptions sendOptions = new SendOptions();
-            sendOptions.setFrom(keyring.getAddress());
-            sendOptions.setGas(gas);
-            ContractMethod method = contract.getMethod("addSaleOrder");
-            PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
-            ret = method.send(params, sendOptions, processor);
-            logger.info("addSaleOrder :" + JSON.toJSONString(ret));
-        } catch (Exception e) {
-            logger.error("addSaleOrder error！", e);
-            e.printStackTrace();
-            return null;
-        }
-        return ret;
+    public static SingleKeyring getOperatorSingleKeyring() {
+        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
+                getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        return keyring;
     }
 
-    public static TransactionReceipt.TransactionReceiptData addBuyOrder(BigInteger amount, BigInteger price) {
+    public static SingleKeyring getSingleKeyring(String privateKey) {
+        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(privateKey);
+        return keyring;
+    }
+
+    public static SingleKeyring getSingleKeyring(Map userWallet) {
+        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(getUserWalletPrivate(userWallet));
+        return keyring;
+    }
+
+    public static TransactionReceipt.TransactionReceiptData addSaleOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) {
+        List<Object> params = new ArrayList<>();
+        params.add(amount);
+        params.add(price);
+        return addOrder(keyring, params, new BigInteger("0"), "addSaleOrder");
+    }
+
+    public static TransactionReceipt.TransactionReceiptData addBuyOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) {
+        List<Object> params = new ArrayList<>();
+        params.add(price);
+        return addOrder(keyring, params, amount, "addBuyOrder");
+    }
+
+    public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params,
+                                                                     BigInteger amount, String methodName) {
         Caver caver = new Caver(MY_SCN_HOST);
         TransactionReceipt.TransactionReceiptData ret = null;
         try {
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
+            SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
                     getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
             caver.wallet.add(keyring);
-            List<Object> params = new ArrayList<>();
-            params.add(price);
             SendOptions sendOptions = new SendOptions();
             sendOptions.setFrom(keyring.getAddress());
             sendOptions.setGas(gas);
             sendOptions.setValue(amount);
+
+            if (keyring.getAddress() != systemKeyring.getAddress()) {
+                caver.wallet.add(systemKeyring);
+                sendOptions.setFeeDelegation(true);
+                sendOptions.setFeePayer(systemKeyring.getAddress());
+            }
             ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS)
-                    .getMethod("addBuyOrder");
+                    .getMethod(methodName);
             PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
             ret = method.send(params, sendOptions, processor);
-            logger.info("addBuyOrder :" + JSON.toJSONString(ret));
+            logger.info(methodName + " :" + JSON.toJSONString(ret));
         } catch (Exception e) {
-            logger.error("addBuyOrder error！", e);
+            logger.error(methodName + " error！", e);
             e.printStackTrace();
             return null;
         }
         return ret;
     }
-
 
     public static ArrayList getOrders(String methodName) {
         Caver caver = new Caver(MY_SCN_HOST);

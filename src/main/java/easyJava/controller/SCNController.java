@@ -323,6 +323,11 @@ public class SCNController {
         return new ResponseEntity(result);
     }
 
+    /**
+     * 获取chrToken的余额
+     * @param map
+     * @return
+     */
     @RequestMapping("/klaySCN/getBalance")
     public ResponseEntity<?> getBalance(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
