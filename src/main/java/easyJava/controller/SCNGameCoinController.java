@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
+import com.klaytn.caver.abi.datatypes.StaticStruct;
 import com.klaytn.caver.abi.datatypes.Type;
 import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.ContractMethod;
@@ -138,46 +139,6 @@ public class SCNGameCoinController {
         }
     }
 
-    public Map getUserWallet(Map user, String address) {
-        Map walletMap = new HashMap<>();
-        walletMap.put("tableName", UserController.USER_WALLET_TABLE);
-        walletMap.put("user_id", user.get("id"));
-        BaseModel baseModel = new BaseModel();
-        baseModel.setPageNo(1);
-        baseModel.setPageSize(10);
-        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
-        Map useWallet = null;
-        for (var wallet : userWalletList) {
-            if (wallet.get("address").equals(address)) {
-                useWallet = wallet;
-            }
-        }
-        return useWallet;
-    }
-
-    /**
-     * 出售gameCoin
-     *
-     * @param map
-     * @return
-     */
-    @RequestMapping("/gameCoin/getOrders/{methodName}")
-    public ResponseEntity<?> getOrders(@RequestParam Map<String, Object> map,
-                                       @PathVariable String methodName
-    ) {
-        if (methodName == null || methodName.length() == 0) {
-            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
-        }
-        String key = "getOrders:" + methodName;
-        ArrayList ordersRedis = (ArrayList) redisTemplate.opsForValue().get(key);
-        if (ordersRedis == null || ordersRedis.size() == 0) {
-            ArrayList orders = getOrders(methodName);
-            redisTemplate.opsForValue().set(key, orders);
-            return new ResponseEntity(orders);
-        } else {
-            return new ResponseEntity(ordersRedis);
-        }
-    }
 
     /**
      * 购买gameCoin挂单
@@ -239,6 +200,56 @@ public class SCNGameCoinController {
         return new ResponseEntity();
     }
 
+    /**
+     * 出售gameCoin
+     *
+     * @param map
+     * @return
+     */
+    @RequestMapping("/gameCoin/getOrders/{methodName}")
+    public ResponseEntity<?> getOrders(@RequestParam Map<String, Object> map,
+                                       @PathVariable String methodName
+    ) {
+        if (methodName == null || methodName.length() == 0) {
+            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
+        }
+        String key = "getOrders:" + methodName;
+        ArrayList ordersRedis = (ArrayList) redisTemplate.opsForValue().get(key);
+        if (ordersRedis == null || ordersRedis.size() == 0) {
+            ArrayList orders = getOrders(methodName);
+            redisTemplate.opsForValue().set(key, orders);
+            return new ResponseEntity(orders);
+        } else {
+            return new ResponseEntity(ordersRedis);
+        }
+    }
+
+    @RequestMapping("/gameCoin/getOrdersByAddress/{methodName}/{address}")
+    public ResponseEntity<?> getOrdersByAddress(@PathVariable String methodName, @PathVariable String address
+    ) {
+        if (methodName == null || methodName.length() == 0) {
+            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
+        }
+        if (address == null || address.length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        String key = "getOrders:" + methodName;
+        ArrayList ordersRedis = (ArrayList) redisTemplate.opsForValue().get(key);
+        if (ordersRedis == null || ordersRedis.size() == 0) {
+            ArrayList orders = getOrders(methodName);
+            List myOrders = new ArrayList();
+            orders.forEach(order -> {
+                StaticStruct orderStr = (StaticStruct) order;
+                if (orderStr.getValue().get(3).getValue().equals(address)) {
+                    myOrders.add(order);
+                }
+            });
+            return new ResponseEntity(myOrders);
+        } else {
+            return new ResponseEntity(ordersRedis);
+        }
+    }
+
     public static String getUserWalletPrivate(Map useWallet) {
         String encrypt_key = useWallet.get("encrypt_key").toString();
         String encrypted_private = useWallet.get("encrypted_private").toString();
@@ -246,18 +257,21 @@ public class SCNGameCoinController {
         return walletPrivate;
     }
 
-    public static void main(String[] args) {
-        try {
-//            balanceOf();
-//            addSaleOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("9"));
-//            addBuyOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("11"));
-//            getOrders("getBuyOrders");
-//            getOrders("getSaleOrders");
-//            gameCoinContractDeploy();
-            testTransfer("0x85c616c2d51b6c653e00325ae85660d5b0c50786", "10000000000000");
-        } catch (Exception e) {
-            logger.error("", e);
+    public Map getUserWallet(Map user, String address) {
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", UserController.USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        Map useWallet = null;
+        for (var wallet : userWalletList) {
+            if (wallet.get("address").equals(address)) {
+                useWallet = wallet;
+            }
         }
+        return useWallet;
     }
 
     public static String gameCoinContractDeploy() {
@@ -411,4 +425,26 @@ public class SCNGameCoinController {
                 getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         return addOrder(systemKeyring, params, new BigInteger("0"), "matchBuyOrder");
     }
+
+    public static void main(String[] args) {
+        try {
+//            balanceOf();
+//            addSaleOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("9"));
+//            addBuyOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("11"));
+//            getOrders("getBuyOrders");
+            ArrayList orders = getOrders("getSaleOrders");
+            List myOrders = new ArrayList();
+            orders.forEach(order -> {
+                StaticStruct orderStr = (StaticStruct) order;
+                if (orderStr.getValue().get(3).getValue().equals("0x85c616c2d51b6c653e00325ae85660d5b0c50786")) {
+                    myOrders.add(order);
+                }
+            });
+//            gameCoinContractDeploy();
+//            testTransfer("0x85c616c2d51b6c653e00325ae85660d5b0c50786", "10000000000000");
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+    }
+
 }
