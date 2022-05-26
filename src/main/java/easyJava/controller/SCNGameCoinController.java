@@ -129,6 +129,8 @@ public class SCNGameCoinController {
             var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
             matchSaleOrder();
+            String key = "getOrders:getSaleOrders";
+            redisTemplate.opsForValue().getAndDelete(key);
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -166,7 +168,15 @@ public class SCNGameCoinController {
         if (methodName == null || methodName.length() == 0) {
             return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
         }
-        return new ResponseEntity(getOrders(methodName));
+        String key = "getOrders:" + methodName;
+        ArrayList ordersRedis = (ArrayList) redisTemplate.opsForValue().get(key);
+        if (ordersRedis == null || ordersRedis.size() == 0) {
+            ArrayList orders = getOrders(methodName);
+            redisTemplate.opsForValue().set(key, orders);
+            return new ResponseEntity(orders);
+        } else {
+            return new ResponseEntity(ordersRedis);
+        }
     }
 
     /**
@@ -206,6 +216,8 @@ public class SCNGameCoinController {
             var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
             matchBuyOrder();
+            String key = "getOrders:getBuyOrders";
+            redisTemplate.opsForValue().getAndDelete(key);
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
