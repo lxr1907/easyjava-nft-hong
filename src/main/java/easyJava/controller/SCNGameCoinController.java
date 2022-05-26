@@ -128,6 +128,7 @@ public class SCNGameCoinController {
         try {
             var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
+            matchSaleOrder();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -204,6 +205,7 @@ public class SCNGameCoinController {
         try {
             var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
+            matchBuyOrder();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -382,5 +384,19 @@ public class SCNGameCoinController {
             return null;
         }
         return result;
+    }
+
+    public static TransactionReceipt.TransactionReceiptData matchSaleOrder() {
+        List<Object> params = new ArrayList<>();
+        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
+                getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        return addOrder(systemKeyring, params, new BigInteger("0"), "matchSaleOrder");
+    }
+
+    public static TransactionReceipt.TransactionReceiptData matchBuyOrder() {
+        List<Object> params = new ArrayList<>();
+        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
+                getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        return addOrder(systemKeyring, params, new BigInteger("0"), "matchBuyOrder");
     }
 }
