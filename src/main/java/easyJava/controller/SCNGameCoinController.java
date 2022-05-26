@@ -214,9 +214,14 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
         }
         String key = "getOrders:" + methodName;
-        ArrayList ordersRedis = (ArrayList) redisTemplate.opsForValue().get(key);
+        List ordersRedis = null;
+        try {
+            ordersRedis = (List) redisTemplate.opsForValue().get(key);
+        } catch (Exception e) {
+            logger.error("error:", e);
+        }
         if (ordersRedis == null || ordersRedis.size() == 0) {
-            ArrayList orders = getOrders(methodName);
+            List<List> orders = getOrders(methodName);
             redisTemplate.opsForValue().set(key, orders);
             return new ResponseEntity(orders);
         } else {
@@ -234,13 +239,17 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "address不能为空！");
         }
         String key = "getOrders:" + methodName;
-        ArrayList ordersRedis = (ArrayList) redisTemplate.opsForValue().get(key);
+        List ordersRedis = null;
+        try {
+            ordersRedis = (List) redisTemplate.opsForValue().get(key);
+        } catch (Exception e) {
+            logger.error("error:", e);
+        }
         if (ordersRedis == null || ordersRedis.size() == 0) {
-            ArrayList orders = getOrders(methodName);
+            List<List> orders = getOrders(methodName);
             List myOrders = new ArrayList();
             orders.forEach(order -> {
-                StaticStruct orderStr = (StaticStruct) order;
-                if (orderStr.getValue().get(3).getValue().equals(address)) {
+                if (order.get(3).equals(address)) {
                     myOrders.add(order);
                 }
             });
@@ -368,9 +377,9 @@ public class SCNGameCoinController {
         addOrder(systemKeyring, params, new BigInteger("0"), "transfer");
     }
 
-    public static ArrayList getOrders(String methodName) {
+    public static List<List> getOrders(String methodName) {
         Caver caver = new Caver(MY_SCN_HOST);
-        ArrayList arr = null;
+        List arr = null;
         try {
             Contract contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
             SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
@@ -381,7 +390,7 @@ public class SCNGameCoinController {
             List<Object> params = new ArrayList<>();
             var ret = method.call(params);
             if (ret.size() != 0) {
-                arr = (ArrayList) ret.get(0).getValue();
+                arr = (List) ret.get(0).getValue();
                 logger.info(methodName + " :" + JSON.toJSONString(arr));
             }
         } catch (Exception e) {
@@ -389,7 +398,17 @@ public class SCNGameCoinController {
             e.printStackTrace();
             return null;
         }
-        return arr;
+        List<List> ordersValues = new ArrayList();
+        arr.forEach(order -> {
+            StaticStruct orderValus = (StaticStruct) order;
+            List valueList = new ArrayList();
+            orderValus.getValue().forEach(v -> {
+                valueList.add(v.getValue());
+
+            });
+            ordersValues.add(valueList);
+        });
+        return ordersValues;
     }
 
     public static String balanceOf(String address) {
@@ -432,7 +451,7 @@ public class SCNGameCoinController {
 //            addSaleOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("9"));
 //            addBuyOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("11"));
 //            getOrders("getBuyOrders");
-            ArrayList orders = getOrders("getSaleOrders");
+            List orders = getOrders("getSaleOrders");
             List myOrders = new ArrayList();
             orders.forEach(order -> {
                 StaticStruct orderStr = (StaticStruct) order;
