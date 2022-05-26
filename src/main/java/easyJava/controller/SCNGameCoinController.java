@@ -131,7 +131,7 @@ public class SCNGameCoinController {
                     new BigInteger(map.get("price").toString()));
             matchSaleOrder();
             String key = "getOrders:getSaleOrders";
-            redisTemplate.opsForValue().getAndDelete(key);
+            redisTemplate.opsForValue().set(key, new ArrayList<>());
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -178,7 +178,7 @@ public class SCNGameCoinController {
                     new BigInteger(map.get("price").toString()));
             matchBuyOrder();
             String key = "getOrders:getBuyOrders";
-            redisTemplate.opsForValue().getAndDelete(key);
+            redisTemplate.opsForValue().set(key, new ArrayList<>());
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
