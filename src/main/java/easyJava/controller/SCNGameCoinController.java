@@ -239,24 +239,22 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "address不能为空！");
         }
         String key = "getOrders:" + methodName;
-        List ordersRedis = null;
+        List<List> ordersRedis = null;
         try {
-            ordersRedis = (List) redisTemplate.opsForValue().get(key);
+            ordersRedis = (List<List>) redisTemplate.opsForValue().get(key);
         } catch (Exception e) {
             logger.error("error:", e);
         }
+        List myOrders = new ArrayList();
         if (ordersRedis == null || ordersRedis.size() == 0) {
-            List<List> orders = getOrders(methodName);
-            List myOrders = new ArrayList();
-            orders.forEach(order -> {
-                if (order.get(3).equals(address)) {
-                    myOrders.add(order);
-                }
-            });
-            return new ResponseEntity(myOrders);
-        } else {
-            return new ResponseEntity(ordersRedis);
+            ordersRedis = getOrders(methodName);
         }
+        ordersRedis.forEach(order -> {
+            if (order.get(3).equals(address)) {
+                myOrders.add(order);
+            }
+        });
+        return new ResponseEntity(myOrders);
     }
 
     public static String getUserWalletPrivate(Map useWallet) {
