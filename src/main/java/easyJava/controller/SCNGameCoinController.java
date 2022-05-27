@@ -25,10 +25,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -284,9 +281,9 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
         }
         String key = "getOrders:" + methodName;
-        List ordersRedis = null;
+        List<List> ordersRedis = null;
         try {
-            ordersRedis = (List) redisTemplate.opsForValue().get(key);
+            ordersRedis = (List<List>) redisTemplate.opsForValue().get(key);
         } catch (Exception e) {
             logger.error("error:", e);
         }
@@ -294,11 +291,31 @@ public class SCNGameCoinController {
             ordersRedis = getOrders(methodName);
             redisTemplate.opsForValue().set(key, ordersRedis);
         }
+        ordersRedis = getSortedCombined(ordersRedis);
         //目前只显示前5条
         if (ordersRedis != null && ordersRedis.size() > 5) {
             ordersRedis = ordersRedis.subList(0, 5);
         }
         return new ResponseEntity(ordersRedis);
+    }
+
+    public static List<List> getSortedCombined(List<List> list) {
+        List<List> newList = new ArrayList<>();
+        Map<Object, List> map = new LinkedHashMap<>();
+        for (var order : list) {
+            if (map.containsKey(order.get(1))) {
+                Object amount = map.get(order.get(1)).get(0);
+                BigInteger addAmount = new BigInteger(amount.toString())
+                        .add(new BigInteger(order.get(0).toString()));
+                map.get(order.get(1)).set(0, addAmount);
+            } else {
+                map.put(order.get(1), order);
+            }
+        }
+        for (var entry : map.entrySet()) {
+            newList.add(entry.getValue());
+        }
+        return newList;
     }
 
     @RequestMapping("/gameCoin/getOrdersByAddress/{methodName}/{address}")
