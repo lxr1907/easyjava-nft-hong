@@ -35,6 +35,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 
 @RestController
@@ -72,7 +73,7 @@ public class SCNController {
      * @throws CipherException
      * @throws TransactionException
      */
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, BigInteger value) throws TransactionException, IOException {
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String keyStoreJSON, String pwd, String toAddress, BigInteger value) throws TransactionException, IOException, ExecutionException, InterruptedException {
         String fromPrivateKey = getPrivateKeyFromJson(keyStoreJSON, pwd);
         var transactionReceipt = sendingSCN(fromPrivateKey, toAddress, value);
         return transactionReceipt;
@@ -96,7 +97,7 @@ public class SCNController {
         return fromPrivateKey;
     }
 
-    public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException {
+    public static TransactionReceipt.TransactionReceiptData sendingSCN(String fromPrivateKey, String toAddress, BigInteger value) throws IOException, TransactionException, ExecutionException, InterruptedException {
         if (fromPrivateKey == null) {
             return null;
         }
@@ -114,7 +115,7 @@ public class SCNController {
         //Sign to the transaction
         valueTransfer.sign(keyring);
         //Send a transaction to the klaytn blockchain platform (Klaytn)
-        Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).send();
+        Bytes32 result = caver.rpc.klay.sendRawTransaction(valueTransfer.getRawTransaction()).sendAsync().get();
         if (result.hasError()) {
             logger.error("sendingSCN 失败:" + result.getError().getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value);
             throw new RuntimeException(result.getError().getMessage());
