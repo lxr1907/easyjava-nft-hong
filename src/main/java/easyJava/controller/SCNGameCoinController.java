@@ -221,12 +221,14 @@ public class SCNGameCoinController {
             logger.error("error:", e);
         }
         if (ordersRedis == null || ordersRedis.size() == 0) {
-            List<List> orders = getOrders(methodName);
-            redisTemplate.opsForValue().set(key, orders);
-            return new ResponseEntity(orders);
-        } else {
-            return new ResponseEntity(ordersRedis);
+            ordersRedis = getOrders(methodName);
+            redisTemplate.opsForValue().set(key, ordersRedis);
         }
+        //目前只显示前5条
+        if (ordersRedis != null && ordersRedis.size() > 5) {
+            ordersRedis = ordersRedis.subList(0, 4);
+        }
+        return new ResponseEntity(ordersRedis);
     }
 
     @RequestMapping("/gameCoin/getOrdersByAddress/{methodName}/{address}")
