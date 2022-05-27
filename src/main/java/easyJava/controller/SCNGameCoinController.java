@@ -186,6 +186,76 @@ public class SCNGameCoinController {
         }
     }
 
+    @RequestMapping("/gameCoin/cancelBuyOrder")
+    public ResponseEntity<?> cancelBuyOrder(@RequestParam Map<String, Object> map,
+                                            @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("time") == null || map.get("time").toString().length() == 0) {
+            return new ResponseEntity(400, "time不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        Map useWallet = getUserWallet(user, map.get("address").toString());
+
+        if (useWallet == null) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            var result = cancelBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
+            matchBuyOrder();
+            String key = "getOrders:getBuyOrders";
+            redisTemplate.opsForValue().set(key, new ArrayList<>());
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("cancelBuyOrder error!", e);
+            return new ResponseEntity(400, "cancelBuyOrder失败:" + e.getMessage());
+        }
+    }
+
+    @RequestMapping("/gameCoin/cancelSaleOrder")
+    public ResponseEntity<?> cancelSaleOrder(@RequestParam Map<String, Object> map,
+                                             @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("time") == null || map.get("time").toString().length() == 0) {
+            return new ResponseEntity(400, "time不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        Map useWallet = getUserWallet(user, map.get("address").toString());
+
+        if (useWallet == null) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            var result = cancelSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
+            matchBuyOrder();
+            String key = "getOrders:getSaleOrders";
+            redisTemplate.opsForValue().set(key, new ArrayList<>());
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("cancelSaleOrder error!", e);
+            return new ResponseEntity(400, "cancelSaleOrder失败:" + e.getMessage());
+        }
+    }
+
     @RequestMapping("/gameCoin/test/addGameCoin")
     public ResponseEntity<?> addGameCoin(@RequestParam Map<String, Object> map,
                                          @RequestHeader("token") String token
@@ -334,6 +404,18 @@ public class SCNGameCoinController {
         List<Object> params = new ArrayList<>();
         params.add(price);
         return addOrder(keyring, params, amount, "addBuyOrder");
+    }
+
+    public static TransactionReceipt.TransactionReceiptData cancelSaleOrder(SingleKeyring keyring, BigInteger time) {
+        List<Object> params = new ArrayList<>();
+        params.add(time);
+        return addOrder(keyring, params, new BigInteger("0"), "cancelSaleOrder");
+    }
+
+    public static TransactionReceipt.TransactionReceiptData cancelBuyOrder(SingleKeyring keyring, BigInteger time) {
+        List<Object> params = new ArrayList<>();
+        params.add(time);
+        return addOrder(keyring, params, new BigInteger("0"), "cancelBuyOrder");
     }
 
     public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params,
