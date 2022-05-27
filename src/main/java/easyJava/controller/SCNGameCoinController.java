@@ -296,7 +296,7 @@ public class SCNGameCoinController {
         }
         //目前只显示前5条
         if (ordersRedis != null && ordersRedis.size() > 5) {
-            ordersRedis = ordersRedis.subList(0, 4);
+            ordersRedis = ordersRedis.subList(0, 5);
         }
         return new ResponseEntity(ordersRedis);
     }
