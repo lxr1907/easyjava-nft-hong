@@ -44,7 +44,7 @@ public class SCNGameCoinController {
     public static final String SCN_CHILD_OPERATOR = "{\"address\":\"56c8cb5daf329fc8613112b51e359b2dbae4fd97\",\"keyring\":[[{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"1a6d4aac70114be5b4eb54bf8cc11c58f23c4e8e97b2235cf6a9d0bfcc478a55\",\"cipherparams\":{\"iv\":\"24a74d100afae38093f7a5267ee17626\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"17ff967beb4c3e98c4d63c3b78c9a721a2fc5906c5d3ab43f81ec0a305c7e4c6\"},\"mac\":\"000d9abe5cd71085e4789abd1a604d77cdc31aef05eae5b1bcfbed364a94fbfb\"}]],\"id\":\"7de1963a-e59d-496b-bf34-029d50b76ab3\",\"version\":4}";
     public static final String SCN_CHILD_OPERATOR_PASSWORD = "cbor{@b9b1__#+#}";
     public static final String SCN_CHILD_OPERATOR_ADDRESS = "0x56c8cb5daf329fc8613112b51e359b2dbae4fd97";
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xb2434172cdb18c35473e1931da69549a7bdc304d";
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0x0e1434f6a2c6ece5f3696a2039d9bd4b202d0e1c";
 
     public static ObjectMapper mapper = new ObjectMapper();
 
@@ -550,15 +550,15 @@ public class SCNGameCoinController {
 //            addSaleOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("9"));
 //            addBuyOrder(getOperatorSingleKeyring(), new BigInteger("1"), new BigInteger("11"));
 //            getOrders("getBuyOrders");
-            List orders = getOrders("getSaleOrders");
-            List myOrders = new ArrayList();
-            orders.forEach(order -> {
-                StaticStruct orderStr = (StaticStruct) order;
-                if (orderStr.getValue().get(3).getValue().equals("0x85c616c2d51b6c653e00325ae85660d5b0c50786")) {
-                    myOrders.add(order);
-                }
-            });
-//            gameCoinContractDeploy();
+//            List orders = getOrders("getSaleOrders");
+//            List myOrders = new ArrayList();
+//            orders.forEach(order -> {
+//                StaticStruct orderStr = (StaticStruct) order;
+//                if (orderStr.getValue().get(3).getValue().equals("0x85c616c2d51b6c653e00325ae85660d5b0c50786")) {
+//                    myOrders.add(order);
+//                }
+//            });
+           gameCoinContractDeploy();
 //            testTransfer("0x85c616c2d51b6c653e00325ae85660d5b0c50786", "10000000000000");
         } catch (Exception e) {
             logger.error("", e);
