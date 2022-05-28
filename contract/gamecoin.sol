@@ -30,15 +30,9 @@ contract GameCoin is ERC20, Ownable {
     OrderEntity [] public   saleOrdersArray;
     //购买gamecoin数组
     OrderEntity [] public   buyOrdersArray;
-    OrderEntity [] public historyOrders;
+    OrderEntity [] public   historyOrders;
     constructor(uint256 initialSupply) ERC20("GameCoin", "gamecoin") {
         _mint(msg.sender, initialSupply * (10 ** uint256(decimals())));
-    }
-
-    receive() external payable
-    {
-        uint256 amount = msg.value;
-        _mint(msg.sender, amount * onePrice);
     }
 
     function getSaleOrders() public view returns (OrderEntity [] memory ){
