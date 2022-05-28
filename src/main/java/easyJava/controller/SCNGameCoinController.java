@@ -312,7 +312,7 @@ public class SCNGameCoinController {
         if (order == 2) {
             List<List> rankedOrders = new ArrayList<>();
             for (int i = 0; i < pageSize; i++) {
-                rankedOrders.add(ordersRedis.get(ordersRedis.size() - i));
+                rankedOrders.add(ordersRedis.get(ordersRedis.size() - 1 - i));
             }
             ordersRedis = rankedOrders;
         }
