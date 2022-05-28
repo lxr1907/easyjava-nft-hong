@@ -21,6 +21,8 @@ contract GameCoin is ERC20, Ownable {
         //时间
         uint256 time;
         address sender;
+        //1用chrToken换gamecoin，反之2
+        uint256 sale;
     }
     OrderEntity cheapOrder;
     OrderEntity buyHighOrder;
@@ -28,14 +30,7 @@ contract GameCoin is ERC20, Ownable {
     OrderEntity [] public   saleOrdersArray;
     //购买gamecoin数组
     OrderEntity [] public   buyOrdersArray;
-    OrderEntity [] public arrTop;
-    function getSaleOrders() public view returns (OrderEntity [] memory ){
-        return saleOrdersArray;
-    }
-
-    function getBuyOrders() public view returns (OrderEntity [] memory ){
-        return buyOrdersArray;
-    }
+    OrderEntity [] public historyOrders;
     constructor(uint256 initialSupply) ERC20("GameCoin", "gamecoin") {
         _mint(msg.sender, initialSupply * (10 ** uint256(decimals())));
     }
@@ -45,6 +40,19 @@ contract GameCoin is ERC20, Ownable {
         uint256 amount = msg.value;
         _mint(msg.sender, amount * onePrice);
     }
+
+    function getSaleOrders() public view returns (OrderEntity [] memory ){
+        return saleOrdersArray;
+    }
+
+    function getBuyOrders() public view returns (OrderEntity [] memory ){
+        return buyOrdersArray;
+    }
+
+    function getHistoryOrders() public view returns (OrderEntity [] memory ){
+        return historyOrders;
+    }
+
     //个人挂单,出售gamecoin
     function addSaleOrder(uint256 amount, uint256 myprice )  public payable
     {
@@ -56,7 +64,8 @@ contract GameCoin is ERC20, Ownable {
         amount:amount,
         price:myprice,
         time:block.timestamp,
-        sender:msg.sender
+        sender:msg.sender,
+        sale:2
         });
         if(saleOrdersArray.length==0){
             saleOrdersArray.push(newOrder);
@@ -82,6 +91,7 @@ contract GameCoin is ERC20, Ownable {
                 saleOrdersArray.push(cheapOrder);
             }
         }
+        matchSaleOrder();
     }
     //取消挂单，出售gamecoin
     function cancelSaleOrder(uint256 time)  public
@@ -120,7 +130,8 @@ contract GameCoin is ERC20, Ownable {
         amount:amount.mul(myprice),
         price:myprice,
         time:block.timestamp,
-        sender:msg.sender
+        sender:msg.sender,
+        sale:1
         });
         if(buyOrdersArray.length==0){
             buyOrdersArray.push(newOrder);
@@ -146,6 +157,7 @@ contract GameCoin is ERC20, Ownable {
                 buyOrdersArray.push(buyHighOrder);
             }
         }
+        matchBuyOrder();
     }
 
     //取消挂单，购买gamecoin
@@ -195,9 +207,18 @@ contract GameCoin is ERC20, Ownable {
                 uint256 gamecoinAmountLeft=gamecoinAmount.sub(gamecoinPayed);
                 uint256 chrGet=gamecoinPayed.div(buyOrdersArray[i].price);
                 buyOrdersArray[i].amount=gamecoinAmountLeft;
-                gamecoinPayed=0;
                 //加chr
                 payable(msg.sender).transfer(chrGet);
+
+                OrderEntity memory newOrderHistory=OrderEntity({
+                amount:gamecoinPayed,
+                price:buyOrdersArray[i].price,
+                time:block.timestamp,
+                sender:buyOrdersArray[i].sender,
+                sale:buyOrdersArray[i].sale
+                });
+                historyOrders.push(newOrderHistory);
+                gamecoinPayed=0;
                 break;
             }else{
                 //当前订单总数不足，则消耗完该订单继续循环
@@ -210,6 +231,15 @@ contract GameCoin is ERC20, Ownable {
                 }
                 //加chr
                 payable(msg.sender).transfer(chrGet);
+                //记录历史
+                OrderEntity memory newOrderHistory=OrderEntity({
+                amount:gamecoinAmount,
+                price:buyOrdersArray[i].price,
+                time:block.timestamp,
+                sender:buyOrdersArray[i].sender,
+                sale:buyOrdersArray[i].sale
+                });
+                historyOrders.push(newOrderHistory);
             }
         }
         if(gamecoinPayed!=0){
@@ -236,9 +266,18 @@ contract GameCoin is ERC20, Ownable {
                 //当前订单总数充足，则部分成交
                 uint256 gamecoinLeft=gamecoinAmount.sub(gamecoinWant);
                 saleOrdersArray[i].amount=gamecoinLeft;
-                gamecoinWant=0;
                 //加gamecoin
                 _mint(msg.sender,gamecoinWant);
+                //记录历史
+                OrderEntity memory newOrderHistory=OrderEntity({
+                amount:gamecoinWant,
+                price:saleOrdersArray[i].price,
+                time:block.timestamp,
+                sender:saleOrdersArray[i].sender,
+                sale:saleOrdersArray[i].sale
+                });
+                historyOrders.push(newOrderHistory);
+                gamecoinWant=0;
                 break;
             }else{
                 //当前订单总数不足，则消耗完该订单继续循环
@@ -251,6 +290,15 @@ contract GameCoin is ERC20, Ownable {
                 }
                 //加gamecoin
                 _mint(msg.sender,gamecoinGet);
+                //记录历史
+                OrderEntity memory newOrderHistory=OrderEntity({
+                amount:gamecoinAmount,
+                price:saleOrdersArray[i].price,
+                time:block.timestamp,
+                sender:saleOrdersArray[i].sender,
+                sale:saleOrdersArray[i].sale
+                });
+                historyOrders.push(newOrderHistory);
             }
         }
         if(gamecoinWant!=0){
@@ -265,7 +313,10 @@ contract GameCoin is ERC20, Ownable {
     {
         if (index >= arr.length) return;
         for (uint i = index; i < arr.length-1; i++) {
-            arr[i] = arr[i+1];
+            arr[i].amount = arr[i+1].amount;
+            arr[i].price = arr[i+1].price;
+            arr[i].time = arr[i+1].time;
+            arr[i].sender = arr[i+1].sender;
         }
         arr.pop();
     }
