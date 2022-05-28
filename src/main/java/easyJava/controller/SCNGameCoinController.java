@@ -278,7 +278,12 @@ public class SCNGameCoinController {
                                        @PathVariable String methodName
     ) {
         if (methodName == null || methodName.length() == 0) {
-            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
+            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders,getHistoryOrders！");
+        }
+        //显示前5条
+        int pageSize = 5;
+        if (map.get("pageSize") != null && map.get("pageSize").toString().length() != 0) {
+            pageSize = Integer.parseInt(map.get("pageSize").toString());
         }
         String key = "getOrders:" + methodName;
         List<List> ordersRedis = null;
@@ -293,8 +298,8 @@ public class SCNGameCoinController {
         }
         ordersRedis = getSortedCombined(ordersRedis);
         //目前只显示前5条
-        if (ordersRedis != null && ordersRedis.size() > 5) {
-            ordersRedis = ordersRedis.subList(0, 5);
+        if (ordersRedis != null && ordersRedis.size() > pageSize) {
+            ordersRedis = ordersRedis.subList(0, pageSize);
         }
         return new ResponseEntity(ordersRedis);
     }
@@ -558,7 +563,7 @@ public class SCNGameCoinController {
 //                    myOrders.add(order);
 //                }
 //            });
-           gameCoinContractDeploy();
+            gameCoinContractDeploy();
 //            testTransfer("0x85c616c2d51b6c653e00325ae85660d5b0c50786", "10000000000000");
         } catch (Exception e) {
             logger.error("", e);
