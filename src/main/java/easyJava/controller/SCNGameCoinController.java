@@ -126,7 +126,6 @@ public class SCNGameCoinController {
         try {
             var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
-            matchSaleOrder();
             clearOrdersRedis();
             return new ResponseEntity(result);
         } catch (Exception e) {
@@ -172,7 +171,6 @@ public class SCNGameCoinController {
         try {
             var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
-            matchBuyOrder();
             clearOrdersRedis();
             return new ResponseEntity(result);
         } catch (Exception e) {
