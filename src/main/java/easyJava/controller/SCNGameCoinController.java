@@ -316,7 +316,9 @@ public class SCNGameCoinController {
             }
             ordersRedis = rankedOrders;
         }
-        ordersRedis = ordersRedis.subList(0, pageSize);
+        if (ordersRedis.size() > pageSize) {
+            ordersRedis = ordersRedis.subList(0, pageSize);
+        }
         return new ResponseEntity(ordersRedis);
     }
 
