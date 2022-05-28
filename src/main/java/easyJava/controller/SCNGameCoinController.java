@@ -287,6 +287,10 @@ public class SCNGameCoinController {
         if (map.get("pageSize") != null && map.get("pageSize").toString().length() != 0) {
             pageSize = Integer.parseInt(map.get("pageSize").toString());
         }
+        int order = 1;
+        if (map.get("order") != null && map.get("order").toString().length() != 0) {
+            order = Integer.parseInt(map.get("order").toString());
+        }
         String key = "getOrders:" + methodName;
         List<List> ordersRedis = null;
         try {
@@ -299,10 +303,20 @@ public class SCNGameCoinController {
             redisTemplate.opsForValue().set(key, ordersRedis);
         }
         ordersRedis = getSortedCombined(ordersRedis);
-        //目前只显示前5条
-        if (ordersRedis != null && ordersRedis.size() > pageSize) {
-            ordersRedis = ordersRedis.subList(0, pageSize);
+        if (ordersRedis == null) {
+            return new ResponseEntity(new ArrayList());
         }
+        if (ordersRedis.size() < pageSize) {
+            pageSize = ordersRedis.size();
+        }
+        if (order == 2) {
+            List<List> rankedOrders = new ArrayList<>();
+            for (int i = 0; i < pageSize; i++) {
+                rankedOrders.add(ordersRedis.get(ordersRedis.size() - i));
+            }
+            ordersRedis = rankedOrders;
+        }
+        ordersRedis = ordersRedis.subList(0, pageSize);
         return new ResponseEntity(ordersRedis);
     }
 
