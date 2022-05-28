@@ -127,8 +127,7 @@ public class SCNGameCoinController {
             var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
             matchSaleOrder();
-            String key = "getOrders:getSaleOrders";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
+            clearOrdersRedis();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -174,8 +173,7 @@ public class SCNGameCoinController {
             var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
             matchBuyOrder();
-            String key = "getOrders:getBuyOrders";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
+            clearOrdersRedis();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -209,8 +207,7 @@ public class SCNGameCoinController {
         try {
             var result = cancelBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
             matchBuyOrder();
-            String key = "getOrders:getBuyOrders";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
+            clearOrdersRedis();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("cancelBuyOrder error!", e);
@@ -244,13 +241,21 @@ public class SCNGameCoinController {
         try {
             var result = cancelSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
             matchBuyOrder();
-            String key = "getOrders:getSaleOrders";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
+            clearOrdersRedis();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("cancelSaleOrder error!", e);
             return new ResponseEntity(400, "cancelSaleOrder失败:" + e.getMessage());
         }
+    }
+
+    public void clearOrdersRedis() {
+        String key = "getOrders:getSaleOrders";
+        redisTemplate.opsForValue().set(key, new ArrayList<>());
+        key = "getOrders:getBuyOrders";
+        redisTemplate.opsForValue().set(key, new ArrayList<>());
+        key = "getOrders:getHistoryOrders";
+        redisTemplate.opsForValue().set(key, new ArrayList<>());
     }
 
     @RequestMapping("/gameCoin/test/addGameCoin")
