@@ -254,8 +254,7 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/test/addGameCoin")
-    public ResponseEntity<?> addGameCoin(@RequestParam Map<String, Object> map,
-                                         @RequestHeader("token") String token
+    public ResponseEntity<?> addGameCoin(@RequestParam Map<String, Object> map
     ) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
