@@ -311,7 +311,8 @@ public class SCNGameCoinController {
             String address = map.get("address").toString();
             List<List> addressOrders = new ArrayList<>();
             for (int i = 0; i < ordersRedis.size(); i++) {
-                if (ordersRedis.get(i).get(3).toString().equals(address)) {
+                if (ordersRedis.get(i).get(3).toString().equals(address)
+                ||ordersRedis.get(i).get(5).toString().equals(address)) {
                     addressOrders.add(ordersRedis.get(i));
                 }
             }
