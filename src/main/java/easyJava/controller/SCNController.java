@@ -398,6 +398,10 @@ public class SCNController {
             baseModel.setOrderAsc("asc");
         }
         List<Map> list = baseDao.selectBaseListOrder(orderMap, baseModel);
+        list.forEach(orderM->{
+            orderM.remove("send_chr_json");
+            orderM.remove("send_chr_token_json");
+        });
         return new ResponseEntity(list);
     }
 
