@@ -23,6 +23,7 @@ contract GameCoin is ERC20, Ownable {
         address sender;
         //1用chrToken换gamecoin，反之2
         uint256 sale;
+        address to;
     }
     OrderEntity cheapOrder;
     OrderEntity buyHighOrder;
@@ -59,31 +60,26 @@ contract GameCoin is ERC20, Ownable {
         price:myprice,
         time:block.timestamp,
         sender:msg.sender,
-        sale:2
+        sale:2,
+        to:msg.sender
         });
         if(saleOrdersArray.length==0){
             saleOrdersArray.push(newOrder);
         }else{
-            bool startMove = false;
+            uint index=0;
             for (uint i = 0; i < saleOrdersArray.length; i++) {
-                if(startMove){
-                    OrderEntity storage  afterOrder = saleOrdersArray[i];
-                    saleOrdersArray[i] = cheapOrder;
-                    cheapOrder = afterOrder;
-                }else{
-                    cheapOrder = saleOrdersArray[i];
-                    if( myprice > cheapOrder.price){
-                        saleOrdersArray[i] =  newOrder;
-                        startMove = true;
+                    if( myprice > saleOrdersArray[i].price){
+                        index=i;
+                        break;
                     }
-                }
             }
-
-            if(!startMove){
-                saleOrdersArray.push(newOrder);
-            }else{
-                saleOrdersArray.push(cheapOrder);
+            //复制最后一条并加到结尾
+            saleOrdersArray.push(saleOrdersArray[saleOrdersArray.length-1]);
+            //把i后面的后移一位
+            for (uint i = saleOrdersArray.length-1; i > index; i--) {
+                    saleOrdersArray[i]=saleOrdersArray[i-1];
             }
+            saleOrdersArray[index]=newOrder;
         }
         matchSaleOrder();
     }
@@ -108,7 +104,7 @@ contract GameCoin is ERC20, Ownable {
                 }
             }
         }
-        delete saleOrdersArray[saleOrdersArray.length-1];
+       saleOrdersArray.pop();
         //取消挂单，加回去gamecoin
         _mint(msg.sender,amount);
     }
@@ -125,31 +121,25 @@ contract GameCoin is ERC20, Ownable {
         price:myprice,
         time:block.timestamp,
         sender:msg.sender,
-        sale:1
+        sale:1,
+        to:msg.sender
         });
         if(buyOrdersArray.length==0){
             buyOrdersArray.push(newOrder);
         }else{
-            bool startMove = false;
+            uint index = 0;
             for (uint i = 0; i < buyOrdersArray.length; i++) {
-                if(startMove){
-                    OrderEntity storage  afterOrder = buyOrdersArray[i];
-                    buyOrdersArray[i] = buyHighOrder;
-                    buyHighOrder = afterOrder;
-                }else{
-                    buyHighOrder = buyOrdersArray[i];
                     if( myprice < buyHighOrder.price){
-                        buyOrdersArray[i] =  newOrder;
-                        startMove = true;
+                        index=i;
                     }
-                }
             }
-
-            if(!startMove){
-                buyOrdersArray.push(newOrder);
-            }else{
-                buyOrdersArray.push(buyHighOrder);
+            //复制最后一条并加到结尾
+            buyOrdersArray.push(buyOrdersArray[buyOrdersArray.length-1]);
+            //把i后面的后移一位
+            for (uint i = buyOrdersArray.length-1; i > index; i--) {
+                    buyOrdersArray[i]=buyOrdersArray[i-1];
             }
+            buyOrdersArray[index]=newOrder;
         }
         matchBuyOrder();
     }
@@ -177,7 +167,7 @@ contract GameCoin is ERC20, Ownable {
                 }
             }
         }
-        delete buyOrdersArray[buyOrdersArray.length-1];
+        buyOrdersArray.pop();
         address payable receiver= payable(msg.sender);
         receiver.transfer(amount.div(price));
     }
@@ -208,7 +198,8 @@ contract GameCoin is ERC20, Ownable {
                 price:buyOrdersArray[i].price,
                 time:block.timestamp,
                 sender:buyOrdersArray[i].sender,
-                sale:buyOrdersArray[i].sale
+                sale:buyOrdersArray[i].sale,
+                to:saleOrdersArray[0].sender
                 });
                 historyOrders.push(newOrderHistory);
                 gamecoinPayed=0;
@@ -218,7 +209,7 @@ contract GameCoin is ERC20, Ownable {
                 gamecoinPayed = gamecoinPayed.sub(gamecoinAmount);
                 uint256 chrGet=gamecoinAmount.div(buyOrdersArray[i].price);
                 //删除消耗掉的这个订单
-                deleteOne(buyOrdersArray,i);
+                deleteOne(buyOrdersArray,0);
                 //加chr
                 payable(msg.sender).transfer(chrGet);
                 //记录历史
@@ -227,7 +218,8 @@ contract GameCoin is ERC20, Ownable {
                 price:buyOrdersArray[i].price,
                 time:block.timestamp,
                 sender:buyOrdersArray[i].sender,
-                sale:buyOrdersArray[i].sale
+                sale:buyOrdersArray[i].sale,
+                to:saleOrdersArray[0].sender
                 });
                 historyOrders.push(newOrderHistory);
             }
@@ -265,7 +257,8 @@ contract GameCoin is ERC20, Ownable {
                 price:saleOrdersArray[i].price,
                 time:block.timestamp,
                 sender:saleOrdersArray[i].sender,
-                sale:saleOrdersArray[i].sale
+                sale:saleOrdersArray[i].sale,
+                to:buyOrdersArray[0].sender
                 });
                 historyOrders.push(newOrderHistory);
                 gamecoinWant=0;
@@ -275,7 +268,7 @@ contract GameCoin is ERC20, Ownable {
                 gamecoinWant = gamecoinWant.sub(gamecoinAmount);
                 uint256 gamecoinGet=saleOrdersArray[i].amount;
                 //删除消耗掉的这个订单
-                deleteOne(saleOrdersArray,i);
+                deleteOne(saleOrdersArray,0);
                 //加gamecoin
                 _mint(msg.sender,gamecoinGet);
                 //记录历史
@@ -284,7 +277,8 @@ contract GameCoin is ERC20, Ownable {
                 price:saleOrdersArray[i].price,
                 time:block.timestamp,
                 sender:saleOrdersArray[i].sender,
-                sale:saleOrdersArray[i].sale
+                sale:saleOrdersArray[i].sale,
+                to:buyOrdersArray[0].sender
                 });
                 historyOrders.push(newOrderHistory);
             }
@@ -297,9 +291,11 @@ contract GameCoin is ERC20, Ownable {
             deleteOne(buyOrdersArray,0);
         }
     }
-    function deleteOne(OrderEntity [] storage arr,uint index) private
+
+   function deleteOne(OrderEntity [] storage arr,uint index) private
     {
-        if (index >= arr.length) return;
+        if (index >= arr.length || arr.length == 0)
+         return;
         for (uint i = index; i < arr.length-1; i++) {
             arr[i].amount = arr[i+1].amount;
             arr[i].price = arr[i+1].price;
@@ -309,6 +305,15 @@ contract GameCoin is ERC20, Ownable {
         arr.pop();
     }
 
+    function deleteOneBuyOrder(uint index) public onlyOwner
+    {
+       deleteOne(buyOrdersArray,index);
+    }
+
+    function deleteOneSaleOrder(uint index) public onlyOwner
+    {
+        deleteOne(saleOrdersArray,index);
+    }
     //个人市价,出售gamecoin
     function saleOrderNoPrice(uint256 gamecoinPayed)  public
     {
