@@ -127,10 +127,11 @@ contract GameCoin is ERC20, Ownable {
         if(buyOrdersArray.length==0){
             buyOrdersArray.push(newOrder);
         }else{
-            uint index = 0;
+            uint index = buyOrdersArray.length;
             for (uint i = 0; i < buyOrdersArray.length; i++) {
                     if( myprice < buyOrdersArray[i].price){
                         index=i;
+                        break;
                     }
             }
             //复制最后一条并加到结尾
