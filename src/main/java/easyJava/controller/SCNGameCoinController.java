@@ -306,9 +306,23 @@ public class SCNGameCoinController {
         if (ordersRedis == null) {
             return new ResponseEntity(new ArrayList());
         }
+
+        if (map.get("address") != null && map.get("address").toString().length() != 0) {
+            String address = map.get("address").toString();
+            List<List> addressOrders = new ArrayList<>();
+            for (int i = 0; i < ordersRedis.size(); i++) {
+                if (ordersRedis.get(i).get(3).toString().equals(address)) {
+                    addressOrders.add(ordersRedis.get(i));
+                }
+            }
+            ordersRedis = addressOrders;
+        }
+
+
         if (ordersRedis.size() < pageSize) {
             pageSize = ordersRedis.size();
         }
+
         if (order == 2) {
             List<List> rankedOrders = new ArrayList<>();
             for (int i = 0; i < pageSize; i++) {
@@ -319,6 +333,7 @@ public class SCNGameCoinController {
         if (ordersRedis.size() > pageSize) {
             ordersRedis = ordersRedis.subList(0, pageSize);
         }
+
         return new ResponseEntity(ordersRedis);
     }
 

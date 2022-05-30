@@ -188,13 +188,13 @@ contract GameCoin is ERC20, Ownable {
     {
         uint256 gamecoinPayed=saleOrdersArray[0].amount;
         uint256 price=saleOrdersArray[0].price;
-
-        for (uint i = 0; i < buyOrdersArray.length &&i>=0; i++) {
+        //由于i=0位置的订单如果匹配上了价格和数量则会删除，1的位置会移动到0，所以没有i++
+        for (uint i = 0;  buyOrdersArray.length>0; ) {
             if(price<buyOrdersArray[i].price){
                 //出价小于订单价则无法成交
                 break;
             }
-            //当前订单对应的chr总数
+            //当前订单对应的gamecoin总数
             uint256 gamecoinAmount=buyOrdersArray[i].amount;
             if(gamecoinAmount>gamecoinPayed){
                 //当前订单总数充足，则部分成交
@@ -203,7 +203,6 @@ contract GameCoin is ERC20, Ownable {
                 buyOrdersArray[i].amount=gamecoinAmountLeft;
                 //加chr
                 payable(msg.sender).transfer(chrGet);
-
                 OrderEntity memory newOrderHistory=OrderEntity({
                 amount:gamecoinPayed,
                 price:buyOrdersArray[i].price,
@@ -220,9 +219,6 @@ contract GameCoin is ERC20, Ownable {
                 uint256 chrGet=gamecoinAmount.div(buyOrdersArray[i].price);
                 //删除消耗掉的这个订单
                 deleteOne(buyOrdersArray,i);
-                if(i!=0){
-                    i=i-1;
-                }
                 //加chr
                 payable(msg.sender).transfer(chrGet);
                 //记录历史
@@ -249,7 +245,8 @@ contract GameCoin is ERC20, Ownable {
     {
         uint256 gamecoinWant = buyOrdersArray[0].amount;
         uint256 price = buyOrdersArray[0].price;
-        for (uint i = 0; i < saleOrdersArray.length &&i>=0; i++) {
+        //由于i=0位置的订单如果匹配上了价格和数量则会删除，1的位置会移动到0，所以没有i++
+        for (uint i = 0;saleOrdersArray.length>0;) {
             if(price>saleOrdersArray[i].price){
                 //出价大于订单价则无法成交
                 break;
@@ -279,9 +276,6 @@ contract GameCoin is ERC20, Ownable {
                 uint256 gamecoinGet=saleOrdersArray[i].amount;
                 //删除消耗掉的这个订单
                 deleteOne(saleOrdersArray,i);
-                if(i!=0){
-                    i=i-1;
-                }
                 //加gamecoin
                 _mint(msg.sender,gamecoinGet);
                 //记录历史
