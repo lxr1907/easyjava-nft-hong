@@ -32,6 +32,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class SCNController {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    public static final String CHR_TOKEN_ORDER_TABLE = "chr_token_order";
 
     public static final String MY_SCN_HOST = "http://13.213.135.231:7551";
     public static final String MY_SCN_WS_HOST = "ws://13.213.135.231:7552";
@@ -195,12 +197,14 @@ public class SCNController {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
         }
+        Map orderMap = new HashMap<>();
         try {
             String encrypt_key = useWallet.get("encrypt_key").toString();
             String encrypted_private = useWallet.get("encrypted_private").toString();
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
             var chrResult =
                     KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, chrValue);
+            orderMap.put("send_chr_json", JSON.toJSONString(chrResult));
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
             return new ResponseEntity(400, "chr支付失败：" + e.getMessage());
@@ -209,10 +213,20 @@ public class SCNController {
         try {
             result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
                     , map.get("address").toString(), chrTokenValue);
+            orderMap.put("send_chr_token_json", JSON.toJSONString(result));
         } catch (Exception e) {
             logger.error("send scn error!", e);
             return new ResponseEntity(400, "chr支付后，发送chrToken失败：" + e.getMessage());
         }
+        //插入订单
+        orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
+        orderMap.put("user_id", user.get("id"));
+        orderMap.put("address", map.get("address").toString());
+        orderMap.put("chr_value", chrValue.toString());
+        orderMap.put("chr_token_value", chrTokenValue.toString());
+        orderMap.put("type", "buyChrToken");
+        orderMap.put("time", new Date());
+        baseDao.insertBase(orderMap);
         return new ResponseEntity(result);
     }
 
@@ -282,6 +296,7 @@ public class SCNController {
             logger.error("value解析失败!", e);
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
         }
+        Map orderMap = new HashMap<>();
         //先扣除chrToken
         TransactionReceipt.TransactionReceiptData result = null;
         try {
@@ -290,18 +305,84 @@ public class SCNController {
             String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
             result = sendingSCN(walletPrivate
                     , KlayController.SWAP_ADDRESS, scnValue);
+            orderMap.put("send_chr_token_json", JSON.toJSONString(result));
         } catch (Exception e) {
             logger.error("send chrToken error!", e);
             return new ResponseEntity(400, "chrToken支付，提现失败:" + e.getMessage());
         }
         //再发放chr
         try {
-            KlayController.sendingCHR(useWallet.get("address").toString(), chrValue);
+            var chrResult = KlayController.sendingCHR(useWallet.get("address").toString(), chrValue);
+            orderMap.put("send_chr_json", JSON.toJSONString(chrResult));
         } catch (Exception e) {
             logger.error("burnCHR error!", e);
             return new ResponseEntity(400, "chrToken支付后，发送chr失败:" + e.getMessage());
         }
+
+        //插入订单
+        orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
+        orderMap.put("user_id", user.get("id"));
+        orderMap.put("address", map.get("address").toString());
+        orderMap.put("chr_value", chrValue.toString());
+        orderMap.put("chr_token_value", scnValue.toString());
+        orderMap.put("type", "withDrawChrToken");
+        orderMap.put("time", new Date());
+        baseDao.insertBase(orderMap);
         return new ResponseEntity(result);
+    }
+
+    /**
+     * 使用chrToken换回chr
+     *
+     * @param map
+     * @param token
+     * @return
+     */
+    @RequestMapping("/klaySCN/getChrTokenOrders")
+    public ResponseEntity<?> getChrTokenOrders(@RequestParam Map<String, Object> map,
+                                               @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        map.put("account", user.get("account"));
+
+        Map walletMap = new HashMap<>();
+        walletMap.put("tableName", UserController.USER_WALLET_TABLE);
+        walletMap.put("user_id", user.get("id"));
+        BaseModel baseModel = new BaseModel();
+        baseModel.setPageNo(1);
+        baseModel.setPageSize(10);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        boolean myWallet = false;
+        for (var wallet : userWalletList) {
+            if (wallet.get("address").equals(map.get("address").toString())) {
+                myWallet = true;
+            }
+        }
+        if (!myWallet) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        Map orderMap = new HashMap<>();
+
+
+        if (map.get("type") != null && map.get("type").toString().length() != 0) {
+            orderMap.put("type", map.get("type").toString());
+        }
+        //订单
+        orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
+        orderMap.put("user_id", user.get("id"));
+        orderMap.put("address", map.get("address").toString());
+        List<Map> list = baseDao.selectBaseList(orderMap, baseModel);
+        return new ResponseEntity(list);
     }
 
     //给某个账户发送scn，测试使用
@@ -326,6 +407,7 @@ public class SCNController {
 
     /**
      * 获取chrToken的余额
+     *
      * @param map
      * @return
      */

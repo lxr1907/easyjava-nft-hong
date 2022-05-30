@@ -136,3 +136,20 @@ CREATE TABLE nft.scn_scan_tx (
 ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_bin;
+
+
+-- nft.chr_token_order definition
+
+CREATE TABLE `chr_token_order` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `address` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `type` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `send_chr_json` text COLLATE utf8mb4_bin,
+  `send_chr_token_json` text COLLATE utf8mb4_bin,
+  `time` datetime DEFAULT NULL,
+  `status` tinyint DEFAULT NULL COMMENT '状态，1开始，2发送完chr，3发送完chrtoken',
+  `chr_value` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `chr_token_value` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

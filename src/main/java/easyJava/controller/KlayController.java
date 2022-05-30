@@ -141,8 +141,8 @@ public class KlayController {
      * @param value
      */
 
-    public static void sendingCHR(String toAddress, BigInteger value) {
-        sendingCHR(SYSTEM_PRIVATE, toAddress, value);
+    public static TransactionReceipt.TransactionReceiptData sendingCHR(String toAddress, BigInteger value) {
+        return sendingCHR(SYSTEM_PRIVATE, toAddress, value);
     }
 
     /**
@@ -471,6 +471,7 @@ public class KlayController {
 
     /**
      * 部署合约
+     *
      * @return
      */
     public static String contractDeploy() {
