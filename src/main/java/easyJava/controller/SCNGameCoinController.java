@@ -294,7 +294,7 @@ public class SCNGameCoinController {
         String key = "getOrders:" + methodName;
         List<List> ordersRedis = null;
         try {
-            ordersRedis = (List<List>) redisTemplate.opsForValue().get(key);
+//            ordersRedis = (List<List>) redisTemplate.opsForValue().get(key);
         } catch (Exception e) {
             logger.error("error:", e);
         }
