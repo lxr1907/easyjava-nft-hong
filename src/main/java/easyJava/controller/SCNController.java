@@ -372,12 +372,7 @@ public class SCNController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
-        baseModel.setOrderColumn("id");
-        baseModel.setOrderAsc("desc");
-        if (order == 2) {
-            baseModel.setOrderAsc("asc");
-        }
-        List<Map> userWalletList = baseDao.selectBaseListOrder(walletMap, baseModel);
+        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
         boolean myWallet = false;
         for (var wallet : userWalletList) {
             if (wallet.get("address").equals(map.get("address").toString())) {
@@ -397,7 +392,12 @@ public class SCNController {
         orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
         orderMap.put("user_id", user.get("id"));
         orderMap.put("address", map.get("address").toString());
-        List<Map> list = baseDao.selectBaseList(orderMap, baseModel);
+        baseModel.setOrderColumn("id");
+        baseModel.setOrderAsc("desc");
+        if (order == 2) {
+            baseModel.setOrderAsc("asc");
+        }
+        List<Map> list = baseDao.selectBaseListOrder(orderMap, baseModel);
         return new ResponseEntity(list);
     }
 
