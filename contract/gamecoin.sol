@@ -12,6 +12,8 @@ contract GameCoin is ERC20, Ownable {
     using SafeMath for uint256;
     //官方价格 1 chr-token = onePrice个 GameCoin
     uint256 public onePrice = 100;
+    //手续费除数，千分之二除以500
+    uint256 public taxRate = 500;
     //订单实体
     struct OrderEntity{
         //数量
@@ -223,7 +225,7 @@ contract GameCoin is ERC20, Ownable {
             }
         }
         //千分之2手续费
-        uint256 taxFee = chrGet.div(500);
+        uint256 taxFee = chrGet.div(taxRate);
         //加chr
         payable(msg.sender).transfer(chrGet.sub(taxFee));
         if(gamecoinPayed!=0){
@@ -286,7 +288,7 @@ contract GameCoin is ERC20, Ownable {
             }
         }
         //手续费千分之二
-        uint256 taxFee=gamecoinGet.div(500);
+        uint256 taxFee=gamecoinGet.div(taxRate);
         //加gamecoin
         _mint(msg.sender,gamecoinGet.sub(taxFee));
         if(gamecoinWant!=0){
@@ -334,5 +336,9 @@ contract GameCoin is ERC20, Ownable {
     //修改价格
     function setPrice(uint256 price) public onlyOwner {
         onePrice = price;
+    }
+    //修改价格
+    function setTax(uint256 rate) public onlyOwner {
+        taxRate = rate;
     }
 }
