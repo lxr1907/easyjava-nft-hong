@@ -188,8 +188,8 @@ public class SCNController {
         BigInteger chrValue = null;
         BigInteger chrTokenValue = null;
         try {
-            chrValue = toDecimal18(v);
-            chrTokenValue = chrTochrTokenPrice(v);
+            chrValue = v;//toDecimal18(v);
+            chrTokenValue = v;//chrTochrTokenPrice(v);
             if (chrTokenValue.compareTo(new BigInteger("1")) < 0) {
                 return new ResponseEntity(400, "能兑换到的chrToken小于1");
             }
@@ -287,7 +287,7 @@ public class SCNController {
         BigInteger chrValue = null;
         BigInteger scnValue = null;
         try {
-            chrValue = toDecimal18(chrTokenToChrPrice(v));
+            chrValue = v;//toDecimal18(chrTokenToChrPrice(v));
             if (chrValue.compareTo(new BigInteger("1")) < 0) {
                 return new ResponseEntity(400, "能兑换到的chr小于1");
             }
