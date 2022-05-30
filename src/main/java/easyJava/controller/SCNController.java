@@ -354,6 +354,11 @@ public class SCNController {
         if (map.get("pageSize") == null || map.get("pageSize").toString().length() == 0) {
             return new ResponseEntity(400, "pageSize不能为空！");
         }
+        int order = 1;
+        if (map.get("order") != null && map.get("order").toString().length() != 0) {
+            order = Integer.parseInt(map.get("order").toString());
+            map.remove("order");
+        }
         Map user = (Map) redisTemplate.opsForValue().get(token);
 
         if (user == null || user.get("id").toString().length() == 0) {
@@ -367,7 +372,12 @@ public class SCNController {
         BaseModel baseModel = new BaseModel();
         baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
         baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
-        List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
+        baseModel.setOrderColumn("id");
+        baseModel.setOrderAsc("desc");
+        if (order == 2) {
+            baseModel.setOrderAsc("asc");
+        }
+        List<Map> userWalletList = baseDao.selectBaseListOrder(walletMap, baseModel);
         boolean myWallet = false;
         for (var wallet : userWalletList) {
             if (wallet.get("address").equals(map.get("address").toString())) {
