@@ -180,26 +180,24 @@ contract GameCoin is ERC20, Ownable {
         uint256 gamecoinPayed=saleOrdersArray[0].amount;
         uint256 price=saleOrdersArray[0].price;
         uint256 chrGet = 0;
-        //由于i=0位置的订单如果匹配上了价格和数量则会删除，1的位置会移动到0，所以没有i++
-        for (uint i = 0;  buyOrdersArray.length>0; ) {
-            if(price<buyOrdersArray[i].price){
-                //出价小于订单价则无法成交
-                break;
-            }
+        //由于i=0位置的订单如果匹配上了价格和数量则会删除
+        //出价小于订单价则无法成交
+        while (buyOrdersArray.length>0
+            && price>=buyOrdersArray[0].price) {
             //当前订单对应的gamecoin总数
-            uint256 gamecoinAmount=buyOrdersArray[i].amount;
+            uint256 gamecoinAmount=buyOrdersArray[0].amount;
             if(gamecoinAmount>gamecoinPayed){
                 //当前订单总数充足，则部分成交
                 uint256 gamecoinAmountLeft=gamecoinAmount.sub(gamecoinPayed);
                 //累加chrGet获得
-                chrGet = chrGet.add(gamecoinPayed.div(buyOrdersArray[i].price));
-                buyOrdersArray[i].amount=gamecoinAmountLeft;
-                OrderEntity memory newOrderHistory=OrderEntity({
+                chrGet = chrGet.add(gamecoinPayed.div(buyOrdersArray[0].price));
+                buyOrdersArray[0].amount = gamecoinAmountLeft;
+                OrderEntity memory newOrderHistory = OrderEntity({
                 amount:gamecoinPayed,
-                price:buyOrdersArray[i].price,
+                price:buyOrdersArray[0].price,
                 time:block.timestamp,
-                sender:buyOrdersArray[i].sender,
-                sale:buyOrdersArray[i].sale,
+                sender:buyOrdersArray[0].sender,
+                sale:buyOrdersArray[0].sale,
                 to:saleOrdersArray[0].sender
                 });
                 historyOrders.push(newOrderHistory);
@@ -208,20 +206,20 @@ contract GameCoin is ERC20, Ownable {
             }else{
                 //当前订单总数不足，则消耗完该订单继续循环
                 gamecoinPayed = gamecoinPayed.sub(gamecoinAmount);
-                //删除消耗掉的这个订单
-                deleteOne(buyOrdersArray,0);
                 //累加chrGet获得
-                chrGet = chrGet.add(gamecoinAmount.div(buyOrdersArray[i].price));
+                chrGet = chrGet.add(gamecoinAmount.div(buyOrdersArray[0].price));
                 //记录历史
                 OrderEntity memory newOrderHistory=OrderEntity({
                 amount:gamecoinAmount,
-                price:buyOrdersArray[i].price,
+                price:buyOrdersArray[0].price,
                 time:block.timestamp,
-                sender:buyOrdersArray[i].sender,
-                sale:buyOrdersArray[i].sale,
+                sender:buyOrdersArray[0].sender,
+                sale:buyOrdersArray[0].sale,
                 to:saleOrdersArray[0].sender
                 });
                 historyOrders.push(newOrderHistory);
+                //删除消耗掉的这个订单
+                deleteOne(buyOrdersArray,0);
             }
         }
         //千分之2手续费
@@ -242,25 +240,23 @@ contract GameCoin is ERC20, Ownable {
         uint256 gamecoinWant = buyOrdersArray[0].amount;
         uint256 price = buyOrdersArray[0].price;
         uint256 gamecoinGet=0;
-        //由于i=0位置的订单如果匹配上了价格和数量则会删除，1的位置会移动到0，所以没有i++
-        for (uint i = 0;saleOrdersArray.length>0;) {
-            if(price>saleOrdersArray[i].price){
-                //出价大于订单价则无法成交
-                break;
-            }
+        //由于i=0位置的订单如果匹配上了价格和数量则会删除，
+        //出价大于订单价则无法成交
+        while (saleOrdersArray.length>0
+            && price<=saleOrdersArray[0].price) {
             //当前订单对应的chr总数
-            uint256 gamecoinAmount=saleOrdersArray[i].amount;
-            if(gamecoinAmount>gamecoinWant){
+            uint256 gamecoinAmount = saleOrdersArray[0].amount;
+            if(gamecoinAmount > gamecoinWant){
                 //当前订单总数充足，则部分成交
-                uint256 gamecoinLeft=gamecoinAmount.sub(gamecoinWant);
-                saleOrdersArray[i].amount=gamecoinLeft;
+                uint256 gamecoinLeft = gamecoinAmount.sub(gamecoinWant);
+                saleOrdersArray[0].amount = gamecoinLeft;
                 //记录历史
                 OrderEntity memory newOrderHistory=OrderEntity({
                 amount:gamecoinWant,
-                price:saleOrdersArray[i].price,
+                price:saleOrdersArray[0].price,
                 time:block.timestamp,
-                sender:saleOrdersArray[i].sender,
-                sale:saleOrdersArray[i].sale,
+                sender:saleOrdersArray[0].sender,
+                sale:saleOrdersArray[0].sale,
                 to:buyOrdersArray[0].sender
                 });
                 historyOrders.push(newOrderHistory);
@@ -272,19 +268,19 @@ contract GameCoin is ERC20, Ownable {
                 //当前订单总数不足，则消耗完该订单继续循环
                 gamecoinWant = gamecoinWant.sub(gamecoinAmount);
                 //累加获得的数量
-                gamecoinGet = gamecoinGet.add(saleOrdersArray[i].amount);
-                //删除消耗掉的这个订单
-                deleteOne(saleOrdersArray,0);
+                gamecoinGet = gamecoinGet.add(gamecoinAmount);
                 //记录历史
                 OrderEntity memory newOrderHistory=OrderEntity({
                 amount:gamecoinAmount,
-                price:saleOrdersArray[i].price,
+                price:saleOrdersArray[0].price,
                 time:block.timestamp,
-                sender:saleOrdersArray[i].sender,
-                sale:saleOrdersArray[i].sale,
+                sender:saleOrdersArray[0].sender,
+                sale:saleOrdersArray[0].sale,
                 to:buyOrdersArray[0].sender
                 });
                 historyOrders.push(newOrderHistory);
+                //删除消耗掉的这个订单
+                deleteOne(saleOrdersArray,0);
             }
         }
         //手续费千分之二
