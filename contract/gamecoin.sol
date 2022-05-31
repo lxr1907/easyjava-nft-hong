@@ -119,7 +119,7 @@ contract GameCoin is ERC20, Ownable {
         uint256 amount = msg.value;
         require(msg.value>0 && myprice>0);
         OrderEntity memory newOrder=OrderEntity({
-        amount:amount.mul(myprice),
+        amount:amount,
         price:myprice,
         time:block.timestamp,
         sender:msg.sender,
@@ -173,26 +173,26 @@ contract GameCoin is ERC20, Ownable {
         }
         buyOrdersArray.pop();
         address payable receiver= payable(msg.sender);
-        receiver.transfer(amount.div(price));
+        receiver.transfer(amount);
     }
 
 
     //撮合出售gamecoin挂单
     function matchSaleOrder()  public  payable
     {
-        uint256 gamecoinPayed=saleOrdersArray[0].amount;
-        uint256 price=saleOrdersArray[0].price;
+        uint256 gamecoinPayed = saleOrdersArray[0].amount;
+        uint256 price = saleOrdersArray[0].price;
         uint256 chrGet = 0;
         //由于i=0位置的订单如果匹配上了价格和数量则会删除
         //出价小于订单价则无法成交
-        while (buyOrdersArray.length>0
-            && price>=buyOrdersArray[0].price) {
+        while (buyOrdersArray.length > 0
+            && price >= buyOrdersArray[0].price) {
             //当前订单对应的gamecoin总数
-            uint256 gamecoinAmount=buyOrdersArray[0].amount;
+            uint256 chrPayed = buyOrdersArray[0].amount;
+            uint256 gamecoinAmount = chrPayed.mul(buyOrdersArray[0].price);
             if(gamecoinAmount>gamecoinPayed){
                 //当前订单总数充足，则部分成交
-                uint256 gamecoinAmountLeft=gamecoinAmount.sub(gamecoinPayed);
-                buyOrdersArray[0].amount = gamecoinAmountLeft;
+                uint256 gamecoinAmountLeft = gamecoinAmount.sub(gamecoinPayed);
                 //千分之2手续费
                 uint256 taxFeeOne = gamecoinPayed.div(taxRate);
                 //发gamecoin给匹配到的买家
@@ -210,6 +210,7 @@ contract GameCoin is ERC20, Ownable {
                 });
                 historyOrders.push(newOrderHistory);
                 gamecoinPayed=0;
+                buyOrdersArray[0].amount = gamecoinAmountLeft;
                 break;
             }else{
                 //当前订单总数不足，则消耗完该订单继续循环
@@ -219,7 +220,7 @@ contract GameCoin is ERC20, Ownable {
                 //发gamecoin给匹配到的买家
                 _mint(buyOrdersArray[0].sender,gamecoinAmount.sub(taxFeeOne));
                 //累加chrGet获得
-                chrGet = chrGet.add(gamecoinAmount.div(buyOrdersArray[0].price));
+                chrGet = chrGet.add(chrPayed);
                 //记录历史
                 OrderEntity memory newOrderHistory=OrderEntity({
                 amount:gamecoinAmount,
@@ -239,9 +240,9 @@ contract GameCoin is ERC20, Ownable {
         uint256 taxFee = chrGet.div(taxRate);
         //加chr
         payable(msg.sender).transfer(chrGet.sub(taxFee));
-        if(gamecoinPayed!=0){
+        if(gamecoinPayed != 0){
             //剩余的金额不为0，则剩余一部分未成交
-            saleOrdersArray[0].amount=gamecoinPayed;
+            saleOrdersArray[0].amount = gamecoinPayed;
         }else{
             //剩余的金额为0，则删除
             deleteOne(saleOrdersArray,0);
@@ -250,23 +251,23 @@ contract GameCoin is ERC20, Ownable {
     //撮合购买gamecoin挂单
     function matchBuyOrder()   public  payable
     {
-        uint256 gamecoinWant = buyOrdersArray[0].amount;
+        uint256 chrPayed = buyOrdersArray[0].amount;
         uint256 price = buyOrdersArray[0].price;
-        uint256 gamecoinGet=0;
+        uint256 gamecoinGet = 0;
         //由于i=0位置的订单如果匹配上了价格和数量则会删除，
         //出价大于订单价则无法成交
-        while (saleOrdersArray.length>0
-            && price<=saleOrdersArray[0].price) {
+        while (saleOrdersArray.length > 0
+            && price <= saleOrdersArray[0].price) {
+            uint256 gamecoinWant = chrPayed.mul(saleOrdersArray[0].price);
             //当前订单对应的chr总数
             uint256 gamecoinAmount = saleOrdersArray[0].amount;
+            uint256 gamecoinPrice = saleOrdersArray[0].amount;
             if(gamecoinAmount > gamecoinWant){
                 //当前订单总数充足，则部分成交
                 uint256 gamecoinLeft = gamecoinAmount.sub(gamecoinWant);
-                saleOrdersArray[0].amount = gamecoinLeft;
                 //加chr给卖家
-                uint256 chrAmount=gamecoinWant.div(saleOrdersArray[0].price);
-                uint256 taxFeeOne=chrAmount.div(taxRate);
-                payable(saleOrdersArray[0].sender).transfer(chrAmount.sub(taxFeeOne));
+                uint256 taxFeeOne = chrPayed.div(taxRate);
+                payable(saleOrdersArray[0].sender).transfer(chrPayed.sub(taxFeeOne));
                 //记录历史
                 OrderEntity memory newOrderHistory=OrderEntity({
                 amount:gamecoinWant,
@@ -280,14 +281,15 @@ contract GameCoin is ERC20, Ownable {
                 historyOrders.push(newOrderHistory);
                 //累加获得的数量
                 gamecoinGet = gamecoinGet.add(gamecoinWant);
-                gamecoinWant=0;
+                chrPayed=0;
+                saleOrdersArray[0].amount = gamecoinLeft;
                 break;
             }else{
-                //当前订单总数不足，则消耗完该订单继续循环
-                gamecoinWant = gamecoinWant.sub(gamecoinAmount);
                 //加chr给卖家
-                uint256 chrAmount=gamecoinAmount.div(saleOrdersArray[0].price);
-                uint256 taxFeeOne=chrAmount.div(taxRate);
+                uint256 chrAmount = gamecoinAmount.div(gamecoinPrice);
+                //当前订单总数不足，则消耗完该订单继续循环
+                chrPayed = chrPayed.sub(chrAmount);
+                uint256 taxFeeOne = chrAmount.div(taxRate);
                 payable(saleOrdersArray[0].sender).transfer(chrAmount.sub(taxFeeOne));
                 //累加获得的数量
                 gamecoinGet = gamecoinGet.add(gamecoinAmount);
@@ -310,9 +312,9 @@ contract GameCoin is ERC20, Ownable {
         uint256 taxFee=gamecoinGet.div(taxRate);
         //加gamecoin
         _mint(msg.sender,gamecoinGet.sub(taxFee));
-        if(gamecoinWant!=0){
+        if(chrPayed != 0){
             //剩余的金额不为0，则部分未成交
-            buyOrdersArray[0].amount=gamecoinWant;
+            buyOrdersArray[0].amount = chrPayed;
         }else{
             //剩余的金额为0，则删除
             deleteOne(buyOrdersArray,0);
