@@ -190,7 +190,8 @@ contract GameCoin is ERC20, Ownable {
         //由于i=0位置的订单如果匹配上了价格和数量则会删除
         //出价小于订单价则无法成交
         while (buyOrdersArray.length > 0
-            && price >= buyOrdersArray[0].price) {
+        && price >= buyOrdersArray[0].price
+            && gamecoinPayed !=0 ) {
             //当前订单对应的gamecoin总数
             uint256 chrAmount = buyOrdersArray[0].chr;
             uint256 chrPrice = buyOrdersArray[0].price;
@@ -219,9 +220,7 @@ contract GameCoin is ERC20, Ownable {
                 buyOrdersArray[0].chr = chrLeft;
                 break;
             }else{
-                uint gamecoinAmount=chrAmount.mul(chrPrice);
-                //当前订单总数不足，则消耗完该订单继续循环
-                gamecoinPayed = gamecoinPayed.sub(gamecoinAmount);
+                uint gamecoinAmount = chrAmount.mul(chrPrice);
                 //千分之2手续费
                 uint256 taxFeeOne = gamecoinAmount.div(taxRate);
                 //发gamecoin给匹配到的买家
@@ -242,6 +241,8 @@ contract GameCoin is ERC20, Ownable {
                 historyOrders.push(newOrderHistory);
                 //删除消耗掉的这个订单
                 deleteOne(buyOrdersArray,0);
+                //当前订单总数不足，则消耗完该订单继续循环
+                gamecoinPayed = gamecoinPayed.sub(gamecoinAmount);
             }
         }
         //千分之2手续费
@@ -265,7 +266,8 @@ contract GameCoin is ERC20, Ownable {
         //由于i=0位置的订单如果匹配上了价格和数量则会删除，
         //出价大于订单价则无法成交
         while (saleOrdersArray.length > 0
-            && price <= saleOrdersArray[0].price) {
+        && price <= saleOrdersArray[0].price
+            && chrPayed != 0) {
             //当前订单对应的chr总数
             uint256 gamecoinAmount = saleOrdersArray[0].amount;
             uint256 gamecoinPrice = saleOrdersArray[0].price;
@@ -296,8 +298,6 @@ contract GameCoin is ERC20, Ownable {
             }else{
                 //加chr给卖家
                 uint256 chrAmount = gamecoinAmount.div(gamecoinPrice);
-                //当前订单总数不足，则消耗完该订单继续循环
-                chrPayed = chrPayed.sub(chrAmount);
                 uint256 taxFeeOne = chrAmount.div(taxRate);
                 payable(saleOrdersArray[0].sender).transfer(chrAmount.sub(taxFeeOne));
                 //累加获得的数量
@@ -316,6 +316,8 @@ contract GameCoin is ERC20, Ownable {
                 historyOrders.push(newOrderHistory);
                 //删除消耗掉的这个订单
                 deleteOne(saleOrdersArray,0);
+                //当前订单总数不足，则消耗完该订单继续循环
+                chrPayed = chrPayed.sub(chrAmount);
             }
         }
         //手续费千分之二
