@@ -24,10 +24,13 @@ contract GameCoin is ERC20, Ownable {
         uint256 price;
         //时间
         uint256 time;
+        //先挂单的用户地址
         address sender;
         //1用chrToken换gamecoin，反之2
         uint256 sale;
+        //后挂单的用户地址
         address to;
+        //手续费
         uint256 taxFee;
     }
     //出售gamecoin数组
