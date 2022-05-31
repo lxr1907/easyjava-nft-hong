@@ -370,8 +370,6 @@ public class SCNController {
         walletMap.put("tableName", UserController.USER_WALLET_TABLE);
         walletMap.put("user_id", user.get("id"));
         BaseModel baseModel = new BaseModel();
-        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
-        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         List<Map> userWalletList = baseDao.selectBaseList(walletMap, baseModel);
         boolean myWallet = false;
         for (var wallet : userWalletList) {
@@ -394,6 +392,8 @@ public class SCNController {
         orderMap.put("address", map.get("address").toString());
         baseModel.setOrderColumn("id");
         baseModel.setOrderAsc("desc");
+        baseModel.setPageNo(Integer.parseInt(map.get("pageNo").toString()));
+        baseModel.setPageSize(Integer.parseInt(map.get("pageSize").toString()));
         if (order == 2) {
             baseModel.setOrderAsc("asc");
         }
