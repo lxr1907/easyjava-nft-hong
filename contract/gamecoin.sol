@@ -192,7 +192,7 @@ contract GameCoin is ERC20, Ownable {
         while (buyOrdersArray.length > 0
             && price >= buyOrdersArray[0].price) {
             //当前订单对应的gamecoin总数
-            uint256 chrAmount = buyOrdersArray[0].amount;
+            uint256 chrAmount = buyOrdersArray[0].chr;
             uint256 chrPrice = buyOrdersArray[0].price;
             uint256 chrWant = gamecoinPayed.div(chrPrice);
             if(chrAmount>chrWant){
@@ -216,7 +216,7 @@ contract GameCoin is ERC20, Ownable {
                 });
                 historyOrders.push(newOrderHistory);
                 gamecoinPayed = 0;
-                buyOrdersArray[0].amount = chrLeft;
+                buyOrdersArray[0].chr = chrLeft;
                 break;
             }else{
                 uint gamecoinAmount=chrAmount.mul(chrPrice);
@@ -259,7 +259,7 @@ contract GameCoin is ERC20, Ownable {
     //撮合购买gamecoin挂单
     function matchBuyOrder()   public  payable
     {
-        uint256 chrPayed = buyOrdersArray[0].amount;
+        uint256 chrPayed = buyOrdersArray[0].chr;
         uint256 price = buyOrdersArray[0].price;
         uint256 gamecoinGet = 0;
         //由于i=0位置的订单如果匹配上了价格和数量则会删除，
@@ -268,7 +268,7 @@ contract GameCoin is ERC20, Ownable {
             && price <= saleOrdersArray[0].price) {
             //当前订单对应的chr总数
             uint256 gamecoinAmount = saleOrdersArray[0].amount;
-            uint256 gamecoinPrice = saleOrdersArray[0].amount;
+            uint256 gamecoinPrice = saleOrdersArray[0].price;
             uint256 gamecoinWant = chrPayed.mul(gamecoinPrice);
             if(gamecoinAmount > gamecoinWant){
                 //当前订单总数充足，则部分成交
@@ -324,7 +324,7 @@ contract GameCoin is ERC20, Ownable {
         _mint(msg.sender,gamecoinGet.sub(taxFee));
         if(chrPayed != 0){
             //剩余的金额不为0，则部分未成交
-            buyOrdersArray[0].amount = chrPayed;
+            buyOrdersArray[0].chr = chrPayed;
         }else{
             //剩余的金额为0，则删除
             deleteOne(buyOrdersArray,0);
