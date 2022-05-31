@@ -189,6 +189,10 @@ contract GameCoin is ERC20, Ownable {
             if(gamecoinAmount>gamecoinPayed){
                 //当前订单总数充足，则部分成交
                 uint256 gamecoinAmountLeft=gamecoinAmount.sub(gamecoinPayed);
+                //千分之2手续费
+                uint256 taxFee = gamecoinAmount.div(taxRate);
+                //发gamecoin给匹配到的买家
+                _mint(buyOrdersArray[0].sender,gamecoinAmount.sub(taxFee));
                 //累加chrGet获得
                 chrGet = chrGet.add(gamecoinPayed.div(buyOrdersArray[0].price));
                 buyOrdersArray[0].amount = gamecoinAmountLeft;
@@ -206,6 +210,10 @@ contract GameCoin is ERC20, Ownable {
             }else{
                 //当前订单总数不足，则消耗完该订单继续循环
                 gamecoinPayed = gamecoinPayed.sub(gamecoinAmount);
+                //千分之2手续费
+                uint256 taxFee = gamecoinAmount.div(taxRate);
+                //发gamecoin给匹配到的买家
+                _mint(buyOrdersArray[0].sender,gamecoinAmount.sub(taxFee));
                 //累加chrGet获得
                 chrGet = chrGet.add(gamecoinAmount.div(buyOrdersArray[0].price));
                 //记录历史
@@ -250,6 +258,10 @@ contract GameCoin is ERC20, Ownable {
                 //当前订单总数充足，则部分成交
                 uint256 gamecoinLeft = gamecoinAmount.sub(gamecoinWant);
                 saleOrdersArray[0].amount = gamecoinLeft;
+                //加chr给卖家
+                uint256 chrAmount=gamecoinAmount.div(saleOrdersArray[0].price);
+                uint256 taxFee=chrAmout.div(taxRate);
+                payable(saleOrdersArray[0].sender).transfer(chrAmount.sub(taxFee));
                 //记录历史
                 OrderEntity memory newOrderHistory=OrderEntity({
                 amount:gamecoinWant,
@@ -267,6 +279,10 @@ contract GameCoin is ERC20, Ownable {
             }else{
                 //当前订单总数不足，则消耗完该订单继续循环
                 gamecoinWant = gamecoinWant.sub(gamecoinAmount);
+                //加chr给卖家
+                uint256 chrAmount=gamecoinAmount.div(saleOrdersArray[0].price);
+                uint256 taxFee=chrAmout.div(taxRate);
+                payable(saleOrdersArray[0].sender).transfer(chrAmount.sub(taxFee));
                 //累加获得的数量
                 gamecoinGet = gamecoinGet.add(gamecoinAmount);
                 //记录历史
