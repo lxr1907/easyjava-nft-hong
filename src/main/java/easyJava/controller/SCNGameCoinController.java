@@ -302,6 +302,7 @@ public class SCNGameCoinController {
             ordersRedis = getOrders(methodName);
             redisTemplate.opsForValue().set(key, ordersRedis);
         }
+        //合并价格相同订单
         ordersRedis = getSortedCombined(ordersRedis);
         if (ordersRedis == null) {
             return new ResponseEntity(new ArrayList());
@@ -312,7 +313,7 @@ public class SCNGameCoinController {
             List<List> addressOrders = new ArrayList<>();
             for (int i = 0; i < ordersRedis.size(); i++) {
                 if (ordersRedis.get(i).get(3).toString().equals(address)
-                ||ordersRedis.get(i).get(5).toString().equals(address)) {
+                        || ordersRedis.get(i).get(5).toString().equals(address)) {
                     addressOrders.add(ordersRedis.get(i));
                 }
             }
@@ -342,13 +343,14 @@ public class SCNGameCoinController {
         List<List> newList = new ArrayList<>();
         Map<Object, List> map = new LinkedHashMap<>();
         for (var order : list) {
-            if (map.containsKey(order.get(1))) {
-                Object amount = map.get(order.get(1)).get(0);
+            var price = order.get(2);
+            if (map.containsKey(price)) {
+                Object amount = map.get(price).get(0);
                 BigInteger addAmount = new BigInteger(amount.toString())
                         .add(new BigInteger(order.get(0).toString()));
-                map.get(order.get(1)).set(0, addAmount);
+                map.get(price).set(0, addAmount);
             } else {
-                map.put(order.get(1), order);
+                map.put(price, order);
             }
         }
         for (var entry : map.entrySet()) {
