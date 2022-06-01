@@ -380,7 +380,7 @@ public class SCNGameCoinController {
             ordersRedis = getOrders(methodName);
         }
         ordersRedis.forEach(order -> {
-            if (order.get(3).equals(address)) {
+            if (order.get(4).equals(address)) {
                 myOrders.add(order);
             }
         });
