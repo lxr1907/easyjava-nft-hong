@@ -63,6 +63,8 @@ public class SCNController {
 
     public static ObjectMapper mapper = new ObjectMapper();
 
+    public static BigInteger int18=new BigInteger("1000000000000000000");
+
 
     /**
      * 发送scn
@@ -188,7 +190,7 @@ public class SCNController {
         BigInteger chrValue = null;
         BigInteger chrTokenValue = null;
         try {
-            chrValue = v;//toDecimal18(v);
+            chrValue = toDecimal18(v);
             chrTokenValue = v;//chrTochrTokenPrice(v);
             if (chrTokenValue.compareTo(new BigInteger("1")) < 0) {
                 return new ResponseEntity(400, "能兑换到的chrToken小于1");
@@ -287,8 +289,8 @@ public class SCNController {
         BigInteger chrValue = null;
         BigInteger scnValue = null;
         try {
-            chrValue = v;//toDecimal18(chrTokenToChrPrice(v));
-            if (chrValue.compareTo(new BigInteger("1")) < 0) {
+            chrValue = toDecimal18(chrTokenToChrPrice(v));
+            if (chrValue.compareTo(int18) < 0) {
                 return new ResponseEntity(400, "能兑换到的chr小于1");
             }
             scnValue = v;
@@ -398,7 +400,7 @@ public class SCNController {
             baseModel.setOrderAsc("asc");
         }
         List<Map> list = baseDao.selectBaseListOrder(orderMap, baseModel);
-        list.forEach(orderM->{
+        list.forEach(orderM -> {
             orderM.remove("send_chr_json");
             orderM.remove("send_chr_token_json");
         });
@@ -537,18 +539,18 @@ public class SCNController {
     }
 
     public static BigInteger getDecimal18(BigInteger amountStr) {
-        BigInteger amount = amountStr.divide(new BigInteger("1000000000000000000"));
+        BigInteger amount = amountStr.divide(int18);
         return amount;
     }
 
 
     public static BigInteger toDecimal18(String amountStr) {
-        BigInteger amount = new BigInteger(amountStr).multiply(new BigInteger("1000000000000000000"));
+        BigInteger amount = new BigInteger(amountStr).multiply(int18);
         return amount;
     }
 
     public static BigInteger toDecimal18(BigInteger amountStr) {
-        BigInteger amount = amountStr.multiply(new BigInteger("1000000000000000000"));
+        BigInteger amount = amountStr.multiply(int18);
         return amount;
     }
 
