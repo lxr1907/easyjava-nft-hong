@@ -1,8 +1,11 @@
+// contracts/GameCoin.sol
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 
 contract GameCoin is ERC20, Ownable {
 
@@ -38,8 +41,8 @@ contract GameCoin is ERC20, Ownable {
     //个人购买道具
     function buyItem(uint256 id)  public payable
     {
-        uint256 amount = msg.value;
-        require(amount>=itemMap[id].price);
+        require(msg.value>=itemMap[id].price);
+        require(itemMap[id].leftAmount>0);
         itemMap[id].leftAmount=itemMap[id].leftAmount-1;
         userItemMap[msg.sender][id]=userItemMap[msg.sender][id]+1;
     }
