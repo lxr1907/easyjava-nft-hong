@@ -322,9 +322,6 @@ public class SCNGameCoinController {
             }
             ordersRedis = addressOrders;
         }
-        if (ordersRedis.size() < pageSize) {
-            pageSize = ordersRedis.size();
-        }
         //按时间采样抽取
         if (methodName.equals("getHistoryOrders")) {
             //按时间抽取，6小时一个
@@ -335,6 +332,9 @@ public class SCNGameCoinController {
             ordersRedis = getSampling(ordersRedis, secondInterval);
         }
 
+        if (ordersRedis.size() < pageSize) {
+            pageSize = ordersRedis.size();
+        }
         //排序
         if (order == 2) {
             List<List> rankedOrders = new ArrayList<>();
