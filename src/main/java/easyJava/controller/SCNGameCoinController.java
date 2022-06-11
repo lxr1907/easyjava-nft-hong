@@ -44,7 +44,6 @@ public class SCNGameCoinController {
     public static final String SCN_CHILD_OPERATOR = "{\"address\":\"56c8cb5daf329fc8613112b51e359b2dbae4fd97\",\"keyring\":[[{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"1a6d4aac70114be5b4eb54bf8cc11c58f23c4e8e97b2235cf6a9d0bfcc478a55\",\"cipherparams\":{\"iv\":\"24a74d100afae38093f7a5267ee17626\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"17ff967beb4c3e98c4d63c3b78c9a721a2fc5906c5d3ab43f81ec0a305c7e4c6\"},\"mac\":\"000d9abe5cd71085e4789abd1a604d77cdc31aef05eae5b1bcfbed364a94fbfb\"}]],\"id\":\"7de1963a-e59d-496b-bf34-029d50b76ab3\",\"version\":4}";
     public static final String SCN_CHILD_OPERATOR_PASSWORD = "cbor{@b9b1__#+#}";
     public static final String SCN_CHILD_OPERATOR_ADDRESS = "0x56c8cb5daf329fc8613112b51e359b2dbae4fd97";
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xd48d755e0d1551feef6184cddc74af6b516d7c32";
 
     public static ObjectMapper mapper = new ObjectMapper();
 
@@ -420,6 +419,76 @@ public class SCNGameCoinController {
         return new ResponseEntity(myOrders);
     }
 
+    /**
+     * 管理员增加游戏道具
+     *
+     * @param map
+     * @param token
+     * @return
+     */
+    @RequestMapping("/gameCoin/addGameItem")
+    public ResponseEntity<?> addGameItem(@RequestParam Map<String, Object> map,
+                                         @RequestHeader("token") String token
+    ) {
+        if (map.get("id") == null || map.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "id不能为空！");
+        }
+        if (map.get("amount") == null || map.get("amount").toString().length() == 0) {
+            return new ResponseEntity(400, "amount不能为空！");
+        }
+        if (map.get("price") == null || map.get("price").toString().length() == 0) {
+            return new ResponseEntity(400, "price不能为空！");
+        }
+        try {
+            var result = addGameItem(getOperatorSingleKeyring(),
+                    new BigInteger(map.get("id").toString()),
+                    new BigInteger(map.get("amount").toString()),
+                    new BigInteger(map.get("price").toString()));
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("addSaleOrder error!", e);
+            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+        }
+    }
+
+    /**
+     * 购买游戏道具
+     *
+     * @param map
+     * @param token
+     * @return
+     */
+    @RequestMapping("/gameCoin/buyGameItem")
+    public ResponseEntity<?> buyGameItem(@RequestParam Map<String, Object> map,
+                                         @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("id") == null || map.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "id不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        Map useWallet = getUserWallet(user, map.get("address").toString());
+
+        if (useWallet == null) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            var result = buyGameItem(getSingleKeyring(useWallet), new BigInteger(map.get("id").toString()));
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("addSaleOrder error!", e);
+            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+        }
+    }
+
     public static String getUserWalletPrivate(Map useWallet) {
         String encrypt_key = useWallet.get("encrypt_key").toString();
         String encrypted_private = useWallet.get("encrypted_private").toString();
@@ -489,6 +558,21 @@ public class SCNGameCoinController {
         params.add(amount);
         params.add(price);
         return addOrder(keyring, params, new BigInteger("0"), "addSaleOrder");
+    }
+
+    public static TransactionReceipt.TransactionReceiptData addGameItem(SingleKeyring keyring, BigInteger id,
+                                                                        BigInteger amount, BigInteger price) {
+        List<Object> params = new ArrayList<>();
+        params.add(id);
+        params.add(price);
+        params.add(amount);
+        return addOrder(keyring, params, new BigInteger("0"), "addItem");
+    }
+
+    public static TransactionReceipt.TransactionReceiptData buyGameItem(SingleKeyring keyring, BigInteger id) {
+        List<Object> params = new ArrayList<>();
+        params.add(id);
+        return addOrder(keyring, params, new BigInteger("0"), "buyItem");
     }
 
     public static TransactionReceipt.TransactionReceiptData addBuyOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) {
@@ -638,5 +722,7 @@ public class SCNGameCoinController {
             logger.error("", e);
         }
     }
+
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xc01d8bbfdfab2c1f01d123419e59f01b1489ab39";
 
 }

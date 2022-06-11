@@ -39,10 +39,10 @@ contract GameCoin is ERC20, Ownable {
         itemMap[id]=newItem;
     }
     //个人购买道具
-    function buyItem(uint256 id)  public payable
+    function buyItem(uint256 id)  public
     {
-        require(msg.value>=itemMap[id].price);
         require(itemMap[id].leftAmount>0);
+        _burn(msg.sender,itemMap[id].price);
         itemMap[id].leftAmount=itemMap[id].leftAmount-1;
         userItemMap[msg.sender][id]=userItemMap[msg.sender][id]+1;
     }
