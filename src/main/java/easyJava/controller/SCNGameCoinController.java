@@ -305,15 +305,6 @@ public class SCNGameCoinController {
         if (!methodName.equals("getHistoryOrders")) {
             //合并价格相同订单
             ordersRedis = getSortedCombined(ordersRedis);
-        } else {
-            //按时间抽取，6小时一个
-            int secondInterval = 60 * 60 * 6;
-            if (map.get("secondInterval") != null && map.get("secondInterval").toString().length() != 0) {
-                secondInterval = Integer.parseInt(map.get("secondInterval").toString());
-            }
-            //按时间采样抽取
-            ordersRedis = getSampling(ordersRedis, secondInterval);
-
         }
         if (ordersRedis == null) {
             return new ResponseEntity(new ArrayList());
@@ -331,12 +322,6 @@ public class SCNGameCoinController {
             }
             ordersRedis = addressOrders;
         }
-
-
-        if (ordersRedis.size() < pageSize) {
-            pageSize = ordersRedis.size();
-        }
-
         //排序
         if (order == 2) {
             List<List> rankedOrders = new ArrayList<>();
@@ -345,7 +330,19 @@ public class SCNGameCoinController {
             }
             ordersRedis = rankedOrders;
         }
+        //按时间采样抽取
+        if (methodName.equals("getHistoryOrders")) {
+            //按时间抽取，6小时一个
+            int secondInterval = 60 * 60 * 6;
+            if (map.get("secondInterval") != null && map.get("secondInterval").toString().length() != 0) {
+                secondInterval = Integer.parseInt(map.get("secondInterval").toString());
+            }
+            ordersRedis = getSampling(ordersRedis, secondInterval);
+        }
 
+        if (ordersRedis.size() < pageSize) {
+            pageSize = ordersRedis.size();
+        }
         //分页
         if (ordersRedis.size() > pageSize) {
             ordersRedis = ordersRedis.subList(0, pageSize);
@@ -374,6 +371,7 @@ public class SCNGameCoinController {
         return newList;
     }
 
+    //按时间采样抽取
     public static List<List> getSampling(List<List> list, int secondInterval) {
         List<List> newList = new ArrayList<>();
         long timeNow = 0;
