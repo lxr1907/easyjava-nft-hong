@@ -322,6 +322,9 @@ public class SCNGameCoinController {
             }
             ordersRedis = addressOrders;
         }
+        if (ordersRedis.size() < pageSize) {
+            pageSize = ordersRedis.size();
+        }
         //排序
         if (order == 2) {
             List<List> rankedOrders = new ArrayList<>();
@@ -340,9 +343,6 @@ public class SCNGameCoinController {
             ordersRedis = getSampling(ordersRedis, secondInterval);
         }
 
-        if (ordersRedis.size() < pageSize) {
-            pageSize = ordersRedis.size();
-        }
         //分页
         if (ordersRedis.size() > pageSize) {
             ordersRedis = ordersRedis.subList(0, pageSize);
