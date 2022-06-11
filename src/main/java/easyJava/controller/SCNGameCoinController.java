@@ -319,6 +319,7 @@ public class SCNGameCoinController {
             return new ResponseEntity(new ArrayList());
         }
 
+        //按地址过滤
         if (map.get("address") != null && map.get("address").toString().length() != 0) {
             String address = map.get("address").toString();
             List<List> addressOrders = new ArrayList<>();
@@ -336,6 +337,7 @@ public class SCNGameCoinController {
             pageSize = ordersRedis.size();
         }
 
+        //排序
         if (order == 2) {
             List<List> rankedOrders = new ArrayList<>();
             for (int i = 0; i < pageSize; i++) {
@@ -343,6 +345,8 @@ public class SCNGameCoinController {
             }
             ordersRedis = rankedOrders;
         }
+
+        //分页
         if (ordersRedis.size() > pageSize) {
             ordersRedis = ordersRedis.subList(0, pageSize);
         }
