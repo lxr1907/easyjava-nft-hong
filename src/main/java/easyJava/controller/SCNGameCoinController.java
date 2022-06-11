@@ -377,15 +377,10 @@ public class SCNGameCoinController {
         long timeNow = 0;
         for (var order : list) {
             var time = Long.parseLong(order.get(3).toString());
-            if (timeNow == 0) {
-                timeNow = time;
-                newList.add(order);
-                continue;
-            }
-            if (time - timeNow >= secondInterval) {
-
+            if (timeNow == 0 || time - timeNow >= secondInterval) {
                 newList.add(order);
             }
+            timeNow = time;
         }
         return newList;
     }
