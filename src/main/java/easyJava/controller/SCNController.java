@@ -63,7 +63,7 @@ public class SCNController {
 
     public static ObjectMapper mapper = new ObjectMapper();
 
-    public static BigInteger int18=new BigInteger("1000000000000000000");
+    public static BigInteger int18 = new BigInteger("1000000000000000000");
 
 
     /**
@@ -314,7 +314,7 @@ public class SCNController {
         }
         //再发放chr
         try {
-            var chrResult = KlayController.sendingCHR(useWallet.get("address").toString(), chrValue);
+            var chrResult = KlayController.sendingCHRFromChrToken(useWallet.get("address").toString(), chrValue);
             orderMap.put("send_chr_json", JSON.toJSONString(chrResult));
         } catch (Exception e) {
             logger.error("burnCHR error!", e);

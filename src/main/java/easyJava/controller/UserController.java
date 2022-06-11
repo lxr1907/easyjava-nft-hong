@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 public class UserController {
-    private static final Logger logger = LogManager.getLogger(NFTScanController.class);
+    private static final Logger logger = LogManager.getLogger(UserController.class);
     @Autowired
     BaseDao baseDao;
     @Autowired

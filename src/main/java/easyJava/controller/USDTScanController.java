@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-public class NFTScanController {
-    public static final Logger logger = LoggerFactory.getLogger(NFTScanController.class);
+public class USDTScanController {
+    public static final Logger logger = LoggerFactory.getLogger(USDTScanController.class);
 
     @Autowired
     BaseDao baseDao;
@@ -111,7 +111,7 @@ public class NFTScanController {
                     try {
                         logger.debug("-----------sendingKLAY to user chr_address:------"
                                 + address + ",val:" + chrVal);
-                        KlayController.sendingCHR(address, chrVal);
+                        KlayController.sendingCHRFromUSDTBuy(address, chrVal);
                         //更新订单状态，支付chr完成
                         matchOrder.put("status", 3);
                         baseDao.updateBaseByPrimaryKey(matchOrder);

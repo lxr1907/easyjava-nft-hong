@@ -53,6 +53,16 @@ public class KlayController {
 //    public static final String SYSTEM_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
     public static final String SYSTEM_PRIVATE = "55490a18860328954ba2d80eaed84dbe1b7a2c42073b6cec3704cf591990e71f";
     public static final String SYSTEM_ADDRESS = "0x0CcEB89A051711b0af1Afd52855fA76Da8aea265";
+
+    //使用usdt购买chr时，用该地址转账
+    public static final String SYSTEM_USDT_PRIVATE = "8a06a7a22851b7e3a97cbb53641ec2a4b3f287d2844b91ba60823643171c4bdf";
+    public static final String SYSTEM_USDT_ADDRESS = "0xC4f459a93169bbF3CF9Dc3c50D34502473703FB0";
+
+    //使用chrToken提现chr时，用该地址转账
+    public static final String SYSTEM_CHR_TOKEN_PRIVATE = "6b9332b28c2a689f464994cb7be26485aba9a3471077cf8607eefe8f849c10f8";
+    public static final String SYSTEM_CHR_TOKEN_ADDRESS = "0xe61c910ac9A6629E88675Ba34E36620cFA966824";
+
+
     public static final String SWAP_ADDRESS = "0x0CcEB89A051711b0af1Afd52855fA76Da8aea265";
     public static final String Klay_HOST = "https://api.baobab.klaytn.net:8651/";
     public static final String MY_KLAY_HOST = "http://43.132.248.207:8551";
@@ -143,6 +153,28 @@ public class KlayController {
 
     public static TransactionReceipt.TransactionReceiptData sendingCHR(String toAddress, BigInteger value) {
         return sendingCHR(SYSTEM_PRIVATE, toAddress, value);
+    }
+
+    /**
+     * 用usdt购买chr时，发送chr
+     *
+     * @param toAddress
+     * @param value
+     * @return
+     */
+    public static TransactionReceipt.TransactionReceiptData sendingCHRFromUSDTBuy(String toAddress, BigInteger value) {
+        return sendingCHR(SYSTEM_USDT_PRIVATE, toAddress, value);
+    }
+
+    /**
+     * 用chrToken提现时，发送chr
+     *
+     * @param toAddress
+     * @param value
+     * @return
+     */
+    public static TransactionReceipt.TransactionReceiptData sendingCHRFromChrToken(String toAddress, BigInteger value) {
+        return sendingCHR(SYSTEM_CHR_TOKEN_PRIVATE, toAddress, value);
     }
 
     /**
@@ -497,17 +529,22 @@ public class KlayController {
 
     //  BigInteger value = new BigInteger(Utils.convertToPeb(BigDecimal.ONE, "KLAY"));
     public static void main(String[] args) {
-//        try {
-        //部署合约
+        try {
+            //部署合约
 //            String address = contractDeploy();
 //            logger.info(address);
 //            burnCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415",new BigInteger("3"));
-//        sendingCHR("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415", Double.parseDouble("100000000000000000000"));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+//            sendingCHR(SYSTEM_USDT_ADDRESS, new BigInteger("66116788386621325939833066"));
+//            sendingCHR(SYSTEM_CHR_TOKEN_ADDRESS, new BigInteger("66116788386621325939833066"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 //        System.out.println(0 + Float.parseFloat(GenerateUtils.getRandomOneToMax(1000) + "") / 10000);
         BigInteger d = balanceOfCHR(SYSTEM_ADDRESS);
+        logger.info(d.toString());
+        d = balanceOfCHR(SYSTEM_USDT_ADDRESS);
+        logger.info(d.toString());
+        d = balanceOfCHR(SYSTEM_CHR_TOKEN_ADDRESS);
         logger.info(d.toString());
     }
 }
