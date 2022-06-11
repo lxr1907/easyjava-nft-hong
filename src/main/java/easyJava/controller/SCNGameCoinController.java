@@ -329,7 +329,7 @@ public class SCNGameCoinController {
             if (map.get("secondInterval") != null && map.get("secondInterval").toString().length() != 0) {
                 secondInterval = Integer.parseInt(map.get("secondInterval").toString());
             }
-            ordersRedis = getSampling(ordersRedis, secondInterval);
+            ordersRedis = getSampling(ordersRedis, secondInterval, order);
         }
 
         if (ordersRedis.size() < pageSize) {
@@ -373,13 +373,19 @@ public class SCNGameCoinController {
     }
 
     //按时间采样抽取
-    public static List<List> getSampling(List<List> list, int secondInterval) {
+    public static List<List> getSampling(List<List> list, int secondInterval, int rankOrder) {
         List<List> newList = new ArrayList<>();
         long timeNow = 0;
         for (var order : list) {
             var time = Long.parseLong(order.get(3).toString());
-            if (timeNow == 0 || time - timeNow >= secondInterval) {
-                newList.add(order);
+            if (rankOrder == 1) {
+                if (timeNow == 0 || time - timeNow >= secondInterval) {
+                    newList.add(order);
+                }
+            } else {
+                if (timeNow == 0 || time - timeNow <= secondInterval) {
+                    newList.add(order);
+                }
             }
             timeNow = time;
         }
