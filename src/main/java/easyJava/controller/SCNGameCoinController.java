@@ -302,8 +302,19 @@ public class SCNGameCoinController {
             ordersRedis = getOrders(methodName);
             redisTemplate.opsForValue().set(key, ordersRedis);
         }
-        //合并价格相同订单
-        ordersRedis = getSortedCombined(ordersRedis);
+        if (!methodName.equals("getHistoryOrders")) {
+            //合并价格相同订单
+            ordersRedis = getSortedCombined(ordersRedis);
+        } else {
+            //按时间抽取，6小时一个
+            int secondInterval = 60 * 60 * 6;
+            if (map.get("secondInterval") != null && map.get("secondInterval").toString().length() != 0) {
+                secondInterval = Integer.parseInt(map.get("secondInterval").toString());
+            }
+            //按时间采样抽取
+            ordersRedis = getSampling(ordersRedis, secondInterval);
+
+        }
         if (ordersRedis == null) {
             return new ResponseEntity(new ArrayList());
         }
@@ -355,6 +366,24 @@ public class SCNGameCoinController {
         }
         for (var entry : map.entrySet()) {
             newList.add(entry.getValue());
+        }
+        return newList;
+    }
+
+    public static List<List> getSampling(List<List> list, int secondInterval) {
+        List<List> newList = new ArrayList<>();
+        long timeNow = 0;
+        for (var order : list) {
+            var time = Long.parseLong(order.get(3).toString());
+            if (timeNow == 0) {
+                timeNow = time;
+                newList.add(order);
+                continue;
+            }
+            if (time - timeNow >= secondInterval) {
+
+                newList.add(order);
+            }
         }
         return newList;
     }
