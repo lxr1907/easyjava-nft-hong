@@ -558,7 +558,7 @@ public class SCNGameCoinController {
         }
         try {
             var result = queryItem(getSingleKeyring(useWallet), Arrays.asList(map.get("id").toString()),
-                    "queryItem");
+                    "userItemMap");
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
