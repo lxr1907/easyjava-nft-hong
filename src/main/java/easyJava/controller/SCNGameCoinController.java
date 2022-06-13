@@ -500,7 +500,7 @@ public class SCNGameCoinController {
 
     @RequestMapping("/gameCoin/buyGameItemList")
     public ResponseEntity<?> buyGameItemList(@RequestParam Map<String, Object> map,
-                                          @RequestHeader("token") String token
+                                             @RequestHeader("token") String token
     ) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
@@ -536,7 +536,7 @@ public class SCNGameCoinController {
 
     @RequestMapping("/gameCoin/queryItem")
     public ResponseEntity<?> queryItem(@RequestParam Map<String, Object> map,
-                                             @RequestHeader("token") String token
+                                       @RequestHeader("token") String token
     ) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
@@ -557,7 +557,10 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         try {
-            var result = queryItem(getSingleKeyring(useWallet), Arrays.asList(map.get("id").toString()),
+            var addr = new ArrayList<>();
+            addr.add(map.get("address").toString());
+            addr.add(map.get("id").toString());
+            var result = queryItem(getSingleKeyring(useWallet), addr,
                     "userItemMap");
             return new ResponseEntity(result);
         } catch (Exception e) {
