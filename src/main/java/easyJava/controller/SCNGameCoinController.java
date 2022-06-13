@@ -125,7 +125,7 @@ public class SCNGameCoinController {
         try {
             var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
-            clearOrdersRedis();
+            clearOrdersRedis(0);
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -170,7 +170,7 @@ public class SCNGameCoinController {
         try {
             var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
                     new BigInteger(map.get("price").toString()));
-            clearOrdersRedis();
+            clearOrdersRedis(0);
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -203,8 +203,7 @@ public class SCNGameCoinController {
         }
         try {
             var result = cancelBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
-            matchBuyOrder();
-            clearOrdersRedis();
+            clearOrdersRedis(2);
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("cancelBuyOrder error!", e);
@@ -237,8 +236,7 @@ public class SCNGameCoinController {
         }
         try {
             var result = cancelSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
-            matchBuyOrder();
-            clearOrdersRedis();
+            clearOrdersRedis(1);
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("cancelSaleOrder error!", e);
@@ -246,13 +244,24 @@ public class SCNGameCoinController {
         }
     }
 
-    public void clearOrdersRedis() {
+    /**
+     * 类型0全部，1sale，2buy，3history
+     *
+     * @param type
+     */
+    public void clearOrdersRedis(int type) {
         String key = "getOrders:getSaleOrders";
-        redisTemplate.opsForValue().set(key, new ArrayList<>());
-        key = "getOrders:getBuyOrders";
-        redisTemplate.opsForValue().set(key, new ArrayList<>());
-        key = "getOrders:getHistoryOrders";
-        redisTemplate.opsForValue().set(key, new ArrayList<>());
+        if (type == 0 || type == 1) {
+            redisTemplate.opsForValue().set(key, new ArrayList<>());
+        }
+        if (type == 0 || type == 2) {
+            key = "getOrders:getBuyOrders";
+            redisTemplate.opsForValue().set(key, new ArrayList<>());
+        }
+        if (type == 0 || type == 3) {
+            key = "getOrders:getHistoryOrders";
+            redisTemplate.opsForValue().set(key, new ArrayList<>());
+        }
     }
 
     @RequestMapping("/gameCoin/test/addGameCoin")
@@ -489,6 +498,74 @@ public class SCNGameCoinController {
         }
     }
 
+    @RequestMapping("/gameCoin/buyGameItemList")
+    public ResponseEntity<?> buyGameItemList(@RequestParam Map<String, Object> map,
+                                          @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("ids") == null || map.get("ids").toString().length() == 0) {
+            return new ResponseEntity(400, "ids不能为空！");
+        }
+        if (map.get("counts") == null || map.get("counts").toString().length() == 0) {
+            return new ResponseEntity(400, "counts不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        Map useWallet = getUserWallet(user, map.get("address").toString());
+
+        if (useWallet == null) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            var ids = Arrays.stream(map.get("ids").toString().split(",")).mapToInt(Integer::parseInt).toArray();
+            var counts = Arrays.stream(map.get("counts").toString().split(",")).mapToInt(Integer::parseInt).toArray();
+            var result = buyGameItems(getSingleKeyring(useWallet), ids, counts);
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("addSaleOrder error!", e);
+            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+        }
+    }
+
+    @RequestMapping("/gameCoin/queryItem")
+    public ResponseEntity<?> queryItem(@RequestParam Map<String, Object> map,
+                                             @RequestHeader("token") String token
+    ) {
+        if (token == null || token.length() == 0) {
+            return new ResponseEntity(400, "token 不能为空！");
+        }
+        if (map.get("address") == null || map.get("address").toString().length() == 0) {
+            return new ResponseEntity(400, "address不能为空！");
+        }
+        if (map.get("id") == null || map.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "id不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
+        Map useWallet = getUserWallet(user, map.get("address").toString());
+
+        if (useWallet == null) {
+            return new ResponseEntity(400, "address不属于自己！");
+        }
+        try {
+            var result = queryItem(getSingleKeyring(useWallet), Arrays.asList(map.get("id").toString()),
+                    "queryItem");
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("addSaleOrder error!", e);
+            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+        }
+    }
+
     public static String getUserWalletPrivate(Map useWallet) {
         String encrypt_key = useWallet.get("encrypt_key").toString();
         String encrypted_private = useWallet.get("encrypted_private").toString();
@@ -575,6 +652,13 @@ public class SCNGameCoinController {
         return addOrder(keyring, params, new BigInteger("0"), "buyItem");
     }
 
+    public static TransactionReceipt.TransactionReceiptData buyGameItems(SingleKeyring keyring, int[] ids, int[] counts) {
+        List<Object> params = new ArrayList<>();
+        params.add(ids);
+        params.add(counts);
+        return addOrder(keyring, params, new BigInteger("0"), "buyItems");
+    }
+
     public static TransactionReceipt.TransactionReceiptData addBuyOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) {
         List<Object> params = new ArrayList<>();
         params.add(price);
@@ -616,6 +700,31 @@ public class SCNGameCoinController {
                     .getMethod(methodName);
             PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
             ret = method.send(params, sendOptions, processor);
+            logger.info(methodName + " :" + JSON.toJSONString(ret));
+        } catch (Exception e) {
+            logger.error(methodName + " error！", e);
+            e.printStackTrace();
+            return null;
+        }
+        return ret;
+    }
+
+    public static List<Type> queryItem(SingleKeyring keyring, List<Object> params,
+                                       String methodName) {
+        Caver caver = new Caver(MY_SCN_HOST);
+        List<Type> ret = null;
+        try {
+            SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
+                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            //设置操作人，gas费默认由操作人付款
+            caver.wallet.add(keyring);
+
+            if (!keyring.getAddress().equals(systemKeyring.getAddress())) {
+                caver.wallet.add(systemKeyring);
+            }
+            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS)
+                    .getMethod(methodName);
+            ret = method.call(params);
             logger.info(methodName + " :" + JSON.toJSONString(ret));
         } catch (Exception e) {
             logger.error(methodName + " error！", e);
@@ -716,13 +825,18 @@ public class SCNGameCoinController {
 //                    myOrders.add(order);
 //                }
 //            });
-            gameCoinContractDeploy();
+//            gameCoinContractDeploy();
 //            testTransfer("0x85c616c2d51b6c653e00325ae85660d5b0c50786", "10000000000000");
+            List addresses = new ArrayList();
+            addresses.add("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415");
+            addresses.add("1");
+            var ret = queryItem(getOperatorSingleKeyring(), addresses, "userItemMap");
+            logger.info(JSON.toJSONString(ret));
         } catch (Exception e) {
             logger.error("", e);
         }
     }
 
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xc01d8bbfdfab2c1f01d123419e59f01b1489ab39";
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xb2b2036b32007048efc9a6ec33369556e19e0c27";
 
 }

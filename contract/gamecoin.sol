@@ -60,6 +60,12 @@ contract GameCoin is ERC20, Ownable {
         }
         _burn(msg.sender,allAmount);
     }
+    function queryItem(address addr,uint256 id) public view returns ( uint256  )
+    {
+        return userItemMap[addr][id];
+    }
+
+
     //官方价格 1 chr-token = onePrice个 GameCoin
     uint256 public onePrice = 100;
     //订单实体
