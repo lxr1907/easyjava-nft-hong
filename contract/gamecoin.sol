@@ -46,7 +46,20 @@ contract GameCoin is ERC20, Ownable {
         itemMap[id].leftAmount=itemMap[id].leftAmount-1;
         userItemMap[msg.sender][id]=userItemMap[msg.sender][id]+1;
     }
-
+    //个人购买道具批量
+    function buyItems( uint256[]calldata ids , uint256 []calldata counts ) public
+    {
+        require(ids.length == counts.length);
+        uint256 allAmount = 0;
+        for (uint i = 0; i < ids.length; i++) {
+            uint256 idI = ids[i];
+            require(counts[i] <= itemMap[idI].leftAmount);
+            allAmount  = counts[i].mul(itemMap[idI].price) + allAmount;
+            itemMap[idI].leftAmount = itemMap[idI].leftAmount - counts[i];
+            userItemMap[msg.sender][idI] = userItemMap[msg.sender][idI] + counts[i];
+        }
+        _burn(msg.sender,allAmount);
+    }
     //官方价格 1 chr-token = onePrice个 GameCoin
     uint256 public onePrice = 100;
     //订单实体
@@ -364,10 +377,6 @@ contract GameCoin is ERC20, Ownable {
         _burn(receiver, amount);
     }
 
-    function getBalance() public view
-    returns (uint256 balance){
-        balance = address(this).balance;
-    }
     //修改价格
     function setPrice(uint256 price) public onlyOwner {
         onePrice = price;
