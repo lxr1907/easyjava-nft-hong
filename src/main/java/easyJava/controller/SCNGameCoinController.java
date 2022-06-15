@@ -437,7 +437,7 @@ public class SCNGameCoinController {
      */
     @RequestMapping("/gameCoin/addGameItem")
     public ResponseEntity<?> addGameItem(@RequestParam Map<String, Object> map,
-                                         @RequestHeader("token") String token
+                                         @RequestHeader("admin_token") String token
     ) {
         if (map.get("id") == null || map.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "id不能为空！");
@@ -491,6 +491,24 @@ public class SCNGameCoinController {
         }
         try {
             var result = buyGameItem(getSingleKeyring(useWallet), new BigInteger(map.get("id").toString()));
+            return new ResponseEntity(result);
+        } catch (Exception e) {
+            logger.error("addSaleOrder error!", e);
+            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+        }
+    }
+
+    @RequestMapping("/gameCoin/getItem")
+    public ResponseEntity<?> getItem(@RequestParam Map<String, Object> map
+    ) {
+        if (map.get("id") == null || map.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "id不能为空！");
+        }
+        try {
+            var addr = new ArrayList<>();
+            addr.add(map.get("id").toString());
+            var result = queryItem(getOperatorSingleKeyring(), addr,
+                    "itemMap");
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
