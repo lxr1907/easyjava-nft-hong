@@ -545,7 +545,7 @@ public class SCNGameCoinController {
             var ids = Arrays.stream(map.get("ids").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             var counts = Arrays.stream(map.get("counts").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             var result = buyGameItems(getSingleKeyring(useWallet), ids, counts);
-            return new ResponseEntity(result);
+            return new ResponseEntity(user);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
             return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
