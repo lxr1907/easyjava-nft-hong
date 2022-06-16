@@ -73,9 +73,7 @@ public class SCNGameCoinController {
      * @return
      */
     @RequestMapping("/gameCoin/balanceOf")
-    public ResponseEntity<?> balanceOf(@RequestParam Map<String, Object> map,
-                                       @RequestHeader("token") String token
-    ) {
+    public ResponseEntity<?> balanceOf(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -98,9 +96,7 @@ public class SCNGameCoinController {
      * @return
      */
     @RequestMapping("/gameCoin/addSaleOrder")
-    public ResponseEntity<?> addSaleOrder(@RequestParam Map<String, Object> map,
-                                          @RequestHeader("token") String token
-    ) {
+    public ResponseEntity<?> addSaleOrder(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -123,8 +119,7 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         try {
-            var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
-                    new BigInteger(map.get("price").toString()));
+            var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()), new BigInteger(map.get("price").toString()));
             clearOrdersRedis(0);
             return new ResponseEntity(result);
         } catch (Exception e) {
@@ -142,9 +137,7 @@ public class SCNGameCoinController {
      * @return
      */
     @RequestMapping("/gameCoin/addBuyOrder")
-    public ResponseEntity<?> addBuyOrder(@RequestParam Map<String, Object> map,
-                                         @RequestHeader("token") String token
-    ) {
+    public ResponseEntity<?> addBuyOrder(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -168,8 +161,7 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         try {
-            var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
-                    new BigInteger(map.get("price").toString()));
+            var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()), new BigInteger(map.get("price").toString()));
             clearOrdersRedis(0);
             return new ResponseEntity(result);
         } catch (Exception e) {
@@ -179,9 +171,7 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/cancelBuyOrder")
-    public ResponseEntity<?> cancelBuyOrder(@RequestParam Map<String, Object> map,
-                                            @RequestHeader("token") String token
-    ) {
+    public ResponseEntity<?> cancelBuyOrder(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -212,9 +202,7 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/cancelSaleOrder")
-    public ResponseEntity<?> cancelSaleOrder(@RequestParam Map<String, Object> map,
-                                             @RequestHeader("token") String token
-    ) {
+    public ResponseEntity<?> cancelSaleOrder(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -265,8 +253,7 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/test/addGameCoin")
-    public ResponseEntity<?> addGameCoin(@RequestParam Map<String, Object> map
-    ) {
+    public ResponseEntity<?> addGameCoin(@RequestParam Map<String, Object> map) {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
@@ -284,9 +271,7 @@ public class SCNGameCoinController {
      * @return
      */
     @RequestMapping("/gameCoin/getOrders/{methodName}")
-    public ResponseEntity<?> getOrders(@RequestParam Map<String, Object> map,
-                                       @PathVariable String methodName
-    ) {
+    public ResponseEntity<?> getOrders(@RequestParam Map<String, Object> map, @PathVariable String methodName) {
         if (methodName == null || methodName.length() == 0) {
             return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders,getHistoryOrders！");
         }
@@ -323,8 +308,7 @@ public class SCNGameCoinController {
             String address = map.get("address").toString();
             List<List> addressOrders = new ArrayList<>();
             for (int i = 0; i < ordersRedis.size(); i++) {
-                if (ordersRedis.get(i).get(4).toString().equals(address)
-                        || ordersRedis.get(i).get(6).toString().equals(address)) {
+                if (ordersRedis.get(i).get(4).toString().equals(address) || ordersRedis.get(i).get(6).toString().equals(address)) {
                     addressOrders.add(ordersRedis.get(i));
                 }
             }
@@ -367,8 +351,7 @@ public class SCNGameCoinController {
             var price = order.get(2);
             if (map.containsKey(price)) {
                 Object amount = map.get(price).get(0);
-                BigInteger addAmount = new BigInteger(amount.toString())
-                        .add(new BigInteger(order.get(0).toString()));
+                BigInteger addAmount = new BigInteger(amount.toString()).add(new BigInteger(order.get(0).toString()));
                 map.get(price).set(0, addAmount);
             } else {
                 map.put(price, order);
@@ -401,8 +384,7 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/getOrdersByAddress/{methodName}/{address}")
-    public ResponseEntity<?> getOrdersByAddress(@PathVariable String methodName, @PathVariable String address
-    ) {
+    public ResponseEntity<?> getOrdersByAddress(@PathVariable String methodName, @PathVariable String address) {
         if (methodName == null || methodName.length() == 0) {
             return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders！");
         }
@@ -436,9 +418,7 @@ public class SCNGameCoinController {
      * @return
      */
     @RequestMapping("/gameCoin/addGameItem")
-    public ResponseEntity<?> addGameItem(@RequestParam Map<String, Object> map,
-                                         @RequestHeader("admin_token") String token
-    ) {
+    public ResponseEntity<?> addGameItem(@RequestParam Map<String, Object> map, @RequestHeader("admin_token") String token) {
         if (map.get("id") == null || map.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "id不能为空！");
         }
@@ -449,10 +429,7 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "price不能为空！");
         }
         try {
-            var result = addGameItem(getOperatorSingleKeyring(),
-                    new BigInteger(map.get("id").toString()),
-                    new BigInteger(map.get("amount").toString()),
-                    new BigInteger(map.get("price").toString()));
+            var result = addGameItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()), new BigInteger(map.get("amount").toString()), new BigInteger(map.get("price").toString()));
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -468,9 +445,7 @@ public class SCNGameCoinController {
      * @return
      */
     @RequestMapping("/gameCoin/buyGameItem")
-    public ResponseEntity<?> buyGameItem(@RequestParam Map<String, Object> map,
-                                         @RequestHeader("token") String token
-    ) {
+    public ResponseEntity<?> buyGameItem(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -499,16 +474,14 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/getItem")
-    public ResponseEntity<?> getItem(@RequestParam Map<String, Object> map
-    ) {
+    public ResponseEntity<?> getItem(@RequestParam Map<String, Object> map) {
         if (map.get("id") == null || map.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "id不能为空！");
         }
         try {
             var addr = new ArrayList<>();
             addr.add(map.get("id").toString());
-            var result = queryItem(getOperatorSingleKeyring(), addr,
-                    "itemMap");
+            var result = queryItem(getOperatorSingleKeyring(), addr, "itemMap");
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -517,9 +490,7 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/buyGameItemList")
-    public ResponseEntity<?> buyGameItemList(@RequestParam Map<String, Object> map,
-                                             @RequestHeader("token") String token
-    ) {
+    public ResponseEntity<?> buyGameItemList(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -545,9 +516,12 @@ public class SCNGameCoinController {
             var ids = Arrays.stream(map.get("ids").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             var counts = Arrays.stream(map.get("counts").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             var result = buyGameItems(getSingleKeyring(useWallet), ids, counts);
-            Map retMap=new HashMap();
-            retMap.put("user",user);
-            retMap.put("transaction",result);
+            if (result.getStatus().equals("0x0")) {
+                return new ResponseEntity(400, "失败,余额不足:" + result.getTxError());
+            }
+            Map retMap = new HashMap();
+            retMap.put("user", user);
+            retMap.put("transaction", result);
             return new ResponseEntity(retMap);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -556,9 +530,7 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/queryItem")
-    public ResponseEntity<?> queryItem(@RequestParam Map<String, Object> map,
-                                       @RequestHeader("token") String token
-    ) {
+    public ResponseEntity<?> queryItem(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
         if (token == null || token.length() == 0) {
             return new ResponseEntity(400, "token 不能为空！");
         }
@@ -581,8 +553,7 @@ public class SCNGameCoinController {
             var addr = new ArrayList<>();
             addr.add(map.get("address").toString());
             addr.add(map.get("id").toString());
-            var result = queryItem(getSingleKeyring(useWallet), addr,
-                    "userItemMap");
+            var result = queryItem(getSingleKeyring(useWallet), addr, "userItemMap");
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -619,8 +590,7 @@ public class SCNGameCoinController {
         Contract contract = null;
         try {
             contract = caver.contract.create(SCNContractController.ABI);
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
             caver.wallet.add(keyring);
             SendOptions sendOptions = new SendOptions();
@@ -639,8 +609,7 @@ public class SCNGameCoinController {
     }
 
     public static SingleKeyring getOperatorSingleKeyring() {
-        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
-                getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        SingleKeyring keyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         return keyring;
     }
 
@@ -661,8 +630,7 @@ public class SCNGameCoinController {
         return addOrder(keyring, params, new BigInteger("0"), "addSaleOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData addGameItem(SingleKeyring keyring, BigInteger id,
-                                                                        BigInteger amount, BigInteger price) {
+    public static TransactionReceipt.TransactionReceiptData addGameItem(SingleKeyring keyring, BigInteger id, BigInteger amount, BigInteger price) {
         List<Object> params = new ArrayList<>();
         params.add(id);
         params.add(price);
@@ -701,13 +669,11 @@ public class SCNGameCoinController {
         return addOrder(keyring, params, new BigInteger("0"), "cancelBuyOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params,
-                                                                     BigInteger amount, String methodName) {
+    public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params, BigInteger amount, String methodName) {
         Caver caver = new Caver(MY_SCN_HOST);
         TransactionReceipt.TransactionReceiptData ret = null;
         try {
-            SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
             caver.wallet.add(keyring);
             SendOptions sendOptions = new SendOptions();
@@ -720,8 +686,7 @@ public class SCNGameCoinController {
                 sendOptions.setFeeDelegation(true);
                 sendOptions.setFeePayer(systemKeyring.getAddress());
             }
-            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS)
-                    .getMethod(methodName);
+            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
             PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
             ret = method.send(params, sendOptions, processor);
             logger.info(methodName + " :" + JSON.toJSONString(ret));
@@ -733,21 +698,18 @@ public class SCNGameCoinController {
         return ret;
     }
 
-    public static List<Type> queryItem(SingleKeyring keyring, List<Object> params,
-                                       String methodName) {
+    public static List<Type> queryItem(SingleKeyring keyring, List<Object> params, String methodName) {
         Caver caver = new Caver(MY_SCN_HOST);
         List<Type> ret = null;
         try {
-            SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
             caver.wallet.add(keyring);
 
             if (!keyring.getAddress().equals(systemKeyring.getAddress())) {
                 caver.wallet.add(systemKeyring);
             }
-            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS)
-                    .getMethod(methodName);
+            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
             ret = method.call(params);
             logger.info(methodName + " :" + JSON.toJSONString(ret));
         } catch (Exception e) {
@@ -759,8 +721,7 @@ public class SCNGameCoinController {
     }
 
     public static void testTransfer(String address, String amount) {
-        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
-                getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         List<Object> params = new ArrayList<>();
         params.add(address);
         params.add(amount);
@@ -772,8 +733,7 @@ public class SCNGameCoinController {
         List arr = null;
         try {
             Contract contract = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS);
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(
-                    getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
             //设置操作人，gas费默认由操作人付款
             caver.wallet.add(keyring);
             ContractMethod method = contract.getMethod(methodName);
@@ -823,15 +783,13 @@ public class SCNGameCoinController {
 
     public static TransactionReceipt.TransactionReceiptData matchSaleOrder() {
         List<Object> params = new ArrayList<>();
-        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
-                getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         return addOrder(systemKeyring, params, new BigInteger("0"), "matchSaleOrder");
     }
 
     public static TransactionReceipt.TransactionReceiptData matchBuyOrder() {
         List<Object> params = new ArrayList<>();
-        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(
-                getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         return addOrder(systemKeyring, params, new BigInteger("0"), "matchBuyOrder");
     }
 
