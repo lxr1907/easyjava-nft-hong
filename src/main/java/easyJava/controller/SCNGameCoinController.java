@@ -548,7 +548,7 @@ public class SCNGameCoinController {
             Map retMap=new HashMap();
             retMap.put("user",user);
             retMap.put("transaction",result);
-            return new ResponseEntity(user);
+            return new ResponseEntity(retMap);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
             return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
