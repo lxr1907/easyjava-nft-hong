@@ -23,10 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.web3j.protocol.exceptions.TransactionException;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -681,29 +678,23 @@ public class SCNGameCoinController {
 
     public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params, BigInteger amount, String methodName) throws Exception {
         Caver caver = new Caver(MY_SCN_HOST);
-        TransactionReceipt.TransactionReceiptData ret = null;
-        try {
-            SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-            //设置操作人，gas费默认由操作人付款
-            caver.wallet.add(keyring);
-            SendOptions sendOptions = new SendOptions();
-            sendOptions.setFrom(keyring.getAddress());
-            sendOptions.setGas(gas);
-            sendOptions.setValue(amount);
+        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        //设置操作人，gas费默认由操作人付款
+        caver.wallet.add(keyring);
+        SendOptions sendOptions = new SendOptions();
+        sendOptions.setFrom(keyring.getAddress());
+        sendOptions.setGas(gas);
+        sendOptions.setValue(amount);
 
-            if (!keyring.getAddress().equals(systemKeyring.getAddress())) {
-                caver.wallet.add(systemKeyring);
-                sendOptions.setFeeDelegation(true);
-                sendOptions.setFeePayer(systemKeyring.getAddress());
-            }
-            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
-            PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
-            ret = method.send(params, sendOptions, processor);
-            logger.info(methodName + " :" + JSON.toJSONString(ret));
-        } catch (Exception e) {
-            logger.error(methodName + " error！", e);
-            throw e;
+        if (!keyring.getAddress().equals(systemKeyring.getAddress())) {
+            caver.wallet.add(systemKeyring);
+            sendOptions.setFeeDelegation(true);
+            sendOptions.setFeePayer(systemKeyring.getAddress());
         }
+        ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
+        PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
+        var ret = method.send(params, sendOptions, processor);
+        logger.info(methodName + " :" + JSON.toJSONString(ret));
         return ret;
     }
 
