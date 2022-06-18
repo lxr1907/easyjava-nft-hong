@@ -322,6 +322,13 @@ public class SCNGameCoinController {
                 secondInterval = Integer.parseInt(map.get("secondInterval").toString());
             }
             ordersRedis = getSampling(ordersRedis, secondInterval, order);
+        } else if (methodName.equals("getBuyOrders")) {
+            //将数量统一为gamecoin的数量
+            for (var buyOrder : ordersRedis) {
+                var gamecoinAmount = new BigInteger(buyOrder.get(0).toString())
+                        .multiply(new BigInteger(buyOrder.get(1).toString()));
+                buyOrder.set(0, gamecoinAmount);
+            }
         }
 
         if (ordersRedis.size() < pageSize) {
