@@ -375,7 +375,7 @@ public class SCNGameCoinController {
         List<List> newList = new ArrayList<>();
         long timeNow = 0;
         for (var order : list) {
-            var time = Long.parseLong(order.get(3).toString());
+            var time = Long.parseLong(order.get(2).toString());
             if (rankOrder == 1) {
                 if (timeNow == 0 || time - timeNow >= secondInterval) {
                     newList.add(order);
