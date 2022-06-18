@@ -814,18 +814,18 @@ public class SCNGameCoinController {
 //                    myOrders.add(order);
 //                }
 //            });
-//            gameCoinContractDeploy();
+            gameCoinContractDeploy();
 //            testTransfer("0x85c616c2d51b6c653e00325ae85660d5b0c50786", "10000000000000");
-            List addresses = new ArrayList();
-            addresses.add("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415");
-            addresses.add("1");
-            var ret = queryItem(getOperatorSingleKeyring(), addresses, "userItemMap");
-            logger.info(JSON.toJSONString(ret));
+//            List addresses = new ArrayList();
+//            addresses.add("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415");
+//            addresses.add("1");
+//            var ret = queryItem(getOperatorSingleKeyring(), addresses, "userItemMap");
+//            logger.info(JSON.toJSONString(ret));
         } catch (Exception e) {
             logger.error("", e);
         }
     }
 
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0xb2b2036b32007048efc9a6ec33369556e19e0c27";
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0x05b6c472e8907566072e1cecc2aa14eedec6412b";
 
 }
