@@ -23,7 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.web3j.protocol.exceptions.TransactionException;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -253,7 +256,7 @@ public class SCNGameCoinController {
     }
 
     @RequestMapping("/gameCoin/test/addGameCoin")
-    public ResponseEntity<?> addGameCoin(@RequestParam Map<String, Object> map) {
+    public ResponseEntity<?> addGameCoin(@RequestParam Map<String, Object> map) throws Exception {
         if (map.get("address") == null || map.get("address").toString().length() == 0) {
             return new ResponseEntity(400, "address不能为空！");
         }
@@ -630,14 +633,14 @@ public class SCNGameCoinController {
         return keyring;
     }
 
-    public static TransactionReceipt.TransactionReceiptData addSaleOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) {
+    public static TransactionReceipt.TransactionReceiptData addSaleOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(amount);
         params.add(price);
         return addOrder(keyring, params, new BigInteger("0"), "addSaleOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData addGameItem(SingleKeyring keyring, BigInteger id, BigInteger amount, BigInteger price) {
+    public static TransactionReceipt.TransactionReceiptData addGameItem(SingleKeyring keyring, BigInteger id, BigInteger amount, BigInteger price) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(id);
         params.add(price);
@@ -645,38 +648,38 @@ public class SCNGameCoinController {
         return addOrder(keyring, params, new BigInteger("0"), "addItem");
     }
 
-    public static TransactionReceipt.TransactionReceiptData buyGameItem(SingleKeyring keyring, BigInteger id) {
+    public static TransactionReceipt.TransactionReceiptData buyGameItem(SingleKeyring keyring, BigInteger id) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(id);
         return addOrder(keyring, params, new BigInteger("0"), "buyItem");
     }
 
-    public static TransactionReceipt.TransactionReceiptData buyGameItems(SingleKeyring keyring, int[] ids, int[] counts) {
+    public static TransactionReceipt.TransactionReceiptData buyGameItems(SingleKeyring keyring, int[] ids, int[] counts) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(ids);
         params.add(counts);
         return addOrder(keyring, params, new BigInteger("0"), "buyItems");
     }
 
-    public static TransactionReceipt.TransactionReceiptData addBuyOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) {
+    public static TransactionReceipt.TransactionReceiptData addBuyOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(price);
         return addOrder(keyring, params, amount, "addBuyOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData cancelSaleOrder(SingleKeyring keyring, BigInteger time) {
+    public static TransactionReceipt.TransactionReceiptData cancelSaleOrder(SingleKeyring keyring, BigInteger time) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(time);
         return addOrder(keyring, params, new BigInteger("0"), "cancelSaleOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData cancelBuyOrder(SingleKeyring keyring, BigInteger time) {
+    public static TransactionReceipt.TransactionReceiptData cancelBuyOrder(SingleKeyring keyring, BigInteger time) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(time);
         return addOrder(keyring, params, new BigInteger("0"), "cancelBuyOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params, BigInteger amount, String methodName) {
+    public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params, BigInteger amount, String methodName) throws Exception {
         Caver caver = new Caver(MY_SCN_HOST);
         TransactionReceipt.TransactionReceiptData ret = null;
         try {
@@ -699,8 +702,7 @@ public class SCNGameCoinController {
             logger.info(methodName + " :" + JSON.toJSONString(ret));
         } catch (Exception e) {
             logger.error(methodName + " error！", e);
-            e.printStackTrace();
-            return null;
+            throw e;
         }
         return ret;
     }
@@ -727,7 +729,7 @@ public class SCNGameCoinController {
         return ret;
     }
 
-    public static void testTransfer(String address, String amount) {
+    public static void testTransfer(String address, String amount) throws Exception {
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         List<Object> params = new ArrayList<>();
         params.add(address);
@@ -788,13 +790,13 @@ public class SCNGameCoinController {
         return result;
     }
 
-    public static TransactionReceipt.TransactionReceiptData matchSaleOrder() {
+    public static TransactionReceipt.TransactionReceiptData matchSaleOrder() throws Exception {
         List<Object> params = new ArrayList<>();
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         return addOrder(systemKeyring, params, new BigInteger("0"), "matchSaleOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData matchBuyOrder() {
+    public static TransactionReceipt.TransactionReceiptData matchBuyOrder() throws Exception {
         List<Object> params = new ArrayList<>();
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         return addOrder(systemKeyring, params, new BigInteger("0"), "matchBuyOrder");
