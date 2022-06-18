@@ -439,8 +439,8 @@ public class SCNGameCoinController {
             var result = addGameItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()), new BigInteger(map.get("amount").toString()), new BigInteger(map.get("price").toString()));
             return new ResponseEntity(result);
         } catch (Exception e) {
-            logger.error("addSaleOrder error!", e);
-            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+            logger.error("addGameItem error!", e);
+            return new ResponseEntity(400, "addGameItem 失败:" + e.getMessage());
         }
     }
 
@@ -475,8 +475,8 @@ public class SCNGameCoinController {
             var result = buyGameItem(getSingleKeyring(useWallet), new BigInteger(map.get("id").toString()));
             return new ResponseEntity(result);
         } catch (Exception e) {
-            logger.error("addSaleOrder error!", e);
-            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+            logger.error("buyGameItem error!", e);
+            return new ResponseEntity(400, "buyGameItem 失败:" + e.getMessage());
         }
     }
 
@@ -491,8 +491,8 @@ public class SCNGameCoinController {
             var result = queryItem(getOperatorSingleKeyring(), addr, "itemMap");
             return new ResponseEntity(result);
         } catch (Exception e) {
-            logger.error("addSaleOrder error!", e);
-            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+            logger.error("getItem error!", e);
+            return new ResponseEntity(400, "getItem 失败:" + e.getMessage());
         }
     }
 
@@ -531,8 +531,8 @@ public class SCNGameCoinController {
             retMap.put("transaction", result);
             return new ResponseEntity(retMap);
         } catch (Exception e) {
-            logger.error("addSaleOrder error!", e);
-            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+            logger.error("buyGameItemList error!", e);
+            return new ResponseEntity(400, "buyGameItemList 失败:" + e.getMessage());
         }
     }
 
@@ -563,8 +563,8 @@ public class SCNGameCoinController {
             var result = queryItem(getSingleKeyring(useWallet), addr, "userItemMap");
             return new ResponseEntity(result);
         } catch (Exception e) {
-            logger.error("addSaleOrder error!", e);
-            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+            logger.error("queryItem error!", e);
+            return new ResponseEntity(400, "queryItem 失败:" + e.getMessage());
         }
     }
 
@@ -695,28 +695,24 @@ public class SCNGameCoinController {
         PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
         var ret = method.send(params, sendOptions, processor);
         logger.info(methodName + " :" + JSON.toJSONString(ret));
+        if (ret.getTxError() != null && ret.getTxError().length() != 0) {
+            throw new Exception("链上交易失败，错误码：" + ret.getTxError());
+        }
         return ret;
     }
 
-    public static List<Type> queryItem(SingleKeyring keyring, List<Object> params, String methodName) {
+    public static List<Type> queryItem(SingleKeyring keyring, List<Object> params, String methodName) throws Exception {
         Caver caver = new Caver(MY_SCN_HOST);
-        List<Type> ret = null;
-        try {
-            SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-            //设置操作人，gas费默认由操作人付款
-            caver.wallet.add(keyring);
+        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
+        //设置操作人，gas费默认由操作人付款
+        caver.wallet.add(keyring);
 
-            if (!keyring.getAddress().equals(systemKeyring.getAddress())) {
-                caver.wallet.add(systemKeyring);
-            }
-            ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
-            ret = method.call(params);
-            logger.info(methodName + " :" + JSON.toJSONString(ret));
-        } catch (Exception e) {
-            logger.error(methodName + " error！", e);
-            e.printStackTrace();
-            return null;
+        if (!keyring.getAddress().equals(systemKeyring.getAddress())) {
+            caver.wallet.add(systemKeyring);
         }
+        ContractMethod method = caver.contract.create(SCNContractController.ABI, GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
+        var ret = method.call(params);
+        logger.info(methodName + " :" + JSON.toJSONString(ret));
         return ret;
     }
 
