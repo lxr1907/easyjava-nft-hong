@@ -184,7 +184,7 @@ public class KlayScanController {
         String result = "";
         amountStr = amountStr.replace("0x", "");
         amountStr = amountStr.replaceAll("^(0+)", "");
-        if (amountStr.length() == 10) {
+        if (amountStr.length() == 0) {
             return "0";
         }
         if (amountStr.length() > 10) {
