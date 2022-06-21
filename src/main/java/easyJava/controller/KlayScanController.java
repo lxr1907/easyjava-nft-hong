@@ -74,9 +74,7 @@ public class KlayScanController {
         if (map.get("pageNo") == null || map.get("pageNo").toString().length() == 0) {
             return new ResponseEntity(400, "pageNo不能为空！");
         }
-        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString(),
-                Integer.parseInt(map.get("pageNo").toString()),
-                Integer.parseInt(map.get("pageSize").toString())));
+        return new ResponseEntity(getAddressTokenTxs(map.get("address").toString(), Integer.parseInt(map.get("pageNo").toString()), Integer.parseInt(map.get("pageSize").toString())));
     }
 
     @RequestMapping("/klayScan/getAddressTokens")
@@ -154,14 +152,29 @@ public class KlayScanController {
      * @return
      */
     public static KlayTxsResult getAddressTokenTxs(String address, int page, int limit) {
-        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL +
-                "?page=" + page + "&limit=" + limit);
+        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL + "?page=" + page + "&limit=" + limit);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
         response.getResult().forEach(row -> {
             if (row.containsKey("amount")) {
                 String amountStr = row.get("amount").toString();
                 if (amountStr.startsWith("0x")) {
                     row.put("amountNum", jin_zhi(amountStr));
+                }
+            }
+            if (row.containsKey("fromAddress")) {
+                String fromAddress = row.get("fromAddress").toString();
+                if (fromAddress != null && fromAddress.equals(KlayController.SYSTEM_USDT_ADDRESS)) {
+                    row.put("receiveType", "USDT充值");
+                }
+
+                if (fromAddress != null && fromAddress.equals(KlayController.SYSTEM_CHR_TOKEN_ADDRESS)) {
+                    row.put("receiveType", "提现chrToken");
+                }
+            }
+            if (row.containsKey("toAddress")) {
+                String toAddress = row.get("toAddress").toString();
+                if (toAddress != null && toAddress.equals(KlayController.SYSTEM_ADDRESS)) {
+                    row.put("receiveType", "兑换chrToken");
                 }
 
             }
