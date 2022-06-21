@@ -184,6 +184,9 @@ public class KlayScanController {
         String result = "";
         amountStr = amountStr.replace("0x", "");
         amountStr = amountStr.replaceAll("^(0+)", "");
+        if (amountStr.length() == 10) {
+            return "0";
+        }
         if (amountStr.length() > 10) {
             String amountStr1 = amountStr.substring(amountStr.length() - 10);
             String amountStr2 = amountStr.substring(0, amountStr.length() - 10);
@@ -199,6 +202,7 @@ public class KlayScanController {
 
     /**
      * 获取一个地址的klay交易历史记录
+     *
      * @param map
      * @return
      */
