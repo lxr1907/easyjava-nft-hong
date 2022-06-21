@@ -163,6 +163,9 @@ public class KlayScanController {
             }
             if (row.containsKey("fromAddress")) {
                 String fromAddress = row.get("fromAddress").toString();
+                if (fromAddress != null && fromAddress.equalsIgnoreCase(address)) {
+                    row.put("receiveType", "转出chr");
+                }
                 if (fromAddress != null && fromAddress.equalsIgnoreCase(KlayController.SYSTEM_USDT_ADDRESS)) {
                     row.put("receiveType", "USDT充值");
                 }
