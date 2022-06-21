@@ -163,17 +163,17 @@ public class KlayScanController {
             }
             if (row.containsKey("fromAddress")) {
                 String fromAddress = row.get("fromAddress").toString();
-                if (fromAddress != null && fromAddress.equals(KlayController.SYSTEM_USDT_ADDRESS)) {
+                if (fromAddress != null && fromAddress.equalsIgnoreCase(KlayController.SYSTEM_USDT_ADDRESS)) {
                     row.put("receiveType", "USDT充值");
                 }
 
-                if (fromAddress != null && fromAddress.equals(KlayController.SYSTEM_CHR_TOKEN_ADDRESS)) {
+                if (fromAddress != null && fromAddress.equalsIgnoreCase(KlayController.SYSTEM_CHR_TOKEN_ADDRESS)) {
                     row.put("receiveType", "提现chrToken");
                 }
             }
             if (row.containsKey("toAddress")) {
                 String toAddress = row.get("toAddress").toString();
-                if (toAddress != null && toAddress.equals(KlayController.SYSTEM_ADDRESS)) {
+                if (toAddress != null && toAddress.equalsIgnoreCase(KlayController.SYSTEM_ADDRESS)) {
                     row.put("receiveType", "兑换chrToken");
                 }
 
