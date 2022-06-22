@@ -390,7 +390,7 @@ public class SCNGameCoinController {
                         order.set(3, timeEnd);
                         newList.add(order);
                         lastOrder = new ArrayList(order.size());
-                        Collections.copy(lastOrder, order);
+                        lastOrder.addAll(order);
                         hasOrder = true;
                     }
                 }
@@ -398,7 +398,7 @@ public class SCNGameCoinController {
                     lastOrder.set(3, timeEnd);
                     newList.add(lastOrder);
                     var lastOrderNew = new ArrayList(lastOrder.size());
-                    Collections.copy(lastOrderNew, lastOrder);
+                    lastOrderNew.addAll(lastOrder);
                     lastOrder = lastOrderNew;
                 }
             }
@@ -413,7 +413,7 @@ public class SCNGameCoinController {
                         order.set(3, timeEnd);
                         newList.add(order);
                         lastOrder = new ArrayList(order.size());
-                        Collections.copy(lastOrder, order);
+                        lastOrder.addAll(order);
                         hasOrder = true;
                     }
                 }
@@ -421,7 +421,7 @@ public class SCNGameCoinController {
                     lastOrder.set(3, timeEnd);
                     newList.add(lastOrder);
                     var lastOrderNew = new ArrayList(lastOrder.size());
-                    Collections.copy(lastOrderNew, lastOrder);
+                    lastOrderNew.addAll(lastOrder);
                     lastOrder = lastOrderNew;
                 }
             }
