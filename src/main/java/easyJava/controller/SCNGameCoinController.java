@@ -373,6 +373,9 @@ public class SCNGameCoinController {
     //按时间采样抽取
     public static List<List> getSampling(List<List> list, int secondInterval, int rankOrder, int pageSize) {
         List<List> newList = new ArrayList<>();
+        if (list == null || list.size() == 0) {
+            return newList;
+        }
         long timeNow = new Date().getTime() / 1000;
 
         List lastOrder = list.get(0);
@@ -386,14 +389,17 @@ public class SCNGameCoinController {
                     if (time <= timeEnd && time >= timeBegin) {
                         order.set(3, timeEnd);
                         newList.add(order);
-                        lastOrder = List.copyOf(order);
+                        lastOrder = new ArrayList();
+                        Collections.copy(order, lastOrder);
                         hasOrder = true;
                     }
                 }
                 if (!hasOrder) {
                     lastOrder.set(3, timeEnd);
                     newList.add(lastOrder);
-                    lastOrder = List.copyOf(lastOrder);
+                    var lastOrderNew = new ArrayList();
+                    Collections.copy(lastOrderNew, lastOrder);
+                    lastOrder = lastOrderNew;
                 }
             }
         } else {
@@ -406,14 +412,17 @@ public class SCNGameCoinController {
                     if (time <= timeEnd && time >= timeBegin) {
                         order.set(3, timeEnd);
                         newList.add(order);
-                        lastOrder = List.copyOf(order);
+                        lastOrder = new ArrayList();
+                        Collections.copy(order, lastOrder);
                         hasOrder = true;
                     }
                 }
                 if (!hasOrder) {
                     lastOrder.set(3, timeEnd);
                     newList.add(lastOrder);
-                    lastOrder = List.copyOf(lastOrder);
+                    var lastOrderNew = new ArrayList();
+                    Collections.copy(lastOrderNew, lastOrder);
+                    lastOrder = lastOrderNew;
                 }
             }
         }
