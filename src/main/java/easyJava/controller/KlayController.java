@@ -209,8 +209,9 @@ public class KlayController {
             if (error == null) {
                 logger.info("------sendingCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
             } else {
-                logger.error("------sendingCHR ret error:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
-                throw new RuntimeException("sendingCHR ret error");
+                String message=JSON.toJSONString(receipt);
+                logger.error("------sendingCHR ret error:" + message + "--to:" + toAddress + ",amount:" + value + "------");
+                throw new RuntimeException(message);
             }
         } catch (Exception e) {
             logger.error("sendingCHR ret error:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);

@@ -232,6 +232,8 @@ public class SCNController {
 
         @Override
         public void run() {
+            //插入订单
+            orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
             try {
                 String encrypt_key = useWallet.get("encrypt_key").toString();
                 String encrypted_private = useWallet.get("encrypted_private").toString();
@@ -242,7 +244,10 @@ public class SCNController {
                 orderMap.put("status", 2);
             } catch (Exception e) {
                 logger.error("burnCHR error!chr支付失败：" + e.getMessage(), e);
+                orderMap.put("send_chr_json",e.getMessage());
                 orderMap.put("status", 4);
+                baseDao.updateBaseByPrimaryKey(orderMap);
+                return;
 //                new ResponseEntity(400, "chr支付失败：" + e.getMessage())
             }
             TransactionReceipt.TransactionReceiptData result = null;
@@ -253,11 +258,10 @@ public class SCNController {
                 orderMap.put("status", 3);
             } catch (Exception e) {
                 logger.error("send scn error!chr支付后，发送chrToken失败：" + e.getMessage(), e);
+                orderMap.put("send_chr_token_json", e.getMessage());
                 orderMap.put("status", 5);
 //                new ResponseEntity(400, "chr支付后，发送chrToken失败：" + e.getMessage())
             }
-            //插入订单
-            orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
             baseDao.updateBaseByPrimaryKey(orderMap);
         }
     }
