@@ -382,6 +382,9 @@ public class SCNGameCoinController {
                 var timeBegin = timeNow - secondInterval * (i + 1);
                 var hasOrder = false;
                 for (var order : list) {
+                    if (lastOrder == null) {
+                        lastOrder = List.copyOf(order);
+                    }
                     var time = Long.parseLong(order.get(3).toString());
                     if (time <= timeEnd && time >= timeBegin) {
                         order.set(3, timeEnd);
@@ -402,6 +405,9 @@ public class SCNGameCoinController {
                 var timeBegin = timeNow - secondInterval * (i + 1);
                 var hasOrder = false;
                 for (var order : list) {
+                    if (lastOrder == null) {
+                        lastOrder = List.copyOf(order);
+                    }
                     var time = Long.parseLong(order.get(3).toString());
                     if (time <= timeEnd && time >= timeBegin) {
                         order.set(3, timeEnd);
