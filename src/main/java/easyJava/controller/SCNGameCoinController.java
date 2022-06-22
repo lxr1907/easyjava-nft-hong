@@ -389,7 +389,7 @@ public class SCNGameCoinController {
                     if (time <= timeEnd && time >= timeBegin) {
                         order.set(3, timeEnd);
                         newList.add(order);
-                        lastOrder = new ArrayList();
+                        lastOrder = new ArrayList(order.size());
                         Collections.copy(lastOrder, order);
                         hasOrder = true;
                     }
@@ -397,7 +397,7 @@ public class SCNGameCoinController {
                 if (!hasOrder) {
                     lastOrder.set(3, timeEnd);
                     newList.add(lastOrder);
-                    var lastOrderNew = new ArrayList();
+                    var lastOrderNew = new ArrayList(lastOrder.size());
                     Collections.copy(lastOrderNew, lastOrder);
                     lastOrder = lastOrderNew;
                 }
@@ -412,7 +412,7 @@ public class SCNGameCoinController {
                     if (time <= timeEnd && time >= timeBegin) {
                         order.set(3, timeEnd);
                         newList.add(order);
-                        lastOrder = new ArrayList();
+                        lastOrder = new ArrayList(order.size());
                         Collections.copy(lastOrder, order);
                         hasOrder = true;
                     }
@@ -420,7 +420,7 @@ public class SCNGameCoinController {
                 if (!hasOrder) {
                     lastOrder.set(3, timeEnd);
                     newList.add(lastOrder);
-                    var lastOrderNew = new ArrayList();
+                    var lastOrderNew = new ArrayList(lastOrder.size());
                     Collections.copy(lastOrderNew, lastOrder);
                     lastOrder = lastOrderNew;
                 }
