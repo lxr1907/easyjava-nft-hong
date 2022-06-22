@@ -244,7 +244,7 @@ public class SCNController {
                 orderMap.put("status", 2);
             } catch (Exception e) {
                 logger.error("burnCHR error!chr支付失败：" + e.getMessage(), e);
-                orderMap.put("send_chr_json",e.getMessage());
+                orderMap.put("send_chr_json", e.getMessage());
                 orderMap.put("status", 4);
                 baseDao.updateBaseByPrimaryKey(orderMap);
                 return;
@@ -333,27 +333,6 @@ public class SCNController {
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
         }
         Map orderMap = new HashMap<>();
-        //先扣除chrToken
-        TransactionReceipt.TransactionReceiptData result = null;
-        try {
-            String encrypt_key = useWallet.get("encrypt_key").toString();
-            String encrypted_private = useWallet.get("encrypted_private").toString();
-            String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
-            result = sendingSCN(walletPrivate
-                    , KlayController.SWAP_ADDRESS, scnValue);
-            orderMap.put("send_chr_token_json", JSON.toJSONString(result));
-        } catch (Exception e) {
-            logger.error("send chrToken error!", e);
-            return new ResponseEntity(400, "chrToken支付，提现失败:" + e.getMessage());
-        }
-        //再发放chr
-        try {
-            var chrResult = KlayController.sendingCHRFromChrToken(useWallet.get("address").toString(), chrValue);
-            orderMap.put("send_chr_json", JSON.toJSONString(chrResult));
-        } catch (Exception e) {
-            logger.error("burnCHR error!", e);
-            return new ResponseEntity(400, "chrToken支付后，发送chr失败:" + e.getMessage());
-        }
 
         //插入订单
         orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
@@ -363,8 +342,62 @@ public class SCNController {
         orderMap.put("chr_token_value", scnValue.toString());
         orderMap.put("type", "withDrawChrToken");
         orderMap.put("time", new Date());
+        orderMap.put("status", 1);
         baseDao.insertBase(orderMap);
-        return new ResponseEntity(result);
+        return new ResponseEntity(orderMap);
+
+
+    }
+
+    class WithDrawChrToken extends Thread {
+        Map useWallet = null;
+        Map orderMap = null;
+        BigInteger chrValue = null;
+        BigInteger chrTokenValue = null;
+        String address = null;
+
+        public WithDrawChrToken(Map orderMapIn, Map userWallet, BigInteger chrValueIn, BigInteger chrTokenValueIn,
+                                String addressIn) {
+            orderMap = orderMapIn;
+            useWallet = userWallet;
+            chrValue = chrValueIn;
+            chrTokenValue = chrTokenValueIn;
+            address = addressIn;
+        }
+
+        @Override
+        public void run() {
+//先扣除chrToken
+            TransactionReceipt.TransactionReceiptData result = null;
+            try {
+                String encrypt_key = useWallet.get("encrypt_key").toString();
+                String encrypted_private = useWallet.get("encrypted_private").toString();
+                String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
+                result = sendingSCN(walletPrivate
+                        , KlayController.SWAP_ADDRESS, chrTokenValue);
+                orderMap.put("send_chr_token_json", JSON.toJSONString(result));
+                orderMap.put("status", 2);
+            } catch (Exception e) {
+                logger.error("send chrToken error!", e);
+                orderMap.put("status", 4);
+                orderMap.put("send_chr_token_json", e.getMessage());
+                baseDao.updateBaseByPrimaryKey(orderMap);
+                return;
+//                return new ResponseEntity(400, "chrToken支付，提现失败:" + e.getMessage());
+            }
+            //再发放chr
+            try {
+                var chrResult = KlayController.sendingCHRFromChrToken(useWallet.get("address").toString(), chrValue);
+                orderMap.put("send_chr_json", JSON.toJSONString(chrResult));
+                orderMap.put("status", 3);
+            } catch (Exception e) {
+                logger.error("burnCHR error!", e);
+                orderMap.put("status", 5);
+                orderMap.put("send_chr_json", e.getMessage());
+//                return new ResponseEntity(400, "chrToken支付后，发送chr失败:" + e.getMessage());
+            }
+            baseDao.updateBaseByPrimaryKey(orderMap);
+        }
     }
 
     /**
