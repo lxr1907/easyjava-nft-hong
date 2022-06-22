@@ -390,7 +390,7 @@ public class SCNGameCoinController {
                         order.set(3, timeEnd);
                         newList.add(order);
                         lastOrder = new ArrayList();
-                        Collections.copy(order, lastOrder);
+                        Collections.copy(lastOrder, order);
                         hasOrder = true;
                     }
                 }
@@ -413,7 +413,7 @@ public class SCNGameCoinController {
                         order.set(3, timeEnd);
                         newList.add(order);
                         lastOrder = new ArrayList();
-                        Collections.copy(order, lastOrder);
+                        Collections.copy(lastOrder, order);
                         hasOrder = true;
                     }
                 }
