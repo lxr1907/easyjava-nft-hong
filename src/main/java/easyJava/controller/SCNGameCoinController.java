@@ -321,7 +321,7 @@ public class SCNGameCoinController {
             if (map.get("secondInterval") != null && map.get("secondInterval").toString().length() != 0) {
                 secondInterval = Integer.parseInt(map.get("secondInterval").toString());
             }
-            ordersRedis = getSampling(ordersRedis, secondInterval, order);
+            ordersRedis = getSampling(ordersRedis, secondInterval, order, pageSize);
         } else if (methodName.equals("getBuyOrders")) {
             //将数量统一为gamecoin的数量
             for (var buyOrder : ordersRedis) {
@@ -371,22 +371,53 @@ public class SCNGameCoinController {
     }
 
     //按时间采样抽取
-    public static List<List> getSampling(List<List> list, int secondInterval, int rankOrder) {
+    public static List<List> getSampling(List<List> list, int secondInterval, int rankOrder, int pageSize) {
         List<List> newList = new ArrayList<>();
-        long timeNow = 0;
-        for (var order : list) {
-            var time = Long.parseLong(order.get(3).toString());
-            if (rankOrder == 1) {
-                if (timeNow == 0 || time - timeNow >= secondInterval) {
-                    newList.add(order);
+        long timeNow = new Date().getTime() / 1000;
+
+        List lastOrder = null;
+        if (rankOrder == 1) {
+            for (int i = 0; i < pageSize; i++) {
+                var timeEnd = timeNow - secondInterval * i;
+                var timeBegin = timeNow - secondInterval * (i + 1);
+                var hasOrder = false;
+                for (var order : list) {
+                    var time = Long.parseLong(order.get(3).toString());
+                    if (time <= timeEnd && time >= timeBegin) {
+                        order.set(3, timeEnd);
+                        newList.add(order);
+                        lastOrder = List.copyOf(order);
+                        hasOrder = true;
+                    }
                 }
-            } else {
-                if (timeNow == 0 || time - timeNow <= secondInterval) {
-                    newList.add(order);
+                if (!hasOrder) {
+                    lastOrder.set(3, timeEnd);
+                    newList.add(lastOrder);
+                    lastOrder = List.copyOf(lastOrder);
                 }
             }
-            timeNow = time;
+        } else {
+            for (int i = pageSize; i > 0; i--) {
+                var timeEnd = timeNow - secondInterval * i;
+                var timeBegin = timeNow - secondInterval * (i + 1);
+                var hasOrder = false;
+                for (var order : list) {
+                    var time = Long.parseLong(order.get(3).toString());
+                    if (time <= timeEnd && time >= timeBegin) {
+                        order.set(3, timeEnd);
+                        newList.add(order);
+                        lastOrder = List.copyOf(order);
+                        hasOrder = true;
+                    }
+                }
+                if (!hasOrder) {
+                    lastOrder.set(3, timeEnd);
+                    newList.add(lastOrder);
+                    lastOrder = List.copyOf(lastOrder);
+                }
+            }
         }
+
         return newList;
     }
 
