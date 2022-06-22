@@ -344,6 +344,7 @@ public class SCNController {
         orderMap.put("time", new Date());
         orderMap.put("status", 1);
         baseDao.insertBase(orderMap);
+        new WithDrawChrToken(orderMap, useWallet, chrValue, scnValue, map.get("address").toString()).start();
         return new ResponseEntity(orderMap);
 
 
