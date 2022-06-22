@@ -200,26 +200,6 @@ public class SCNController {
             return new ResponseEntity(400, "value解析失败" + map.get("value"));
         }
         Map orderMap = new HashMap<>();
-        try {
-            String encrypt_key = useWallet.get("encrypt_key").toString();
-            String encrypted_private = useWallet.get("encrypted_private").toString();
-            String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
-            var chrResult =
-                    KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, chrValue);
-            orderMap.put("send_chr_json", JSON.toJSONString(chrResult));
-        } catch (Exception e) {
-            logger.error("burnCHR error!", e);
-            return new ResponseEntity(400, "chr支付失败：" + e.getMessage());
-        }
-        TransactionReceipt.TransactionReceiptData result = null;
-        try {
-            result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                    , map.get("address").toString(), chrTokenValue);
-            orderMap.put("send_chr_token_json", JSON.toJSONString(result));
-        } catch (Exception e) {
-            logger.error("send scn error!", e);
-            return new ResponseEntity(400, "chr支付后，发送chrToken失败：" + e.getMessage());
-        }
         //插入订单
         orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
         orderMap.put("user_id", user.get("id"));
@@ -228,8 +208,58 @@ public class SCNController {
         orderMap.put("chr_token_value", chrTokenValue.toString());
         orderMap.put("type", "buyChrToken");
         orderMap.put("time", new Date());
+        orderMap.put("status", 1);
         baseDao.insertBase(orderMap);
-        return new ResponseEntity(result);
+        new BuyChrToken(orderMap, useWallet, chrValue, chrTokenValue, map.get("address").toString()).start();
+        return new ResponseEntity(orderMap);
+    }
+
+    class BuyChrToken extends Thread {
+        Map useWallet = null;
+        Map orderMap = null;
+        BigInteger chrValue = null;
+        BigInteger chrTokenValue = null;
+        String address = null;
+
+        public BuyChrToken(Map orderMapIn, Map userWallet, BigInteger chrValueIn, BigInteger chrTokenValueIn,
+                           String addressIn) {
+            orderMap = orderMapIn;
+            useWallet = userWallet;
+            chrValue = chrValueIn;
+            chrTokenValue = chrTokenValueIn;
+            address = addressIn;
+        }
+
+        @Override
+        public void run() {
+            try {
+                String encrypt_key = useWallet.get("encrypt_key").toString();
+                String encrypted_private = useWallet.get("encrypted_private").toString();
+                String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
+                var chrResult =
+                        KlayController.sendingCHR(walletPrivate, KlayController.SWAP_ADDRESS, chrValue);
+                orderMap.put("send_chr_json", JSON.toJSONString(chrResult));
+                orderMap.put("status", 2);
+            } catch (Exception e) {
+                logger.error("burnCHR error!chr支付失败：" + e.getMessage(), e);
+                orderMap.put("status", 4);
+//                new ResponseEntity(400, "chr支付失败：" + e.getMessage())
+            }
+            TransactionReceipt.TransactionReceiptData result = null;
+            try {
+                result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
+                        , address, chrTokenValue);
+                orderMap.put("send_chr_token_json", JSON.toJSONString(result));
+                orderMap.put("status", 3);
+            } catch (Exception e) {
+                logger.error("send scn error!chr支付后，发送chrToken失败：" + e.getMessage(), e);
+                orderMap.put("status", 5);
+//                new ResponseEntity(400, "chr支付后，发送chrToken失败：" + e.getMessage())
+            }
+            //插入订单
+            orderMap.put("tableName", CHR_TOKEN_ORDER_TABLE);
+            baseDao.updateBaseByPrimaryKey(orderMap);
+        }
     }
 
     /**
