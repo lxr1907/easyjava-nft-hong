@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GameCoin</title>
+    <meta charset="utf-8">
+</head>
+<body>
+<div id="canvasDiv"></div>
+<div id="registDiv">
+    <input id="name" type="text" style="border:2px solid groove;position:absolute;left:400px;top:140px;opacity:.5"/>
+    <input id="password" type="text" style="border:2px solid groove;position:absolute;left:400px;top:200px;opacity:.5"/>
+</div>
+<div id="roomDiv"></div>
+<div id="messages"></div>
+<script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.js"></script>
+<script src="message.js"></script>
+<!--<script src="texasJS/fullscreen.js"></script>
+<script src="texasJS/facebook.js"></script>-->
+<script>
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //初始化websocket连接
+        wsInit();
+
+    });
+</script>
+</body>
+</html>

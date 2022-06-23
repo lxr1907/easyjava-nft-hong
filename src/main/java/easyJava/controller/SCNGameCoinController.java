@@ -14,6 +14,7 @@ import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
 import com.klaytn.caver.wallet.keyring.KeyStore;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
+import easyJava.controller.websocket.TexasWS;
 import easyJava.dao.master.BaseDao;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
@@ -351,7 +352,7 @@ public class SCNGameCoinController {
         if (ordersRedis.size() > pageSize) {
             ordersRedis = ordersRedis.subList(0, pageSize);
         }
-
+        TexasWS.sendToAllText(JSON.toJSONString(ordersRedis));
         return new ResponseEntity(ordersRedis);
     }
 
