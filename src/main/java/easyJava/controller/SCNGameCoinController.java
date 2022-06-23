@@ -321,7 +321,7 @@ public class SCNGameCoinController {
             if (map.get("secondInterval") != null && map.get("secondInterval").toString().length() != 0) {
                 secondInterval = Integer.parseInt(map.get("secondInterval").toString());
             }
-            ordersRedis = getSampling(ordersRedis, secondInterval, order, pageSize);
+            ordersRedis = getSampling(ordersRedis, secondInterval, pageSize);
         } else if (methodName.equals("getBuyOrders")) {
             //将数量统一为gamecoin的数量
             for (var buyOrder : ordersRedis) {
@@ -371,7 +371,7 @@ public class SCNGameCoinController {
     }
 
     //按时间采样抽取
-    public static List<List> getSampling(List<List> list, int secondInterval, int rankOrder, int pageSize) {
+    public static List<List> getSampling(List<List> list, int secondInterval, int pageSize) {
         List<List> newList = new ArrayList<>();
         if (list == null || list.size() == 0) {
             return newList;
@@ -380,7 +380,7 @@ public class SCNGameCoinController {
 
         List lastOrder = new ArrayList(list.get(0).size());
         lastOrder.addAll(list.get(0));
-        for (int i = 0; i < pageSize; i++) {
+        for (int i = pageSize; i > 0; i--) {
             var timeEnd = timeNow - secondInterval * i;
             var timeBegin = timeNow - secondInterval * (i + 1);
             var hasOrder = false;
