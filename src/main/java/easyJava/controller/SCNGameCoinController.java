@@ -292,7 +292,11 @@ public class SCNGameCoinController {
             logger.error("error:", e);
         }
         if (ordersRedis == null || ordersRedis.size() == 0) {
-            ordersRedis = getOrders(methodName);
+            if (methodName.equalsIgnoreCase("getSamplingOrders")) {
+                ordersRedis = getOrders("getHistoryOrders");
+            } else {
+                ordersRedis = getOrders(methodName);
+            }
             redisTemplate.opsForValue().set(key, ordersRedis);
         }
         if (!methodName.equals("getHistoryOrders")) {
@@ -378,8 +382,8 @@ public class SCNGameCoinController {
         }
         long timeNow = new Date().getTime() / 1000;
 
-        List lastOrder = new ArrayList(list.get(list.size()-1).size());
-        lastOrder.addAll(list.get(list.size()-1));
+        List lastOrder = new ArrayList(list.get(list.size() - 1).size());
+        lastOrder.addAll(list.get(list.size() - 1));
         for (int i = pageSize; i > 0; i--) {
             var timeEnd = timeNow - secondInterval * i;
             var timeBegin = timeNow - secondInterval * (i + 1);
