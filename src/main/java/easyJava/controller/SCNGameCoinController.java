@@ -380,51 +380,26 @@ public class SCNGameCoinController {
 
         List lastOrder = new ArrayList(list.get(0).size());
         lastOrder.addAll(list.get(0));
-        if (rankOrder == 1) {
-            for (int i = 0; i < pageSize; i++) {
-                var timeEnd = timeNow - secondInterval * i;
-                var timeBegin = timeNow - secondInterval * (i + 1);
-                var hasOrder = false;
-                for (var order : list) {
-                    var time = Long.parseLong(order.get(3).toString());
-                    if (time <= timeEnd && time > timeBegin) {
-                        lastOrder = new ArrayList(order.size());
-                        lastOrder.addAll(order);
-                        lastOrder.set(3, timeEnd);
-                        newList.add(lastOrder);
-                        hasOrder = true;
-                        break;
-                    }
-                }
-                if (!hasOrder) {
-                    var lastOrderNew = new ArrayList(lastOrder.size());
-                    lastOrderNew.addAll(lastOrder);
-                    lastOrderNew.set(3, timeEnd);
-                    newList.add(lastOrderNew);
+        for (int i = 0; i < pageSize; i++) {
+            var timeEnd = timeNow - secondInterval * i;
+            var timeBegin = timeNow - secondInterval * (i + 1);
+            var hasOrder = false;
+            for (var order : list) {
+                var time = Long.parseLong(order.get(3).toString());
+                if (time <= timeEnd && time > timeBegin) {
+                    lastOrder = new ArrayList(order.size());
+                    lastOrder.addAll(order);
+                    lastOrder.set(3, timeEnd);
+                    newList.add(lastOrder);
+                    hasOrder = true;
+                    break;
                 }
             }
-        } else {
-            for (int i = pageSize; i > 0; i--) {
-                var timeEnd = timeNow - secondInterval * i;
-                var timeBegin = timeNow - secondInterval * (i + 1);
-                var hasOrder = false;
-                for (var order : list) {
-                    var time = Long.parseLong(order.get(3).toString());
-                    if (time <= timeEnd && time > timeBegin) {
-                        lastOrder = new ArrayList(order.size());
-                        lastOrder.addAll(order);
-                        lastOrder.set(3, timeEnd);
-                        newList.add(lastOrder);
-                        hasOrder = true;
-                        break;
-                    }
-                }
-                if (!hasOrder) {
-                    var lastOrderNew = new ArrayList(lastOrder.size());
-                    lastOrderNew.addAll(lastOrder);
-                    lastOrderNew.set(3, timeEnd);
-                    newList.add(lastOrderNew);
-                }
+            if (!hasOrder) {
+                var lastOrderNew = new ArrayList(lastOrder.size());
+                lastOrderNew.addAll(lastOrder);
+                lastOrderNew.set(3, timeEnd);
+                newList.add(lastOrderNew);
             }
         }
 
