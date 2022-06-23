@@ -392,7 +392,6 @@ public class SCNGameCoinController {
                     lastOrder.set(3, timeEnd);
                     newList.add(lastOrder);
                     hasOrder = true;
-                    break;
                 }
             }
             if (!hasOrder) {
