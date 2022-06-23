@@ -273,7 +273,7 @@ public class SCNGameCoinController {
     @RequestMapping("/gameCoin/getOrders/{methodName}")
     public ResponseEntity<?> getOrders(@RequestParam Map<String, Object> map, @PathVariable String methodName) {
         if (methodName == null || methodName.length() == 0) {
-            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders,getHistoryOrders！");
+            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders,getHistoryOrders，getSamplingOrders！");
         }
         //显示前5条
         int pageSize = 5;
@@ -315,7 +315,7 @@ public class SCNGameCoinController {
             ordersRedis = addressOrders;
         }
         //按时间采样抽取
-        if (methodName.equals("getHistoryOrders")) {
+        if (methodName.equals("getSamplingOrders")) {
             //按时间抽取，6小时一个
             int secondInterval = 60 * 60 * 6;
             if (map.get("secondInterval") != null && map.get("secondInterval").toString().length() != 0) {
