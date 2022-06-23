@@ -392,6 +392,7 @@ public class SCNGameCoinController {
                         lastOrder = new ArrayList(order.size());
                         lastOrder.addAll(order);
                         hasOrder = true;
+                        break;
                     }
                 }
                 if (!hasOrder) {
@@ -415,6 +416,7 @@ public class SCNGameCoinController {
                         lastOrder = new ArrayList(order.size());
                         lastOrder.addAll(order);
                         hasOrder = true;
+                        break;
                     }
                 }
                 if (!hasOrder) {
