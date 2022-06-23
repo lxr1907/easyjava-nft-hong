@@ -378,8 +378,8 @@ public class SCNGameCoinController {
         }
         long timeNow = new Date().getTime() / 1000;
 
-        List lastOrder = new ArrayList(list.get(0).size());
-        lastOrder.addAll(list.get(0));
+        List lastOrder = new ArrayList(list.get(list.size()-1).size());
+        lastOrder.addAll(list.get(list.size()-1));
         for (int i = pageSize; i > 0; i--) {
             var timeEnd = timeNow - secondInterval * i;
             var timeBegin = timeNow - secondInterval * (i + 1);
