@@ -397,10 +397,9 @@ public class SCNGameCoinController {
                 }
                 if (!hasOrder) {
                     lastOrder.set(3, timeEnd);
-                    newList.add(lastOrder);
                     var lastOrderNew = new ArrayList(lastOrder.size());
                     lastOrderNew.addAll(lastOrder);
-                    lastOrder = lastOrderNew;
+                    newList.add(lastOrderNew);
                 }
             }
         } else {
@@ -421,10 +420,9 @@ public class SCNGameCoinController {
                 }
                 if (!hasOrder) {
                     lastOrder.set(3, timeEnd);
-                    newList.add(lastOrder);
                     var lastOrderNew = new ArrayList(lastOrder.size());
                     lastOrderNew.addAll(lastOrder);
-                    lastOrder = lastOrderNew;
+                    newList.add(lastOrderNew);
                 }
             }
         }
