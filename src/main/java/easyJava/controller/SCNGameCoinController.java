@@ -387,7 +387,7 @@ public class SCNGameCoinController {
                 var hasOrder = false;
                 for (var order : list) {
                     var time = Long.parseLong(order.get(3).toString());
-                    if (time <= timeEnd && time >= timeBegin) {
+                    if (time <= timeEnd && time > timeBegin) {
                         order.set(3, timeEnd);
                         newList.add(order);
                         lastOrder = new ArrayList(order.size());
@@ -410,7 +410,7 @@ public class SCNGameCoinController {
                 var hasOrder = false;
                 for (var order : list) {
                     var time = Long.parseLong(order.get(3).toString());
-                    if (time <= timeEnd && time >= timeBegin) {
+                    if (time <= timeEnd && time > timeBegin) {
                         order.set(3, timeEnd);
                         newList.add(order);
                         lastOrder = new ArrayList(order.size());
