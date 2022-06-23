@@ -388,18 +388,18 @@ public class SCNGameCoinController {
                 for (var order : list) {
                     var time = Long.parseLong(order.get(3).toString());
                     if (time <= timeEnd && time > timeBegin) {
-                        order.set(3, timeEnd);
-                        newList.add(order);
                         lastOrder = new ArrayList(order.size());
                         lastOrder.addAll(order);
+                        lastOrder.set(3, timeEnd);
+                        newList.add(lastOrder);
                         hasOrder = true;
                         break;
                     }
                 }
                 if (!hasOrder) {
-                    lastOrder.set(3, timeEnd);
                     var lastOrderNew = new ArrayList(lastOrder.size());
                     lastOrderNew.addAll(lastOrder);
+                    lastOrderNew.set(3, timeEnd);
                     newList.add(lastOrderNew);
                 }
             }
@@ -411,18 +411,18 @@ public class SCNGameCoinController {
                 for (var order : list) {
                     var time = Long.parseLong(order.get(3).toString());
                     if (time <= timeEnd && time > timeBegin) {
-                        order.set(3, timeEnd);
-                        newList.add(order);
                         lastOrder = new ArrayList(order.size());
                         lastOrder.addAll(order);
+                        lastOrder.set(3, timeEnd);
+                        newList.add(lastOrder);
                         hasOrder = true;
                         break;
                     }
                 }
                 if (!hasOrder) {
-                    lastOrder.set(3, timeEnd);
                     var lastOrderNew = new ArrayList(lastOrder.size());
                     lastOrderNew.addAll(lastOrder);
+                    lastOrderNew.set(3, timeEnd);
                     newList.add(lastOrderNew);
                 }
             }
