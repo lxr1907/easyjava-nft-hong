@@ -1,7 +1,5 @@
 package easyJava.controller.websocket;
 
-import com.alibaba.fastjson.JSON;
-import easyJava.entity.BaseEntity;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -25,23 +23,21 @@ public class TexasWS {
     static final int maxSize = 256;// 1 * 1024;// 1K
 
     private static Map<String, Session> sessionMap = new ConcurrentHashMap<>();
-    private static CopyOnWriteArrayList<Session> sessionList = new CopyOnWriteArrayList<Session>();
+    private static CopyOnWriteArrayList<Session> sessionList = new CopyOnWriteArrayList<>();
 
     @OnMessage
-    public void onMessage(String message, Session session) throws IOException, InterruptedException {
+    public void onMessage(String message, Session session) {
         logger.info("onMessage:" + message);
-        // onMessageDoReflect(message, session);
         onMessageDo(message, session);
     }
 
     public void onMessageDo(String message, Session session) {
-        sessionMap.put(JSON.parseObject(message, BaseEntity.class).getId(), session);
     }
 
 
     @OnOpen
     public void onOpen(Session session) {
-        logger.info("onOpen");
+        logger.info("TexasWS onOpen");
         // 可以缓冲的传入二进制消息的最大长度
         session.setMaxBinaryMessageBufferSize(maxSize);
         // 可以缓冲的传入文本消息的最大长度
@@ -53,16 +49,17 @@ public class TexasWS {
     @OnClose
     public void onClose(Session session) {
         onConnectLost(session);
-        logger.info(" connection closed ");
+        logger.info("TexasWS connection closed ");
     }
 
     @OnError
     public void onError(Session session, Throwable e) {
         onConnectLost(session);
-        logger.info(" connection error: " + e.getMessage());
+        logger.error("TexasWS connection error: ", e);
     }
 
     public void onConnectLost(Session session) {
+        sessionList.remove(session);
     }
 
     public static void sendToAllText(String text) {
