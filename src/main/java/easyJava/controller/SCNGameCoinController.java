@@ -267,7 +267,7 @@ public class SCNGameCoinController {
             BaseEntity entity = new BaseEntity();
             entity.setType(methodName);
             entity.setList(ordersRedis);
-            TexasWS.sendToAllObject(entity);
+            TexasWS.sendToAllText(JSON.toJSONString(entity));
         }
 
         @Override
