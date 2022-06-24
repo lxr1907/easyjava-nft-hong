@@ -89,6 +89,30 @@ public class TexasWS {
             }
         }
     }
+    public static void sendToAllObject(Object obj) {
+        logger.info("sendToAllText size:" + sessionList.size() + ",txt:" + obj);
+        sessionList.forEach(session -> {
+            if (session == null) {
+                return;
+            }
+            synchronized (session) {
+                if (session.isOpen()) {
+                    try {
+                        session.getBasicRemote().sendObject(obj);
+                    } catch (IOException | EncodeException e) {
+                        logger.error("sendToAllText error:", e);
+                    }
+                }
+            }
+        });
+        for (int i = 0; i < sessionList.size(); i++) {
+            if (sessionList.get(i) == null || !sessionList.get(i).isOpen()) {
+                logger.error("session remove :" + i);
+                sessionList.remove(i);
+                break;
+            }
+        }
+    }
 
     /**
      * 发送文本消息
