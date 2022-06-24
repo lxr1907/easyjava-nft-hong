@@ -351,6 +351,7 @@ public class KlayController {
             withDrawCHR(SYSTEM_PRIVATE, map.get("address").toString(), BigInteger.valueOf(Long.parseLong(map.get("value").toString())));
         } catch (Exception e) {
             logger.error("withDrawCHR失败！", e);
+            return new ResponseEntity("withDrawCHR失败！");
         }
         return new ResponseEntity();
     }
