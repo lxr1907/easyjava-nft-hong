@@ -16,6 +16,7 @@ import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import easyJava.controller.websocket.TexasWS;
 import easyJava.dao.master.BaseDao;
+import easyJava.entity.BaseEntity;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.utils.DESUtils;
@@ -121,7 +122,7 @@ public class SCNGameCoinController {
         }
         try {
             var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()), new BigInteger(map.get("price").toString()));
-            clearOrdersRedis(0);
+            new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -163,7 +164,7 @@ public class SCNGameCoinController {
         }
         try {
             var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()), new BigInteger(map.get("price").toString()));
-            clearOrdersRedis(0);
+            new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -194,7 +195,7 @@ public class SCNGameCoinController {
         }
         try {
             var result = cancelBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
-            clearOrdersRedis(2);
+            new ClearOrdersRedisThread(2).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("cancelBuyOrder error!", e);
@@ -225,7 +226,7 @@ public class SCNGameCoinController {
         }
         try {
             var result = cancelSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
-            clearOrdersRedis(1);
+            new ClearOrdersRedisThread(1).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("cancelSaleOrder error!", e);
@@ -233,23 +234,55 @@ public class SCNGameCoinController {
         }
     }
 
-    /**
-     * 类型0全部，1sale，2buy，3history
-     *
-     * @param type
-     */
-    public void clearOrdersRedis(int type) {
-        String key = "getOrders:getSaleOrders";
-        if (type == 0 || type == 1) {
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
+
+    class ClearOrdersRedisThread extends Thread {
+        int type;
+
+        public ClearOrdersRedisThread(int type) {
+            this.type = type;
         }
-        if (type == 0 || type == 2) {
-            key = "getOrders:getBuyOrders";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
+
+        /**
+         * 类型0全部，1sale，2buy，3history
+         *
+         * @param type
+         */
+        public void clearOrdersRedis(int type) {
+            String key = "getOrders:getSaleOrders";
+            if (type == 0 || type == 1) {
+                redisTemplate.opsForValue().set(key, new ArrayList<>());
+            }
+            if (type == 0 || type == 2) {
+                key = "getOrders:getBuyOrders";
+                redisTemplate.opsForValue().set(key, new ArrayList<>());
+            }
+            if (type == 0 || type == 3) {
+                key = "getOrders:getHistoryOrders";
+                redisTemplate.opsForValue().set(key, new ArrayList<>());
+            }
         }
-        if (type == 0 || type == 3) {
-            key = "getOrders:getHistoryOrders";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
+
+        public void sendNotification(String methodName, String secondIntervalStr, int pageSize, int order) {
+            var ordersRedis = getOrdersList(methodName, null, secondIntervalStr, pageSize, order);
+            BaseEntity entity = new BaseEntity();
+            entity.setType(methodName);
+            entity.setList(ordersRedis);
+            TexasWS.sendToAllText(JSON.toJSONString(entity));
+        }
+
+        @Override
+        public void run() {
+            clearOrdersRedis(type);
+            if (type == 0) {
+                sendNotification("getHistoryOrders", "1", 15, 2);
+                sendNotification("getSamplingOrders", "21600", 100, 1);
+            }
+            if (type == 0 || type == 2) {
+                sendNotification("getBuyOrders", "1", 5, 1);
+            }
+            if (type == 0 || type == 1) {
+                sendNotification("getSaleOrders", "1", 5, 1);
+            }
         }
     }
 
@@ -266,7 +299,7 @@ public class SCNGameCoinController {
     }
 
     /**
-     * 出售gameCoin
+     * 查询挂单列表，买单，卖单，历史，折线图采样
      *
      * @param map
      * @return
@@ -285,6 +318,16 @@ public class SCNGameCoinController {
         if (map.get("order") != null && map.get("order").toString().length() != 0) {
             order = Integer.parseInt(map.get("order").toString());
         }
+
+        var ordersRedis = getOrdersList(methodName, map.get("address"), map.get("secondInterval"), pageSize, order);
+        //分页
+        if (ordersRedis.size() > pageSize) {
+            ordersRedis = ordersRedis.subList(0, pageSize);
+        }
+        return new ResponseEntity(ordersRedis);
+    }
+
+    private List<List> getOrdersList(String methodName, Object address, Object secondIntervalStr, int pageSize, int order) {
         String key = "getOrders:" + methodName;
         List<List> ordersRedis = null;
         try {
@@ -305,12 +348,11 @@ public class SCNGameCoinController {
             ordersRedis = getSortedCombined(ordersRedis);
         }
         if (ordersRedis == null) {
-            return new ResponseEntity(new ArrayList());
+            return new ArrayList();
         }
 
         //按地址过滤
-        if (map.get("address") != null && map.get("address").toString().length() != 0) {
-            String address = map.get("address").toString();
+        if (address != null && address.toString().length() != 0) {
             List<List> addressOrders = new ArrayList<>();
             for (int i = 0; i < ordersRedis.size(); i++) {
                 if (ordersRedis.get(i).get(4).toString().equals(address) || ordersRedis.get(i).get(6).toString().equals(address)) {
@@ -323,8 +365,8 @@ public class SCNGameCoinController {
         if (methodName.equals("getSamplingOrders")) {
             //按时间抽取，6小时一个
             int secondInterval = 60 * 60 * 6;
-            if (map.get("secondInterval") != null && map.get("secondInterval").toString().length() != 0) {
-                secondInterval = Integer.parseInt(map.get("secondInterval").toString());
+            if (secondIntervalStr != null && secondIntervalStr.toString().length() != 0) {
+                secondInterval = Integer.parseInt(secondIntervalStr.toString());
             }
             ordersRedis = getSampling(ordersRedis, secondInterval, pageSize);
         } else if (methodName.equals("getBuyOrders")) {
@@ -347,13 +389,7 @@ public class SCNGameCoinController {
             }
             ordersRedis = rankedOrders;
         }
-
-        //分页
-        if (ordersRedis.size() > pageSize) {
-            ordersRedis = ordersRedis.subList(0, pageSize);
-        }
-        TexasWS.sendToAllText(JSON.toJSONString(ordersRedis));
-        return new ResponseEntity(ordersRedis);
+        return ordersRedis;
     }
 
     public static List<List> getSortedCombined(List<List> list) {
