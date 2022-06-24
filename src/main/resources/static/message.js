@@ -60,10 +60,10 @@ function bindWsFunction(ws) {
  * 接收服务器消息
  */
 function onMessage(event) {
+        document.getElementById('messages').innerHTML = event.data;
     if (event.data != null) {
         var dataJson = JSON.parse(event.data);
-        console.log(dataJson.c + " is call by server!");
-        document.getElementById('messages').innerHTML = event.data;
+        console.log(dataJson.type + " is call by server!");
     }
 }
 /**

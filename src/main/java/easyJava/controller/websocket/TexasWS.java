@@ -60,14 +60,13 @@ public class TexasWS {
     public void onError(Session session, Throwable e) {
         onConnectLost(session);
         logger.info(" connection error: " + e.getMessage());
-        e.printStackTrace();
     }
 
     public void onConnectLost(Session session) {
     }
 
     public static void sendToAllText(String text) {
-        logger.info("sendToAllText:" + text);
+        logger.info("sendToAllText size:" + sessionList.size() + ",txt:" + text);
         sessionList.forEach(session -> {
             if (session == null) {
                 return;
@@ -77,11 +76,18 @@ public class TexasWS {
                     try {
                         session.getBasicRemote().sendText(text);
                     } catch (IOException e) {
-                        logger.error("sendToAllText", e);
+                        logger.error("sendToAllText error:", e);
                     }
                 }
             }
         });
+        for (int i = 0; i < sessionList.size(); i++) {
+            if (sessionList.get(i) == null || !sessionList.get(i).isOpen()) {
+                logger.error("session remove :" + i);
+                sessionList.remove(i);
+                break;
+            }
+        }
     }
 
     /**
@@ -100,8 +106,7 @@ public class TexasWS {
                     session.getBasicRemote().sendText(text);
                     // logger.info(text);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.error("sendText error:", e);
                 }
             }
         }
