@@ -111,31 +111,31 @@ CREATE TABLE `user_log` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 -- 查询服务链的交易，定期保存入库
-CREATE TABLE nft.scn_scan_tx (
-	hash varchar(200) NOT NULL,
-	blockHash varchar(200) NULL,
-	blockNumber varchar(100) NULL,
-	codeFormat varchar(100) NULL,
-	feePayer varchar(100) NULL,
-	feeRatio varchar(100) NULL,
-	`from` varchar(100) NULL,
-	gas varchar(100) NULL,
-	gasPrice varchar(100) NULL,
-	`key` varchar(100) NULL,
-	`input` varchar(100) NULL,
-	nonce varchar(100) NULL,
-	senderTxHash varchar(100) NULL,
-	`to` varchar(100) NULL,
-	transactionIndex varchar(100) NULL,
-	`type` varchar(100) NULL,
-	typeInt varchar(100) NULL,
-	value varchar(100) NULL,
-	chainID varchar(100) NULL,
-	CONSTRAINT scn_scan_tx_PK PRIMARY KEY (hash)
-)
-ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_bin;
+-- nft.scn_scan_tx definition
+
+CREATE TABLE `scn_scan_tx` (
+  `hash` varchar(200) COLLATE utf8mb4_bin NOT NULL,
+  `blockHash` varchar(200) COLLATE utf8mb4_bin DEFAULT NULL,
+  `blockNumber` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `codeFormat` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `feePayer` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `feeRatio` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `from` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `gas` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `gasPrice` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `key` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `input` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `nonce` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `senderTxHash` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `to` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `transactionIndex` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `type` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `typeInt` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `value` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `chainID` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 
 -- nft.chr_token_order definition
@@ -153,3 +153,20 @@ CREATE TABLE `chr_token_order` (
   `chr_token_value` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- nft.order_usdt definition
+
+CREATE TABLE `order_usdt` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `send_value` varchar(100) DEFAULT NULL COMMENT '实际发送的金额，比如1usdt发送1.03324',
+  `buy_amount` varchar(100) DEFAULT NULL COMMENT '购买合约币数量',
+  `status` varchar(100) DEFAULT NULL COMMENT '状态，1创建，2收到usdt，3发送合约币',
+  `to_address` varchar(255) DEFAULT NULL COMMENT 'usdt-erc20的接收地址',
+  `date` datetime DEFAULT NULL COMMENT '创建时间',
+  `price` varchar(100) DEFAULT NULL COMMENT '1usdt换多少',
+  `from_address` varchar(300) DEFAULT NULL,
+  `user_id` bigint DEFAULT NULL COMMENT '用户id',
+  `hash` varchar(500) DEFAULT NULL COMMENT 'usdt-erc20的实际交易hash',
+  PRIMARY KEY (`id`),
+  KEY `order_usdt_date_IDX` (`date`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=84 ;
