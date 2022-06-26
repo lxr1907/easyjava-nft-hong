@@ -193,3 +193,13 @@ CREATE TABLE `klay_txs` (
   `methodName` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`txHash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+
+-- nft.chr_price definition
+
+CREATE TABLE `chr_price` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `from` varchar(100) COLLATE utf8mb4_bin NOT NULL,
+  `to` varchar(100) COLLATE utf8mb4_bin NOT NULL,
+  `rate` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ;
