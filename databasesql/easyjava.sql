@@ -152,7 +152,7 @@ CREATE TABLE `chr_token_order` (
   `chr_value` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `chr_token_value` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- nft.order_usdt definition
 
@@ -169,4 +169,27 @@ CREATE TABLE `order_usdt` (
   `hash` varchar(500) DEFAULT NULL COMMENT 'usdt-erc20的实际交易hash',
   PRIMARY KEY (`id`),
   KEY `order_usdt_date_IDX` (`date`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=84 ;
+) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb4;
+
+-- nft.klay_txs definition
+
+CREATE TABLE `klay_txs` (
+  `txHash` varchar(500) NOT NULL,
+  `createdAt` bigint DEFAULT NULL,
+  `txType` varchar(100) DEFAULT NULL,
+  `txStatus` int DEFAULT NULL,
+  `inputHeader` varchar(100) DEFAULT NULL,
+  `blockNumber` bigint DEFAULT NULL,
+  `fromAddress` varchar(500) DEFAULT NULL,
+  `toAddress` varchar(500) DEFAULT NULL,
+  `amount` varchar(100) DEFAULT NULL,
+  `txFee` varchar(100) DEFAULT NULL,
+  `gasLimit` varchar(100) DEFAULT NULL,
+  `gasUsed` varchar(100) DEFAULT NULL,
+  `nonce` varchar(100) DEFAULT NULL,
+  `gasPrice` varchar(100) DEFAULT NULL,
+  `parentHash` varchar(255) DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL,
+  `methodName` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`txHash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
