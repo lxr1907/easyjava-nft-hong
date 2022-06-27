@@ -14,8 +14,8 @@ public class SendMailTLS {
     public static final String host = "smtp.gmail.com";
 
     public static void main(String[] args) {
-        gmailSender("418982099@qq.com",
-                "title", "content", "ssl");
+//        gmailSender("418982099@qq.com",
+//                "title", "content", "ssl");
     }
 
 

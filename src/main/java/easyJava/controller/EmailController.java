@@ -30,7 +30,7 @@ public class EmailController {
 //            redisTemplate.opsForValue().set(key, ret, 10, TimeUnit.DAYS);
 //        }
 //        return ret;
-        SendMailSSL.send(to, subject, text);
+//        SendMailSSL.send(to, subject, text);
         return new ResponseEntity();
     }
 

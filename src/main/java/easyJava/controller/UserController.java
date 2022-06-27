@@ -407,7 +407,7 @@ public class UserController {
             if (map.get("ssl") == null) {
                 map.put("ssl", "ssl");
             }
-            SendMailTLS.gmailSender(map.get("account").toString(), "登录注册验证码", code, map.get("ssl").toString());
+            SendMailSSLGandi.send(map.get("account").toString(), "登录注册验证码", code);
         }
         return new ResponseEntity(1, "验证码已经发送至邮箱" + map.get("account").toString() +
                 ",10分钟内有效！");
