@@ -320,10 +320,7 @@ public class SCNGameCoinController {
         }
 
         var ordersRedis = getOrdersList(methodName, map.get("address"), map.get("secondInterval"), pageSize, order);
-        //分页
-        if (ordersRedis.size() > pageSize) {
-            ordersRedis = ordersRedis.subList(0, pageSize);
-        }
+
         return new ResponseEntity(ordersRedis);
     }
 
@@ -388,6 +385,10 @@ public class SCNGameCoinController {
                 rankedOrders.add(ordersRedis.get(ordersRedis.size() - 1 - i));
             }
             ordersRedis = rankedOrders;
+        }
+        //分页
+        if (ordersRedis.size() > pageSize) {
+            ordersRedis = ordersRedis.subList(0, pageSize);
         }
         return ordersRedis;
     }
