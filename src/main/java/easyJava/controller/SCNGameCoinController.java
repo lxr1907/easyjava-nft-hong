@@ -418,13 +418,13 @@ public class SCNGameCoinController {
         if (list == null || list.size() == 0) {
             return newList;
         }
-        long timeNow = new Date().getTime() / 1000;
+        long timeNow = new Date().getTime() / 1000 / secondInterval * secondInterval;
 
-        List lastOrder = new ArrayList(list.get(list.size() - 1).size());
-        lastOrder.addAll(list.get(list.size() - 1));
-        for (int i = pageSize; i > 0; i--) {
-            var timeEnd = timeNow - secondInterval * i;
-            var timeBegin = timeNow - secondInterval * (i + 1);
+        List lastOrder = new ArrayList(list.get(0).size());
+        lastOrder.addAll(list.get(0));
+        for (int i = 0; i < pageSize; i++) {
+            var timeEnd = timeNow - secondInterval * (pageSize - i - 1);
+            var timeBegin = timeNow - secondInterval * (pageSize - i);
             var hasOrder = false;
             for (var order : list) {
                 var time = Long.parseLong(order.get(3).toString());
