@@ -526,9 +526,13 @@ public class SCNGameCoinController {
         String to;
         //手续费
         String taxFee;
+        //开盘价
         String beginPrice;
+        //收盘价
         String endPrice;
+        //最高价
         String maxPrice;
+        //最低价
         String minPrice;
     }
 
