@@ -333,7 +333,8 @@ public class SCNGameCoinController {
             logger.error("error:", e);
         }
         if (ordersRedis == null || ordersRedis.size() == 0) {
-            if (methodName.equalsIgnoreCase("getSamplingOrders")) {
+            if (methodName.equalsIgnoreCase("getSamplingOrders")
+                    ||methodName.equalsIgnoreCase("getKline")) {
                 ordersRedis = getOrders("getHistoryOrders");
             } else {
                 ordersRedis = getOrders(methodName);
@@ -373,7 +374,7 @@ public class SCNGameCoinController {
                 secondInterval = Integer.parseInt(secondIntervalStr.toString());
             }
             ordersRedis = getKline(ordersRedis, secondInterval, pageSize);
-        }else if (methodName.equals("getBuyOrders")) {
+        } else if (methodName.equals("getBuyOrders")) {
             //将数量统一为gamecoin的数量
             for (var buyOrder : ordersRedis) {
                 var gamecoinAmount = new BigInteger(buyOrder.get(1).toString())
@@ -418,6 +419,7 @@ public class SCNGameCoinController {
         }
         return newList;
     }
+
     //按时间采样抽取
     public static List<List> getSampling(List<List> list, int secondInterval, int pageSize) {
         List<List> newList = new ArrayList<>();
@@ -452,6 +454,7 @@ public class SCNGameCoinController {
 
         return newList;
     }
+
     //按时间getKline
     public static List<List> getKline(List<List> list, int secondInterval, int pageSize) {
         List<List> newList = new ArrayList<>();
@@ -460,7 +463,7 @@ public class SCNGameCoinController {
         }
         long timeNow = new Date().getTime() / 1000 / secondInterval * secondInterval;
 
-        List lastOrder = new ArrayList(list.get(0).size()+4);
+        List lastOrder = new ArrayList(list.get(0).size() + 4);
         lastOrder.addAll(list.get(0));
         var price = lastOrder.get(2);
         lastOrder.add(price);
@@ -471,30 +474,30 @@ public class SCNGameCoinController {
             var timeEnd = timeNow - secondInterval * (pageSize - i - 1);
             var timeBegin = timeNow - secondInterval * (pageSize - i);
             var hasOrder = false;
+            var begin = true;
             for (var order : list) {
                 var time = Long.parseLong(order.get(3).toString());
-                var begin=true;
                 if (time <= timeEnd && time > timeBegin) {
-                    lastOrder = new ArrayList(order.size()+4);
+                    lastOrder = new ArrayList(order.size() + 4);
                     lastOrder.addAll(order);
                     lastOrder.set(3, timeEnd);
-                    var orderPrice=Integer.parseInt(order.get(2).toString());
-                    if(begin){
+                    var orderPrice = Integer.parseInt(order.get(2).toString());
+                    if (begin) {
                         lastOrder.add(orderPrice);
                         lastOrder.add(orderPrice);
                         lastOrder.add(orderPrice);
                         lastOrder.add(orderPrice);
-                    }else {
-                        lastOrder.set(9,orderPrice);
-                        if(Integer.parseInt(lastOrder.get(10).toString())<orderPrice){
-                            lastOrder.set(10,orderPrice);
+                        begin = false;
+                    } else {
+                        lastOrder.set(9, orderPrice);
+                        if (Integer.parseInt(lastOrder.get(10).toString()) < orderPrice) {
+                            lastOrder.set(10, orderPrice);
                         }
-                        if(Integer.parseInt(lastOrder.get(11).toString())>orderPrice){
-                            lastOrder.set(11,orderPrice);
+                        if (Integer.parseInt(lastOrder.get(11).toString()) > orderPrice) {
+                            lastOrder.set(11, orderPrice);
                         }
                     }
                     newList.add(lastOrder);
-                    begin=false;
                     hasOrder = true;
                 }
             }
@@ -508,7 +511,8 @@ public class SCNGameCoinController {
 
         return newList;
     }
-    class OrderEntity{
+
+    class OrderEntity {
         //gamecoin数量
         String amount;
         //chr数量
@@ -530,6 +534,7 @@ public class SCNGameCoinController {
         String maxPrice;
         String minPrice;
     }
+
     @RequestMapping("/gameCoin/getOrdersByAddress/{methodName}/{address}")
     public ResponseEntity<?> getOrdersByAddress(@PathVariable String methodName, @PathVariable String address) {
         if (methodName == null || methodName.length() == 0) {
