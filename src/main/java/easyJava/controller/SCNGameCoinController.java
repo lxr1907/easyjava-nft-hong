@@ -275,7 +275,7 @@ public class SCNGameCoinController {
             clearOrdersRedis(type);
             if (type == 0) {
                 sendNotification("getHistoryOrders", "1", 15, 2);
-                sendNotification("getSamplingOrders", "21600", 100, 1);
+                sendNotification("getKline", "21600", 100, 1);
             }
             if (type == 0 || type == 2) {
                 sendNotification("getBuyOrders", "1", 5, 1);
