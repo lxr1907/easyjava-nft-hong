@@ -307,7 +307,7 @@ public class SCNGameCoinController {
     @RequestMapping("/gameCoin/getOrders/{methodName}")
     public ResponseEntity<?> getOrders(@RequestParam Map<String, Object> map, @PathVariable String methodName) {
         if (methodName == null || methodName.length() == 0) {
-            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders,getHistoryOrders，getSamplingOrders！");
+            return new ResponseEntity(400, "methodName不能为空,可选：getBuyOrders,getSaleOrders,getHistoryOrders，getSamplingOrders，getKline！");
         }
         //显示前5条
         int pageSize = 5;
@@ -366,7 +366,14 @@ public class SCNGameCoinController {
                 secondInterval = Integer.parseInt(secondIntervalStr.toString());
             }
             ordersRedis = getSampling(ordersRedis, secondInterval, pageSize);
-        } else if (methodName.equals("getBuyOrders")) {
+        } else if (methodName.equals("getKline")) {
+            //按时间抽取，6小时一个
+            int secondInterval = 60 * 60 * 6;
+            if (secondIntervalStr != null && secondIntervalStr.toString().length() != 0) {
+                secondInterval = Integer.parseInt(secondIntervalStr.toString());
+            }
+            ordersRedis = getKline(ordersRedis, secondInterval, pageSize);
+        }else if (methodName.equals("getBuyOrders")) {
             //将数量统一为gamecoin的数量
             for (var buyOrder : ordersRedis) {
                 var gamecoinAmount = new BigInteger(buyOrder.get(1).toString())
@@ -411,7 +418,6 @@ public class SCNGameCoinController {
         }
         return newList;
     }
-
     //按时间采样抽取
     public static List<List> getSampling(List<List> list, int secondInterval, int pageSize) {
         List<List> newList = new ArrayList<>();
@@ -446,7 +452,84 @@ public class SCNGameCoinController {
 
         return newList;
     }
+    //按时间getKline
+    public static List<List> getKline(List<List> list, int secondInterval, int pageSize) {
+        List<List> newList = new ArrayList<>();
+        if (list == null || list.size() == 0) {
+            return newList;
+        }
+        long timeNow = new Date().getTime() / 1000 / secondInterval * secondInterval;
 
+        List lastOrder = new ArrayList(list.get(0).size()+4);
+        lastOrder.addAll(list.get(0));
+        var price = lastOrder.get(2);
+        lastOrder.add(price);
+        lastOrder.add(price);
+        lastOrder.add(price);
+        lastOrder.add(price);
+        for (int i = 0; i < pageSize; i++) {
+            var timeEnd = timeNow - secondInterval * (pageSize - i - 1);
+            var timeBegin = timeNow - secondInterval * (pageSize - i);
+            var hasOrder = false;
+            for (var order : list) {
+                var time = Long.parseLong(order.get(3).toString());
+                var begin=true;
+                if (time <= timeEnd && time > timeBegin) {
+                    lastOrder = new ArrayList(order.size()+4);
+                    lastOrder.addAll(order);
+                    lastOrder.set(3, timeEnd);
+                    var orderPrice=Integer.parseInt(order.get(2).toString());
+                    if(begin){
+                        lastOrder.add(orderPrice);
+                        lastOrder.add(orderPrice);
+                        lastOrder.add(orderPrice);
+                        lastOrder.add(orderPrice);
+                    }else {
+                        lastOrder.set(9,orderPrice);
+                        if(Integer.parseInt(lastOrder.get(10).toString())<orderPrice){
+                            lastOrder.set(10,orderPrice);
+                        }
+                        if(Integer.parseInt(lastOrder.get(11).toString())>orderPrice){
+                            lastOrder.set(11,orderPrice);
+                        }
+                    }
+                    newList.add(lastOrder);
+                    begin=false;
+                    hasOrder = true;
+                }
+            }
+            if (!hasOrder) {
+                var lastOrderNew = new ArrayList(lastOrder.size());
+                lastOrderNew.addAll(lastOrder);
+                lastOrderNew.set(3, timeEnd);
+                newList.add(lastOrderNew);
+            }
+        }
+
+        return newList;
+    }
+    class OrderEntity{
+        //gamecoin数量
+        String amount;
+        //chr数量
+        String chr;
+        //价格
+        String price;
+        //时间
+        String time;
+        //先挂单的用户地址
+        String sender;
+        //1用chrToken换gamecoin，反之2
+        String sale;
+        //后挂单的用户地址
+        String to;
+        //手续费
+        String taxFee;
+        String beginPrice;
+        String endPrice;
+        String maxPrice;
+        String minPrice;
+    }
     @RequestMapping("/gameCoin/getOrdersByAddress/{methodName}/{address}")
     public ResponseEntity<?> getOrdersByAddress(@PathVariable String methodName, @PathVariable String address) {
         if (methodName == null || methodName.length() == 0) {
