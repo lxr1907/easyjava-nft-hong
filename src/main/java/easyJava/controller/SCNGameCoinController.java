@@ -334,7 +334,7 @@ public class SCNGameCoinController {
         }
         if (ordersRedis == null || ordersRedis.size() == 0) {
             if (methodName.equalsIgnoreCase("getSamplingOrders")
-                    ||methodName.equalsIgnoreCase("getKline")) {
+                    || methodName.equalsIgnoreCase("getKline")) {
                 ordersRedis = getOrders("getHistoryOrders");
             } else {
                 ordersRedis = getOrders(methodName);
@@ -463,7 +463,7 @@ public class SCNGameCoinController {
         }
         long timeNow = new Date().getTime() / 1000 / secondInterval * secondInterval;
 
-        List lastOrder = new ArrayList(list.get(0).size() + 4);
+        List lastOrder = new ArrayList();
         lastOrder.addAll(list.get(0));
         var price = lastOrder.get(2);
         lastOrder.add(price);
@@ -473,36 +473,33 @@ public class SCNGameCoinController {
         for (int i = 0; i < pageSize; i++) {
             var timeEnd = timeNow - secondInterval * (pageSize - i - 1);
             var timeBegin = timeNow - secondInterval * (pageSize - i);
-            var hasOrder = false;
-            var begin = true;
+            List orderI = new ArrayList();
             for (var order : list) {
                 var time = Long.parseLong(order.get(3).toString());
                 if (time <= timeEnd && time > timeBegin) {
-                    lastOrder = new ArrayList(order.size() + 4);
-                    lastOrder.addAll(order);
-                    lastOrder.set(3, timeEnd);
                     var orderPrice = Integer.parseInt(order.get(2).toString());
-                    if (begin) {
-                        lastOrder.add(orderPrice);
-                        lastOrder.add(orderPrice);
-                        lastOrder.add(orderPrice);
-                        lastOrder.add(orderPrice);
-                        begin = false;
+                    if (orderI.size() == 0) {
+                        orderI.addAll(order);
+                        orderI.set(3, timeEnd);
+                        orderI.add(orderPrice);
+                        orderI.add(orderPrice);
+                        orderI.add(orderPrice);
+                        orderI.add(orderPrice);
                     } else {
-                        lastOrder.set(9, orderPrice);
-                        if (Integer.parseInt(lastOrder.get(10).toString()) < orderPrice) {
-                            lastOrder.set(10, orderPrice);
+                        orderI.set(9, orderPrice);
+                        if (Integer.parseInt(orderI.get(10).toString()) < orderPrice) {
+                            orderI.set(10, orderPrice);
                         }
-                        if (Integer.parseInt(lastOrder.get(11).toString()) > orderPrice) {
-                            lastOrder.set(11, orderPrice);
+                        if (Integer.parseInt(orderI.get(11).toString()) > orderPrice) {
+                            orderI.set(11, orderPrice);
                         }
                     }
-                    newList.add(lastOrder);
-                    hasOrder = true;
                 }
             }
-            if (!hasOrder) {
-                var lastOrderNew = new ArrayList(lastOrder.size());
+            if (orderI.size() != 0) {
+                newList.add(orderI);
+            } else {
+                var lastOrderNew = new ArrayList();
                 lastOrderNew.addAll(lastOrder);
                 lastOrderNew.set(3, timeEnd);
                 newList.add(lastOrderNew);
