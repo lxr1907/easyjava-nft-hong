@@ -253,6 +253,9 @@ public class KlayController {
             TransactionReceipt.TransactionReceiptData receipt = contract.getMethod("withDraw")
                     .send(Arrays.asList(value, toAddress), sendOptions);
             logger.info("------withDrawCHR ret:" + JSON.toJSONString(receipt) + "--to:" + toAddress + ",amount:" + value + "------");
+            if (receipt.getTxError() != null && receipt.getTxError().length() != 0) {
+                throw new Exception("链上交易失败，错误码：" + receipt.getTxError());
+            }
         } catch (Exception e) {
             logger.error("withDrawCHR 失败:" + e.getMessage() + ",from:" + fromAddress + ",to:" + toAddress + ",val:" + value, e);
             throw new RuntimeException(e.getMessage());
