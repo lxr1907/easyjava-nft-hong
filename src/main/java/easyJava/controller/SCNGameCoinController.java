@@ -26,7 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.*;
 
 
@@ -318,10 +320,29 @@ public class SCNGameCoinController {
         if (map.get("order") != null && map.get("order").toString().length() != 0) {
             order = Integer.parseInt(map.get("order").toString());
         }
+        int priceScale = 5;
+        if (map.get("priceScale") != null && map.get("priceScale").toString().length() != 0) {
+            priceScale = Integer.parseInt(map.get("priceScale").toString());
+        }
 
         var ordersRedis = getOrdersList(methodName, map.get("address"), map.get("secondInterval"), pageSize, order);
-
+        if (priceScale != 0) {
+            //价格翻转为chrToken计价
+            priceTypeTransfer(ordersRedis, priceScale);
+        }
         return new ResponseEntity(ordersRedis);
+    }
+
+    private void priceTypeTransfer(List<List> orders, int scale) {
+        orders.forEach(order -> {
+            var price = order.get(2);
+            BigDecimal priceInt = BigDecimal.valueOf(Long.parseLong(price.toString()));
+            var transferPrice = new BigDecimal(1).setScale(scale).
+                    divide(priceInt, RoundingMode.HALF_DOWN);
+            transferPrice.setScale(scale);
+            String transferPriceStr = transferPrice.toPlainString();
+            order.add(transferPriceStr);
+        });
     }
 
     private List<List> getOrdersList(String methodName, Object address, Object secondIntervalStr, int pageSize, int order) {
@@ -949,13 +970,20 @@ public class SCNGameCoinController {
 //                    myOrders.add(order);
 //                }
 //            });
-            gameCoinContractDeploy();
+//            gameCoinContractDeploy();
 //            testTransfer("0x85c616c2d51b6c653e00325ae85660d5b0c50786", "10000000000000");
 //            List addresses = new ArrayList();
 //            addresses.add("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415");
 //            addresses.add("1");
 //            var ret = queryItem(getOperatorSingleKeyring(), addresses, "userItemMap");
 //            logger.info(JSON.toJSONString(ret));
+
+            BigDecimal priceInt = BigDecimal.valueOf(Long.parseLong("7"));
+            var transferPrice = new BigDecimal(1).setScale(5)
+                    .divide(priceInt, RoundingMode.HALF_DOWN);
+            transferPrice.setScale(5);
+            String transferPriceStr = transferPrice.toPlainString();
+            logger.info(transferPriceStr);
         } catch (Exception e) {
             logger.error("", e);
         }
