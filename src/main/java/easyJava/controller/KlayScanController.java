@@ -42,11 +42,15 @@ public class KlayScanController {
 
     @Scheduled(cron = "*/50 * * * * ?")
     @RequestMapping("/scanKlayTxs")
-    public ResponseEntity<?> scanKlayTxs() {
+    public void scanKlayTxs() {
         //查询直接给chr合约转入klay的链上交易
         KlayTxsResult result = getAddressTxs(KlayController.KLAY_CHR_ADDRESS);
 
         List<Map<String, Object>> retList = result.getResult();
+        if(retList==null){
+            logger.info("scanKlayTxs retList null 数据为空");
+            return ;
+        }
         retList.forEach(map -> {
             map.put("tableName", KLAY_TXS_TABLE);
             baseDao.insertIgnoreBase(map);
@@ -60,7 +64,6 @@ public class KlayScanController {
 //            logger.info(JSON.toJSONString(map));
             baseDao.insertIgnoreBase(map);
         });
-        return new ResponseEntity();
     }
 
     @RequestMapping("/klayScan/getAddressTokenTxs")
