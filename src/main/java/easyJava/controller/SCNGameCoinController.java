@@ -400,7 +400,7 @@ public class SCNGameCoinController {
             //将数量统一为gamecoin的数量
             for (var buyOrder : ordersRedis) {
                 var gamecoinAmount = new BigInteger(buyOrder.get(1).toString())
-                        .multiply(new BigInteger(buyOrder.get(2).toString()));
+                        .multiply(new BigInteger(buyOrder.get(2).toString())).divide(new BigInteger("10000"));
                 buyOrder.set(0, gamecoinAmount);
             }
         }
@@ -432,6 +432,9 @@ public class SCNGameCoinController {
                 Object amount = map.get(price).get(0);
                 BigInteger addAmount = new BigInteger(amount.toString()).add(new BigInteger(order.get(0).toString()));
                 map.get(price).set(0, addAmount);
+                Object amount2 = map.get(price).get(2);
+                BigInteger addAmount2 = new BigInteger(amount2.toString()).add(new BigInteger(order.get(2).toString()));
+                map.get(price).set(0, addAmount2);
             } else {
                 map.put(price, order);
             }

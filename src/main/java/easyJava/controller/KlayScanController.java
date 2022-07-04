@@ -46,10 +46,14 @@ public class KlayScanController {
         //查询直接给chr合约转入klay的链上交易
         KlayTxsResult result = getAddressTxs(KlayController.KLAY_CHR_ADDRESS);
 
+        if (result == null) {
+            logger.info("scanKlayTxs result null 数据为空");
+            return;
+        }
         List<Map<String, Object>> retList = result.getResult();
-        if(retList==null){
+        if (retList == null) {
             logger.info("scanKlayTxs retList null 数据为空");
-            return ;
+            return;
         }
         retList.forEach(map -> {
             map.put("tableName", KLAY_TXS_TABLE);
