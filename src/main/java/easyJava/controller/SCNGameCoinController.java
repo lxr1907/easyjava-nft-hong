@@ -178,7 +178,7 @@ public class SCNGameCoinController {
     }
 
     private BigInteger getPriceScale(String priceStr) {
-        BigInteger price = new BigDecimal("3.28134").setScale(4, RoundingMode.DOWN).multiply(new BigDecimal(10000)).toBigInteger();
+        BigInteger price = new BigDecimal(priceStr).setScale(4, RoundingMode.DOWN).multiply(new BigDecimal(10000)).toBigInteger();
         return price;
     }
 
