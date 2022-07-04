@@ -70,6 +70,8 @@ contract GameCoin is ERC20, Ownable {
     uint256 public onePrice = 100;
     //手续费除数，千分之二除以500
     uint256 public taxRate = 500;
+    //传入的gamecoin价格保留4位小数，传入最小值10000，代表1
+    uint256 public scale = 10000;
     //订单实体
     struct OrderEntity{
         //gamecoin数量
@@ -110,7 +112,7 @@ contract GameCoin is ERC20, Ownable {
     //个人挂单,出售gamecoin
     function addSaleOrder(uint256 amount, uint256 myprice )  public payable
     {
-        require(amount>0 && myprice>0);
+        require(amount>0 && myprice>=scale);
         require(balanceOf(msg.sender) >= amount);
         //先扣gamecoin，取消订单加回去
         _burn(msg.sender, amount);
@@ -176,7 +178,7 @@ contract GameCoin is ERC20, Ownable {
     function addBuyOrder(uint256 myprice )  public payable
     {
         uint256 amount = msg.value;
-        require(msg.value>0 && myprice>0);
+        require(msg.value>0 && myprice>=scale);
         OrderEntity memory newOrder=OrderEntity({
         amount:0,
         chr:amount,
@@ -251,16 +253,16 @@ contract GameCoin is ERC20, Ownable {
             //当前订单对应的gamecoin总数
             uint256 chrAmount = buyOrdersArray[0].chr;
             uint256 chrPrice = buyOrdersArray[0].price;
-            uint256 chrWant = gamecoinPayed.div(chrPrice);
+            uint256 chrWant = gamecoinPayed.mul(scale).div(chrPrice);
             if(chrAmount>chrWant){
                 //当前订单总数充足，则部分成交
-                uint256 chrLeft = chrAmount.sub(gamecoinPayed.div(buyOrdersArray[0].price));
+                uint256 chrLeft = chrAmount.sub(gamecoinPayed.mul(scale).div(buyOrdersArray[0].price));
                 //千分之2手续费
                 uint256 taxFeeOne = gamecoinPayed.div(taxRate);
                 //发gamecoin给匹配到的买家
                 _mint(buyOrdersArray[0].sender,gamecoinPayed.sub(taxFeeOne));
                 //累加chrGet获得
-                chrGet = chrGet.add(gamecoinPayed.div(buyOrdersArray[0].price));
+                chrGet = chrGet.add(gamecoinPayed.mul(scale).div(buyOrdersArray[0].price));
                 OrderEntity memory newOrderHistory = OrderEntity({
                 amount:gamecoinPayed,
                 chr:chrGet,
@@ -276,7 +278,7 @@ contract GameCoin is ERC20, Ownable {
                 buyOrdersArray[0].chr = chrLeft;
                 break;
             }else{
-                uint gamecoinAmount = chrAmount.mul(chrPrice);
+                uint gamecoinAmount = chrAmount.mul(chrPrice).div(scale);
                 //千分之2手续费
                 uint256 taxFeeOne = gamecoinAmount.div(taxRate);
                 //发gamecoin给匹配到的买家
@@ -327,7 +329,7 @@ contract GameCoin is ERC20, Ownable {
             //当前订单对应的chr总数
             uint256 gamecoinAmount = saleOrdersArray[0].amount;
             uint256 gamecoinPrice = saleOrdersArray[0].price;
-            uint256 gamecoinWant = chrPayed.mul(gamecoinPrice);
+            uint256 gamecoinWant = chrPayed.mul(gamecoinPrice).div(scale);
             if(gamecoinAmount > gamecoinWant){
                 //当前订单总数充足，则部分成交
                 uint256 gamecoinLeft = gamecoinAmount.sub(gamecoinWant);
@@ -353,7 +355,7 @@ contract GameCoin is ERC20, Ownable {
                 break;
             }else{
                 //加chr给卖家
-                uint256 chrAmount = gamecoinAmount.div(gamecoinPrice);
+                uint256 chrAmount = gamecoinAmount.mul(scale).div(gamecoinPrice);
                 uint256 taxFeeOne = chrAmount.div(taxRate);
                 payable(saleOrdersArray[0].sender).transfer(chrAmount.sub(taxFeeOne));
                 //累加获得的数量
