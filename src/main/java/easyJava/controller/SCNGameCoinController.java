@@ -124,7 +124,9 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         try {
-            var result = addSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
+            var result = addSaleOrder(getSingleKeyring(useWallet),
+                    //数量也保留4位小数
+                    getPriceScale(map.get("amount").toString()) ,
                     getPriceScale(map.get("price").toString()));
             new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
@@ -167,7 +169,9 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "address不属于自己！");
         }
         try {
-            var result = addBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("amount").toString()),
+            var result = addBuyOrder(getSingleKeyring(useWallet),
+                    //数量也保留4位小数
+                    getPriceScale(map.get("amount").toString()) ,
                     getPriceScale(map.get("price").toString()));
             new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
@@ -177,9 +181,14 @@ public class SCNGameCoinController {
         }
     }
 
-    private BigInteger getPriceScale(String priceStr) {
+    private static BigInteger getPriceScale(String priceStr) {
         BigInteger price = new BigDecimal(priceStr).setScale(4, RoundingMode.DOWN).multiply(new BigDecimal(10000)).toBigInteger();
         return price;
+    }
+
+    private static String getPriceScaleDecimal(String priceStr) {
+        BigDecimal price = new BigDecimal(priceStr).setScale(4, RoundingMode.DOWN).divide(new BigDecimal(10000));
+        return price.toPlainString();
     }
 
     @RequestMapping("/gameCoin/cancelBuyOrder")
@@ -304,7 +313,7 @@ public class SCNGameCoinController {
         if (map.get("amount") == null || map.get("amount").toString().length() == 0) {
             return new ResponseEntity(400, "amount不能为空！");
         }
-        testTransfer(map.get("address").toString(), map.get("amount").toString());
+        testTransfer(map.get("address").toString(),getPriceScale(map.get("amount").toString()).toString() );
         return new ResponseEntity();
     }
 
@@ -343,6 +352,14 @@ public class SCNGameCoinController {
             transferPrice.setScale(priceScale);
             String transferPriceStr = transferPrice.toPlainString();
             order.add(transferPriceStr);
+
+
+            var amount = order.get(0);
+            BigDecimal amountDecimal = BigDecimal.valueOf(Long.parseLong(amount.toString()));
+            var transferAmount = new BigDecimal(10).pow(priceScale).setScale(priceScale).
+                    divide(amountDecimal, RoundingMode.HALF_DOWN);
+            transferAmount.setScale(priceScale);
+            order.add(transferAmount.toPlainString());
         });
     }
 
@@ -947,7 +964,8 @@ public class SCNGameCoinController {
             e.printStackTrace();
             return null;
         }
-        return result;
+        //保留4位小数转换
+      return   getPriceScaleDecimal(result);
     }
 
     public static TransactionReceipt.TransactionReceiptData matchSaleOrder() throws Exception {
