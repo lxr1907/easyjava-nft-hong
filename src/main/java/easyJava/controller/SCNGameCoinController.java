@@ -652,7 +652,8 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "price不能为空！");
         }
         try {
-            var result = addGameItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()), new BigInteger(map.get("amount").toString()), new BigInteger(map.get("price").toString()));
+            var result = addGameItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()), new BigInteger(map.get("amount").toString()),
+                    getPriceScale(map.get("price").toString()));
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addGameItem error!", e);
@@ -683,7 +684,7 @@ public class SCNGameCoinController {
         }
         try {
             var result = transferItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()),
-                    map.get("from").toString(), map.get("to").toString(), new BigInteger(map.get("price").toString()));
+                    map.get("from").toString(), map.get("to").toString(),  getPriceScale(map.get("price").toString()));
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("transferItem error!", e);
