@@ -254,7 +254,7 @@ public class SCNController {
             try {
                 //购买chrToken时，由于chrtoken和gamecoin挂单是4位小数，这里发放的金额乘以该位数
                 result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                        , address, chrTokenValue.multiply(new BigInteger("10").pow(SCNGameCoinController.priceScale)));
+                        , address, getScaleChrToken(chrTokenValue));
                 orderMap.put("send_chr_token_json", JSON.toJSONString(result));
                 orderMap.put("status", 3);
             } catch (Exception e) {
@@ -376,7 +376,7 @@ public class SCNController {
                 String encrypted_private = useWallet.get("encrypted_private").toString();
                 String walletPrivate = DESUtils.encrypt(encrypted_private, Integer.parseInt(encrypt_key));
                 result = sendingSCN(walletPrivate
-                        , KlayController.SWAP_ADDRESS, chrTokenValue);
+                        , KlayController.SWAP_ADDRESS, getScaleChrToken(chrTokenValue));
                 orderMap.put("send_chr_token_json", JSON.toJSONString(result));
                 orderMap.put("status", 2);
             } catch (Exception e) {
@@ -402,6 +402,9 @@ public class SCNController {
         }
     }
 
+    private static BigInteger getScaleChrToken(BigInteger chrTokenAmount){
+        return  chrTokenAmount.multiply(new BigInteger("10").pow(SCNGameCoinController.priceScale));
+    }
     /**
      * 使用chrToken换回chr
      *
