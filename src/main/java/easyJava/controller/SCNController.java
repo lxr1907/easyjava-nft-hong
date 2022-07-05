@@ -252,8 +252,9 @@ public class SCNController {
             }
             TransactionReceipt.TransactionReceiptData result = null;
             try {
+                //购买chrToken时，由于chrtoken和gamecoin挂单是4位小数，这里发放的金额乘以该位数
                 result = sendingSCN(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD
-                        , address, chrTokenValue);
+                        , address, chrTokenValue.multiply(new BigInteger("10").pow(SCNGameCoinController.priceScale)));
                 orderMap.put("send_chr_token_json", JSON.toJSONString(result));
                 orderMap.put("status", 3);
             } catch (Exception e) {
