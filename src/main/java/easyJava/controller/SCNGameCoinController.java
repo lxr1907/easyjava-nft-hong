@@ -358,11 +358,15 @@ public class SCNGameCoinController {
 
 
             var amount = order.get(0);
+            if(!amount.toString().equals("0")){
             BigDecimal amountDecimal = BigDecimal.valueOf(Long.parseLong(amount.toString()));
             BigDecimal priceDecimal = BigDecimal.valueOf(Long.parseLong(price.toString()));
             var chrTokenAmount = amountDecimal.setScale(priceScale).
                     divide(priceDecimal);
             order.add(chrTokenAmount.toPlainString());
+            }else {
+
+            }
         });
     }
 
