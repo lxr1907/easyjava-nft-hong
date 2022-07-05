@@ -32,6 +32,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -324,7 +325,7 @@ public class SCNController {
         BigInteger chrValue = null;
         BigInteger scnValue = null;
         try {
-            chrValue = toDecimal18(chrTokenToChrPrice(v));
+            chrValue = toDecimal18(v);
             if (chrValue.compareTo(int18) < 0) {
                 return new ResponseEntity(400, "能兑换到的chr小于1");
             }
@@ -404,6 +405,13 @@ public class SCNController {
 
     private static BigInteger getScaleChrToken(BigInteger chrTokenAmount){
         return  chrTokenAmount.multiply(new BigInteger("10").pow(SCNGameCoinController.priceScale));
+    }
+    private static String getScaleChrTokenDecimal(BigInteger chrTokenAmount){
+        if(chrTokenAmount.compareTo(new BigInteger("0"))==0){
+            return "0";
+        }
+        BigDecimal amount = new BigDecimal(chrTokenAmount.toString()).setScale(4, RoundingMode.DOWN).divide(new BigDecimal(10000));
+        return amount.toPlainString();
     }
     /**
      * 使用chrToken换回chr
@@ -514,7 +522,7 @@ public class SCNController {
         return new ResponseEntity(result);
     }
 
-    public static BigInteger getchrTokenBalance(String address) {
+    public static String getchrTokenBalance(String address) {
         Caver caver = new Caver(MY_SCN_HOST);
         var request = caver.rpc.klay.getBalance(address, DefaultBlockParameter.valueOf("latest"));
         BigInteger val = new BigInteger("0");
@@ -523,80 +531,9 @@ public class SCNController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return val;
+       return getScaleChrTokenDecimal(val);
     }
 
-    public static BigInteger getChrBalance(String address) {
-        return KlayController.balanceOfCHR(address);
-    }
-
-    public static BigInteger getChrTokenBalance() {
-        return getDecimal6(getchrTokenBalance(KlayController.SWAP_ADDRESS));
-    }
-
-    public static BigInteger getChrBalance() {
-        return getDecimal18(getChrBalance(KlayController.SWAP_ADDRESS));
-    }
-
-    //    @RequestMapping("/klaySCN/swap/chrTochrTokenPrice")
-    public ResponseEntity<?> chrTochrTokenPrice(@RequestParam Map<String, Object> map) {
-        if (map.get("value") == null || map.get("value").toString().length() == 0) {
-            return new ResponseEntity(400, "value不能为空！");
-        }
-        if (map.get("value").toString().contains(".")) {
-            return new ResponseEntity(400, "value不能包含小数点");
-        }
-        BigInteger payChrValue = new BigInteger(map.get("value").toString());
-        BigInteger chrTokenMinus = chrTochrTokenPrice(payChrValue);
-        Map balanceMap = new HashMap();
-        balanceMap.put("chrBalance", getChrBalance());
-        balanceMap.put("chrTokenBalance", getChrTokenBalance());
-        balanceMap.put("chrAdd", map.get("value").toString());
-        balanceMap.put("chrTokenMinus", chrTokenMinus);
-        return new ResponseEntity(balanceMap);
-    }
-
-    //    @RequestMapping("/klaySCN/swap/chrTokenToChrPrice")
-    public ResponseEntity<?> chrTokenToChrPrice(@RequestParam Map<String, Object> map) {
-        if (map.get("value") == null || map.get("value").toString().length() == 0) {
-            return new ResponseEntity(400, "value不能为空！");
-        }
-        if (map.get("value").toString().contains(".")) {
-            return new ResponseEntity(400, "value不能包含小数点");
-        }
-        BigInteger paychrTokenValue = new BigInteger(map.get("value").toString());
-
-        BigInteger chrMinus = chrTokenToChrPrice(paychrTokenValue);
-        Map balanceMap = new HashMap();
-        balanceMap.put("chrBalance", getChrBalance());
-        balanceMap.put("chrTokenBalance", getChrTokenBalance());
-        balanceMap.put("chrTokenAdd", map.get("value").toString());
-        balanceMap.put("chrMinus", chrMinus);
-        return new ResponseEntity(balanceMap);
-    }
-
-    public static BigInteger chrTochrTokenPrice(BigInteger value) {
-        return value;
-//        BigInteger chrBalance = getChrBalance();
-//        BigInteger chrTokenBalance = getChrTokenBalance();
-//        return abSwap(chrBalance, chrTokenBalance, value);
-    }
-
-    public static BigInteger chrTokenToChrPrice(BigInteger value) {
-        return value;
-//        BigInteger chrBalance = getChrBalance();
-//        BigInteger chrTokenBalance = getChrTokenBalance();
-//        return abSwap(chrTokenBalance, chrBalance, value);
-    }
-
-    public static BigInteger abSwap(BigInteger a, BigInteger b, BigInteger payAValue) {
-        BigInteger k = a.multiply(b);
-        BigInteger aAfterAdd = a.add(payAValue);
-        BigInteger divided = k.divide(aAfterAdd).add(new BigInteger("1"));
-        BigInteger bMinus = b.subtract(divided);
-        logger.info("k:" + k + "," + "aAfterAdd:" + aAfterAdd + "," + "divided:" + divided + "," + "bMinus:" + bMinus + ",");
-        return bMinus;
-    }
 
     /**
      * 返回除以10的18次方后，带小数点的字符串
