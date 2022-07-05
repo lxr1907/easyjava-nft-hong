@@ -585,6 +585,8 @@ public class SCNGameCoinController {
                 myOrders.add(order);
             }
         });
+        //价格翻转为chrToken计价
+        priceTypeTransfer(ordersRedis);
         return new ResponseEntity(myOrders);
     }
 
