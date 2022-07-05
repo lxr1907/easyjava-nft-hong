@@ -350,18 +350,19 @@ public class SCNGameCoinController {
         orders.forEach(order -> {
             var price = order.get(2);
             BigDecimal priceInt = BigDecimal.valueOf(Long.parseLong(price.toString()));
-            var transferPrice = new BigDecimal(10).pow(priceScale).setScale(priceScale).
+            var chrTokenPrice = new BigDecimal(10).pow(priceScale).setScale(priceScale).
                     divide(priceInt, RoundingMode.HALF_DOWN);
-            transferPrice.setScale(priceScale);
-            String transferPriceStr = transferPrice.toPlainString();
-            order.add(transferPriceStr);
+            chrTokenPrice.setScale(priceScale);
+            String chrTokenPriceStr = chrTokenPrice.toPlainString();
+            order.add(chrTokenPriceStr);
 
 
             var amount = order.get(0);
             BigDecimal amountDecimal = BigDecimal.valueOf(Long.parseLong(amount.toString()));
-            var transferAmount = amountDecimal.setScale(priceScale).
-                    divide(new BigDecimal(10).pow(priceScale).setScale(priceScale), RoundingMode.HALF_DOWN);
-            order.add(transferAmount.toPlainString());
+            BigDecimal priceDecimal = BigDecimal.valueOf(Long.parseLong(price.toString()));
+            var chrTokenAmount = amountDecimal.setScale(priceScale).
+                    divide(priceDecimal);
+            order.add(chrTokenAmount.toPlainString());
         });
     }
 
@@ -552,8 +553,30 @@ public class SCNGameCoinController {
 
         return newList;
     }
-
     class OrderEntity {
+        //gamecoin数量
+        String amount;
+        //chr数量
+        String chr;
+        //价格
+        String price;
+        //时间
+        String time;
+        //先挂单的用户地址
+        String sender;
+        //1用chrToken换gamecoin，反之2
+        String sale;
+        //后挂单的用户地址
+        String to;
+        //手续费
+        String taxFee;
+        //以chrToken计价价格，=1除以price
+        String chrTokenPirce;
+        //以chrToken数量，=amount除以price
+        String chrTokenAmount;
+    }
+
+    class OrderKlineEntity {
         //gamecoin数量
         String amount;
         //chr数量
