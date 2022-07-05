@@ -359,9 +359,8 @@ public class SCNGameCoinController {
 
             var amount = order.get(0);
             BigDecimal amountDecimal = BigDecimal.valueOf(Long.parseLong(amount.toString()));
-            var transferAmount = amountDecimal.
+            var transferAmount = amountDecimal.setScale(priceScale).
                     divide(new BigDecimal(10).pow(priceScale).setScale(priceScale), RoundingMode.HALF_DOWN);
-            transferAmount.setScale(priceScale);
             order.add(transferAmount.toPlainString());
         });
     }
