@@ -661,38 +661,33 @@ public class SCNGameCoinController {
     }
 
     /**
-     * 购买游戏道具
+     * 管理员，用户之间交易道具
      *
      * @param map
      * @param token
      * @return
      */
-    @RequestMapping("/gameCoin/buyGameItem")
-    public ResponseEntity<?> buyGameItem(@RequestParam Map<String, Object> map, @RequestHeader("token") String token) {
-        if (token == null || token.length() == 0) {
-            return new ResponseEntity(400, "token 不能为空！");
-        }
-        if (map.get("address") == null || map.get("address").toString().length() == 0) {
-            return new ResponseEntity(400, "address不能为空！");
-        }
+    @RequestMapping("/gameCoin/transferItem")
+    public ResponseEntity<?> transferItem(@RequestParam Map<String, Object> map, @RequestHeader("admin_token") String token) {
         if (map.get("id") == null || map.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "id不能为空！");
         }
-        Map user = (Map) redisTemplate.opsForValue().get(token);
-        if (user == null || user.get("id").toString().length() == 0) {
-            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        if (map.get("from") == null || map.get("from").toString().length() == 0) {
+            return new ResponseEntity(400, "from不能为空！");
         }
-        Map useWallet = getUserWallet(user, map.get("address").toString());
-
-        if (useWallet == null) {
-            return new ResponseEntity(400, "address不属于自己！");
+        if (map.get("to") == null || map.get("to").toString().length() == 0) {
+            return new ResponseEntity(400, "to不能为空！");
+        }
+        if (map.get("price") == null || map.get("price").toString().length() == 0) {
+            return new ResponseEntity(400, "price不能为空！");
         }
         try {
-            var result = buyGameItem(getSingleKeyring(useWallet), new BigInteger(map.get("id").toString()));
+            var result = transferItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()),
+                    map.get("from").toString(), map.get("to").toString(), new BigInteger(map.get("price").toString()));
             return new ResponseEntity(result);
         } catch (Exception e) {
-            logger.error("buyGameItem error!", e);
-            return new ResponseEntity(400, "buyGameItem 失败:" + e.getMessage());
+            logger.error("transferItem error!", e);
+            return new ResponseEntity(400, "transferItem 失败:" + e.getMessage());
         }
     }
 
@@ -861,11 +856,15 @@ public class SCNGameCoinController {
         return addOrder(keyring, params, new BigInteger("0"), "addItem");
     }
 
-    public static TransactionReceipt.TransactionReceiptData buyGameItem(SingleKeyring keyring, BigInteger id) throws Exception {
+    public static TransactionReceipt.TransactionReceiptData transferItem(SingleKeyring keyring, BigInteger id, String from, String to, BigInteger price) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(id);
-        return addOrder(keyring, params, new BigInteger("0"), "buyItem");
+        params.add(from);
+        params.add(to);
+        params.add(price);
+        return addOrder(keyring, params, new BigInteger("0"), "transferItem");
     }
+
 
     public static TransactionReceipt.TransactionReceiptData buyGameItems(SingleKeyring keyring, int[] ids, int[] counts) throws Exception {
         List<Object> params = new ArrayList<>();
@@ -1020,7 +1019,7 @@ public class SCNGameCoinController {
 //                    myOrders.add(order);
 //                }
 //            });
-//            gameCoinContractDeploy();
+            gameCoinContractDeploy();
 //            testTransfer("0x85c616c2d51b6c653e00325ae85660d5b0c50786", "10000000000000");
 //            List addresses = new ArrayList();
 //            addresses.add("0x83bc8d296e2a0d07425915d0e4b3f3c058db9415");
@@ -1042,6 +1041,6 @@ public class SCNGameCoinController {
         }
     }
 
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0x505555f3a7705f92e983a818e532894e27c223c4";
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0x431dbe7dc99a35ff06da0347bcf8d50107cfe015";
 
 }

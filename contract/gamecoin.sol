@@ -38,14 +38,16 @@ contract GameCoin is ERC20, Ownable {
         });
         itemMap[id]=newItem;
     }
-    //个人购买道具
-    function buyItem(uint256 id)  public
+
+    //道具转让给另一个人
+    function transferItem(uint256 id,address from ,address to,uint256 price)  public onlyOwner
     {
-        require(itemMap[id].leftAmount>0);
-        _burn(msg.sender,itemMap[id].price);
-        itemMap[id].leftAmount=itemMap[id].leftAmount-1;
-        userItemMap[msg.sender][id]=userItemMap[msg.sender][id]+1;
+        require(userItemMap[from][id]>0);
+        _transfer(to , from ,price );
+        userItemMap[from][id] = userItemMap[from][id]-1;
+        userItemMap[to][id] = userItemMap[to][id]+1;
     }
+
     //个人购买道具批量
     function buyItems( uint256[]calldata ids , uint256 []calldata counts ) public
     {
@@ -60,6 +62,7 @@ contract GameCoin is ERC20, Ownable {
         }
         _burn(msg.sender,allAmount);
     }
+
     function queryItem(address addr,uint256 id) public view returns ( uint256  )
     {
         return userItemMap[addr][id];
@@ -404,15 +407,6 @@ contract GameCoin is ERC20, Ownable {
         arr.pop();
     }
 
-    function deleteOneBuyOrder(uint index) public onlyOwner
-    {
-        deleteOne(buyOrdersArray,index);
-    }
-
-    function deleteOneSaleOrder(uint index) public onlyOwner
-    {
-        deleteOne(saleOrdersArray,index);
-    }
     //消耗掉gamecoin
     function burn(uint256 amount, address receiver)
     public onlyOwner {
