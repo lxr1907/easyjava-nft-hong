@@ -126,7 +126,7 @@ public class SCNGameCoinController {
         try {
             var result = addSaleOrder(getSingleKeyring(useWallet),
                     //数量也保留4位小数
-                    getPriceScale(map.get("amount").toString()) ,
+                    getPriceScale(map.get("amount").toString()),
                     getPriceScale(map.get("price").toString()));
             new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
@@ -171,7 +171,7 @@ public class SCNGameCoinController {
         try {
             var result = addBuyOrder(getSingleKeyring(useWallet),
                     //数量也保留4位小数
-                    getPriceScale(map.get("amount").toString()) ,
+                    getPriceScale(map.get("amount").toString()),
                     getPriceScale(map.get("price").toString()));
             new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
@@ -187,7 +187,7 @@ public class SCNGameCoinController {
     }
 
     private static String getPriceScaleDecimal(String priceStr) {
-        if(priceStr.equals("0")){
+        if (priceStr.equals("0")) {
             return "0";
         }
         BigDecimal price = new BigDecimal(priceStr).setScale(4, RoundingMode.DOWN).divide(new BigDecimal(10000));
@@ -316,7 +316,7 @@ public class SCNGameCoinController {
         if (map.get("amount") == null || map.get("amount").toString().length() == 0) {
             return new ResponseEntity(400, "amount不能为空！");
         }
-        testTransfer(map.get("address").toString(),getPriceScale(map.get("amount").toString()).toString() );
+        testTransfer(map.get("address").toString(), getPriceScale(map.get("amount").toString()).toString());
         return new ResponseEntity();
     }
 
@@ -358,15 +358,11 @@ public class SCNGameCoinController {
 
 
             var amount = order.get(0);
-            if(!amount.toString().equals("0")){
             BigDecimal amountDecimal = BigDecimal.valueOf(Long.parseLong(amount.toString()));
             BigDecimal priceDecimal = BigDecimal.valueOf(Long.parseLong(price.toString()));
             var chrTokenAmount = amountDecimal.setScale(priceScale).
-                    divide(priceDecimal);
+                    divide(priceDecimal, RoundingMode.HALF_DOWN);
             order.add(chrTokenAmount.toPlainString());
-            }else {
-
-            }
         });
     }
 
@@ -557,6 +553,7 @@ public class SCNGameCoinController {
 
         return newList;
     }
+
     class OrderEntity {
         //gamecoin数量
         String amount;
@@ -994,7 +991,7 @@ public class SCNGameCoinController {
             return null;
         }
         //保留4位小数转换
-      return   getPriceScaleDecimal(result);
+        return getPriceScaleDecimal(result);
     }
 
     public static TransactionReceipt.TransactionReceiptData matchSaleOrder() throws Exception {
