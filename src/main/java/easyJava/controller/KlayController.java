@@ -368,7 +368,7 @@ public class KlayController {
         if (map.get("value") == null || map.get("value").toString().length() == 0) {
             return new ResponseEntity(400, "value不能为空！");
         }
-        BigInteger value = BigInteger.valueOf(Long.parseLong(map.get("value").toString()));
+        BigInteger value = new BigInteger(map.get("value").toString());
         TransactionReceipt.TransactionReceiptData result = null;
         try {
             sendingCHR(map.get("address").toString(), value);
