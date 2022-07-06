@@ -682,9 +682,16 @@ public class SCNGameCoinController {
         if (map.get("price") == null || map.get("price").toString().length() == 0) {
             return new ResponseEntity(400, "price不能为空！");
         }
+        if (map.get("count") == null || map.get("count").toString().length() == 0) {
+            return new ResponseEntity(400, "count不能为空！");
+        }
         try {
-            var result = transferItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()),
-                    map.get("from").toString(), map.get("to").toString(),  getPriceScale(map.get("price").toString()));
+            var result = transferItem(getOperatorSingleKeyring(),
+                    new BigInteger(map.get("id").toString()),
+                    map.get("from").toString(),
+                    map.get("to").toString(),
+                    getPriceScale(map.get("price").toString()),
+                    Integer.parseInt(map.get("count").toString()));
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("transferItem error!", e);
@@ -857,12 +864,13 @@ public class SCNGameCoinController {
         return addOrder(keyring, params, new BigInteger("0"), "addItem");
     }
 
-    public static TransactionReceipt.TransactionReceiptData transferItem(SingleKeyring keyring, BigInteger id, String from, String to, BigInteger price) throws Exception {
+    public static TransactionReceipt.TransactionReceiptData transferItem(SingleKeyring keyring, BigInteger id, String from, String to, BigInteger price, int count) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(id);
         params.add(from);
         params.add(to);
         params.add(price);
+        params.add(count);
         return addOrder(keyring, params, new BigInteger("0"), "transferItem");
     }
 
