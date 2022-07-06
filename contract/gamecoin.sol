@@ -40,12 +40,12 @@ contract GameCoin is ERC20, Ownable {
     }
 
     //道具转让给另一个人
-    function transferItem(uint256 id,address from ,address to,uint256 price)  public onlyOwner
+    function transferItem(uint256 id,address from ,address to,uint256 price,uint256 count)  public onlyOwner
     {
-        require(userItemMap[from][id]>0);
-        _transfer(to , from ,price );
-        userItemMap[from][id] = userItemMap[from][id]-1;
-        userItemMap[to][id] = userItemMap[to][id]+1;
+        require(userItemMap[from][id]>=count);
+        _transfer(to , from ,price.mul(count));
+        userItemMap[from][id] = userItemMap[from][id]-count;
+        userItemMap[to][id] = userItemMap[to][id]+count;
     }
 
     //个人购买道具批量
@@ -134,6 +134,7 @@ contract GameCoin is ERC20, Ownable {
         }else{
             uint index=saleOrdersArray.length;
             for (uint i = 0; i < saleOrdersArray.length; i++) {
+                //找到价格合适的位置
                 if( myprice > saleOrdersArray[i].price){
                     index=i;
                     break;
@@ -145,6 +146,7 @@ contract GameCoin is ERC20, Ownable {
             for (uint i = saleOrdersArray.length-1; i > index; i--) {
                 saleOrdersArray[i]=saleOrdersArray[i-1];
             }
+            //新挂单插入合适的位置
             saleOrdersArray[index]=newOrder;
         }
         matchSaleOrder();
@@ -152,25 +154,17 @@ contract GameCoin is ERC20, Ownable {
     //取消挂单，出售gamecoin
     function cancelSaleOrder(uint256 time)  public
     {
-        bool startMove = false;
-        uint256 amount=0;
+        uint256 index = 0;
+        uint256 amount = 0;
         for (uint i = 0; i < saleOrdersArray.length; i++) {
-            if(startMove){
-                if(i+1< saleOrdersArray.length){
-                    saleOrdersArray[i] = saleOrdersArray[i+1];
-                }
-            }else{
-                if( time == saleOrdersArray[i].time
-                    && saleOrdersArray[i].sender == msg.sender){
-                    amount=saleOrdersArray[i].amount;
-                    if(i+1< saleOrdersArray.length){
-                        saleOrdersArray[i] = saleOrdersArray[i+1];
-                    }
-                    startMove = true;
-                }
+            if( time == saleOrdersArray[i].time
+                && saleOrdersArray[i].sender == msg.sender){
+                amount = saleOrdersArray[i].amount;
+                index = i;
+                break;
             }
         }
-        saleOrdersArray.pop();
+        deleteOne(saleOrdersArray,index);
         //取消挂单，加回去gamecoin
         _mint(msg.sender,amount);
     }
@@ -197,6 +191,7 @@ contract GameCoin is ERC20, Ownable {
         }else{
             uint index = buyOrdersArray.length;
             for (uint i = 0; i < buyOrdersArray.length; i++) {
+                //找到价格合适的位置
                 if( myprice < buyOrdersArray[i].price){
                     index=i;
                     break;
@@ -208,6 +203,7 @@ contract GameCoin is ERC20, Ownable {
             for (uint i = buyOrdersArray.length-1; i > index; i--) {
                 buyOrdersArray[i]=buyOrdersArray[i-1];
             }
+            //插入新订单到合适位置
             buyOrdersArray[index]=newOrder;
         }
         matchBuyOrder();
@@ -216,27 +212,17 @@ contract GameCoin is ERC20, Ownable {
     //取消挂单，购买gamecoin
     function cancelBuyOrder(uint256 time)  public
     {
-        bool startMove = false;
+        uint256 index = 0;
         uint256 amount=0;
-        uint256 price=1;
         for (uint i = 0; i < buyOrdersArray.length; i++) {
-            if(startMove){
-                if(i+1< buyOrdersArray.length){
-                    buyOrdersArray[i] = buyOrdersArray[i+1];
-                }
-            }else{
-                if( time == buyOrdersArray[i].time
-                    && buyOrdersArray[i].sender == msg.sender){
-                    amount=buyOrdersArray[i].amount;
-                    price=buyOrdersArray[i].price;
-                    if(i+1< saleOrdersArray.length){
-                        buyOrdersArray[i] = buyOrdersArray[i+1];
-                    }
-                    startMove = true;
-                }
+            if( time == buyOrdersArray[i].time
+                && buyOrdersArray[i].sender == msg.sender){
+                amount = buyOrdersArray[i].chr;
+                index = i;
+                break;
             }
         }
-        buyOrdersArray.pop();
+        deleteOne(buyOrdersArray,index);
         address payable receiver= payable(msg.sender);
         receiver.transfer(amount);
     }
