@@ -1050,6 +1050,6 @@ public class SCNGameCoinController {
         }
     }
 
-    public static final String GAME_COIN_CONTRACT_ADDRESS = "0x431dbe7dc99a35ff06da0347bcf8d50107cfe015";
+    public static final String GAME_COIN_CONTRACT_ADDRESS = "0x9b53b99dfd929008869f533491ec8bdc2fc8c397";
 
 }
