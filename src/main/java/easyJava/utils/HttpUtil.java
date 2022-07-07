@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.cert.CertificateException;
@@ -59,7 +60,40 @@ public class HttpUtil {
 			return null;
 		}
 	}
+	public static String httpGet(String url) {
+		StringBuffer bufferRes = null;
+		try {
+			TrustManager[] tm = { new MyX509TrustManager() };
+			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+			sslContext.init(null, tm, new java.security.SecureRandom());// 从上述SSLContext对象中得到SSLSocketFactory对象  
+			SSLSocketFactory ssf = sslContext.getSocketFactory();
 
+			URL urlGet = new URL(url);
+			HttpURLConnection http = (HttpURLConnection) urlGet.openConnection();// 连接超时
+			http.setConnectTimeout(60 * 1000);// 读取超时 --服务器响应比较慢，增大时间
+			http.setReadTimeout(60 * 1000);
+			http.setRequestMethod("GET");
+			http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			http.setDoOutput(true);
+			http.setDoInput(true);
+			http.connect();
+			InputStream in = http.getInputStream();
+			BufferedReader read = new BufferedReader(new InputStreamReader(in, DEFAULT_CHARSET));
+			String valueString = null;
+			bufferRes = new StringBuffer();
+			while ((valueString = read.readLine()) != null) {
+				bufferRes.append(valueString);
+			}
+			in.close();
+			if (http != null) {// 关闭连接
+				http.disconnect();
+			}
+			return bufferRes.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	/**
 	 *  * get请求https * @param url * @param params * @return 
 	 */

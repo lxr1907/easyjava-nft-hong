@@ -782,7 +782,7 @@ public class SCNGameCoinController {
                         + "&code=" + code
                         + "&time=" + time
                         + "&sign=" + sign;
-                String result = HttpUtil.get(url);
+                String result = HttpUtil.httpGet(url);
                 logger.info("BuyGameItemThread payback result:" + result);
             } catch (Exception e) {
                 logger.error("BuyGameItemThread error:", e);
