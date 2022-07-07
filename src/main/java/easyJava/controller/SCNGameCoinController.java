@@ -51,6 +51,7 @@ public class SCNGameCoinController {
     public static final String SCN_CHILD_OPERATOR_PASSWORD = "cbor{@b9b1__#+#}";
     public static final String SCN_CHILD_OPERATOR_ADDRESS = "0x56c8cb5daf329fc8613112b51e359b2dbae4fd97";
     public static final int priceScale = 4;
+    public static final String ITEM_LOG_TABLE = "item_change_log";
 
     public static ObjectMapper mapper = new ObjectMapper();
 
@@ -747,7 +748,8 @@ public class SCNGameCoinController {
             var ids = Arrays.stream(map.get("ids").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             var counts = Arrays.stream(map.get("counts").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             //异步购买
-            new BuyGameItemThread(getSingleKeyring(useWallet), ids, counts, map.get("no").toString()).start();
+            new BuyGameItemThread(getSingleKeyring(useWallet), ids, counts, map.get("no").toString()
+                    , user,map.get("address").toString()).start();
             return new ResponseEntity(user);
         } catch (Exception e) {
             logger.error("buyGameItemList error!", e);
@@ -760,16 +762,27 @@ public class SCNGameCoinController {
         int[] ids;
         int[] counts;
         String no;
+        Map user;
+        String address;
 
-        public BuyGameItemThread(SingleKeyring keyring, int[] ids, int[] counts, String no) {
+        public BuyGameItemThread(SingleKeyring keyring, int[] ids, int[] counts, String no,Map user,String address) {
             this.keyring = keyring;
             this.ids = ids;
             this.counts = counts;
             this.no = no;
+            this.user = user;
+            this.address = address;
         }
 
         @Override
         public void run() {
+            Map orderMap = new HashMap<>();
+            //插入订单
+            orderMap.put("tableName", ITEM_LOG_TABLE);
+            orderMap.put("user_id", user.get("id"));
+            orderMap.put("address", address);
+            orderMap.put("item_ids", ids.toString());
+            orderMap.put("item_counts", counts.toString());
             try {
                 var ret = buyGameItems(keyring, ids, counts);
                 int code = 1;
@@ -785,9 +798,13 @@ public class SCNGameCoinController {
                         + "&sign=" + sign;
                 String result = HttpUtil.httpGet(url);
                 logger.info("BuyGameItemThread payback result:" + result);
+                orderMap.put("chain_result", JSON.toJSONString(ret));
+                orderMap.put("web_payback_result", result);
             } catch (Exception e) {
                 logger.error("BuyGameItemThread error:", e);
             }
+            orderMap.put("time", new Date());
+            baseDao.insertBase(orderMap);
         }
     }
 
