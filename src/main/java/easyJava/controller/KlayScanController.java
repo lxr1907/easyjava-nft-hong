@@ -159,8 +159,13 @@ public class KlayScanController {
      * @return
      */
     public static KlayTxsResult getAddressTokenTxs(String address, int page, int limit) {
-        String result = HttpUtil.get(KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL + "?page=" + page + "&limit=" + limit);
+        String url = KLAY_API_PRE + address + KLAY_CHR_TRANSFER_API_TAIL + "?page=" + page + "&limit=" + limit;
+        String result = HttpUtil.get(url);
         KlayTxsResult response = JSON.parseObject(result, KlayTxsResult.class);
+        if (response == null || response.getResult() == null) {
+            logger.error("getAddressTokenTxs result null url:" + url);
+            return null;
+        }
         response.getResult().forEach(row -> {
             if (row.containsKey("amount")) {
                 String amountStr = row.get("amount").toString();
