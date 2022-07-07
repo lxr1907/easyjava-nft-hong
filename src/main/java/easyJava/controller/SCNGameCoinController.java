@@ -781,7 +781,7 @@ public class SCNGameCoinController {
                 String url = "http://52.77.31.208/api/index/payback?no=" + no
                         + "&code=" + code
                         + "&time=" + time
-                        + "&info=" + ret.getTxError()
+                        + "&info=" + ret.getStatus()
                         + "&sign=" + sign;
                 String result = HttpUtil.httpGet(url);
                 logger.info("BuyGameItemThread payback result:" + result);
