@@ -20,6 +20,8 @@ import easyJava.entity.BaseEntity;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.utils.DESUtils;
+import easyJava.utils.HttpUtil;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -729,6 +731,9 @@ public class SCNGameCoinController {
         if (map.get("counts") == null || map.get("counts").toString().length() == 0) {
             return new ResponseEntity(400, "counts不能为空！");
         }
+        if (map.get("no") == null || map.get("no").toString().length() == 0) {
+            return new ResponseEntity(400, "no不能为空！");
+        }
         Map user = (Map) redisTemplate.opsForValue().get(token);
         if (user == null || user.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "token 已经失效，请重新登录！");
@@ -742,7 +747,7 @@ public class SCNGameCoinController {
             var ids = Arrays.stream(map.get("ids").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             var counts = Arrays.stream(map.get("counts").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             //异步购买
-            new BuyGameItemThread(getSingleKeyring(useWallet), ids, counts).start();
+            new BuyGameItemThread(getSingleKeyring(useWallet), ids, counts, map.get("no").toString()).start();
             return new ResponseEntity(user);
         } catch (Exception e) {
             logger.error("buyGameItemList error!", e);
@@ -754,17 +759,31 @@ public class SCNGameCoinController {
         SingleKeyring keyring;
         int[] ids;
         int[] counts;
+        String no;
 
-        public BuyGameItemThread(SingleKeyring keyring, int[] ids, int[] counts) {
+        public BuyGameItemThread(SingleKeyring keyring, int[] ids, int[] counts, String no) {
             this.keyring = keyring;
             this.ids = ids;
             this.counts = counts;
+            this.no = no;
         }
 
         @Override
         public void run() {
             try {
-                buyGameItems(keyring, ids, counts);
+                var ret = buyGameItems(keyring, ids, counts);
+                int code = 1;
+                if (ret.getTxError() != null && ret.getTxError().length() != 0) {
+                    code = 0;
+                }
+                String time = new Date().getTime() + "";
+                String sign = DigestUtils.md5Hex(no + time);
+                String url = "http://52.77.31.208/api/index/payback?no=" + no
+                        + "&code=" + code
+                        + "&time=" + time
+                        + "&sign=" + sign;
+                String result = HttpUtil.get(url);
+                logger.info("BuyGameItemThread payback result:" + result);
             } catch (Exception e) {
                 logger.error("BuyGameItemThread error:", e);
             }
