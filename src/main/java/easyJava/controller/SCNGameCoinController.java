@@ -743,7 +743,7 @@ public class SCNGameCoinController {
             var counts = Arrays.stream(map.get("counts").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             //异步购买
             new BuyGameItemThread(getSingleKeyring(useWallet), ids, counts).start();
-            return new ResponseEntity();
+            return new ResponseEntity(user);
         } catch (Exception e) {
             logger.error("buyGameItemList error!", e);
             return new ResponseEntity(400, "buyGameItemList 失败:" + e.getMessage());
