@@ -741,17 +741,33 @@ public class SCNGameCoinController {
         try {
             var ids = Arrays.stream(map.get("ids").toString().split(",")).mapToInt(Integer::parseInt).toArray();
             var counts = Arrays.stream(map.get("counts").toString().split(",")).mapToInt(Integer::parseInt).toArray();
-            var result = buyGameItems(getSingleKeyring(useWallet), ids, counts);
-            if (result.getStatus().equals("0x0")) {
-                return new ResponseEntity(400, "失败,余额不足:" + result.getTxError());
-            }
-            Map retMap = new HashMap();
-            retMap.put("user", user);
-            retMap.put("transaction", result);
-            return new ResponseEntity(retMap);
+            //异步购买
+            new BuyGameItemThread(getSingleKeyring(useWallet), ids, counts).start();
+            return new ResponseEntity();
         } catch (Exception e) {
             logger.error("buyGameItemList error!", e);
             return new ResponseEntity(400, "buyGameItemList 失败:" + e.getMessage());
+        }
+    }
+
+    class BuyGameItemThread extends Thread {
+        SingleKeyring keyring;
+        int[] ids;
+        int[] counts;
+
+        public BuyGameItemThread(SingleKeyring keyring, int[] ids, int[] counts) {
+            this.keyring = keyring;
+            this.ids = ids;
+            this.counts = counts;
+        }
+
+        @Override
+        public void run() {
+            try {
+                buyGameItems(keyring, ids, counts);
+            } catch (Exception e) {
+                logger.error("BuyGameItemThread error:", e);
+            }
         }
     }
 
