@@ -672,7 +672,19 @@ public class SCNGameCoinController {
      * @return
      */
     @RequestMapping("/gameCoin/transferItem")
-    public ResponseEntity<?> transferItem(@RequestParam Map<String, Object> map, @RequestHeader("admin_token") String token) {
+    public ResponseEntity<?> transferItem(@RequestParam Map<String, Object> map
+            , @RequestHeader("admin_token") String admin_token
+            , @RequestHeader("token") String token) {
+        if (map.get("admin_token") == null || map.get("admin_token").toString().length() == 0) {
+            return new ResponseEntity(400, "admin_token不能为空！");
+        }
+        if (map.get("token") == null || map.get("token").toString().length() == 0) {
+            return new ResponseEntity(400, "token不能为空！");
+        }
+        Map user = (Map) redisTemplate.opsForValue().get(token);
+        if (user == null || user.get("id").toString().length() == 0) {
+            return new ResponseEntity(400, "token 已经失效，请重新登录！");
+        }
         if (map.get("id") == null || map.get("id").toString().length() == 0) {
             return new ResponseEntity(400, "id不能为空！");
         }
@@ -689,16 +701,35 @@ public class SCNGameCoinController {
             return new ResponseEntity(400, "count不能为空！");
         }
         try {
-            var result = transferItem(getOperatorSingleKeyring(),
-                    new BigInteger(map.get("id").toString()),
-                    map.get("from").toString(),
-                    map.get("to").toString(),
-                    getPriceScale(map.get("price").toString()),
-                    Integer.parseInt(map.get("count").toString()));
-            return new ResponseEntity(result);
+            new TransferItemThread(user, map).start();
+            return new ResponseEntity(user);
         } catch (Exception e) {
             logger.error("transferItem error!", e);
             return new ResponseEntity(400, "transferItem 失败:" + e.getMessage());
+        }
+    }
+
+    class TransferItemThread extends Thread {
+        Map user;
+        Map map;
+
+        public TransferItemThread(Map user, Map map) {
+            this.map = map;
+            this.user = user;
+        }
+
+        @Override
+        public void run() {
+            try {
+                transferItem(getOperatorSingleKeyring(),
+                        new BigInteger(map.get("id").toString()),
+                        map.get("from").toString(),
+                        map.get("to").toString(),
+                        getPriceScale(map.get("price").toString()),
+                        Integer.parseInt(map.get("count").toString()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
