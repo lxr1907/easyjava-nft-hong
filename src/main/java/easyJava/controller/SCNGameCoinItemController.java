@@ -97,7 +97,7 @@ public class SCNGameCoinItemController {
             return new ResponseEntity(400, "price不能为空！");
         }
         try {
-            new AddGameItemThread(map);
+            new AddGameItemThread(map).start();
             return new ResponseEntity();
         } catch (Exception e) {
             logger.error("addGameItem error!", e);
