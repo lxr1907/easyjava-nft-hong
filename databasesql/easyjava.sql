@@ -204,16 +204,16 @@ CREATE TABLE `chr_price` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ;
 
--- nft.item_change_log definition
-
 CREATE TABLE `item_change_log` (
   `id` bigint NOT NULL AUTO_INCREMENT,
+  `no` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '订单唯一编号',
   `user_id` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `address` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `item_ids` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `item_counts` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `chain_result` text COLLATE utf8mb4_bin,
   `web_payback_result` text COLLATE utf8mb4_bin,
-  `time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
