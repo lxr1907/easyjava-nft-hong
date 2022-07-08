@@ -365,7 +365,8 @@ public class SCNGameCoinController {
             BigDecimal priceDecimal = BigDecimal.valueOf(Long.parseLong(price.toString()));
             var chrTokenAmount = amountDecimal.setScale(priceScale).
                     divide(priceDecimal, RoundingMode.HALF_DOWN);
-            order.add(chrTokenAmount.toPlainString());
+//            order.add(chrTokenAmount.toPlainString());
+            order.set(0,chrTokenAmount.toPlainString());
         });
     }
 
