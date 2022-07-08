@@ -675,7 +675,7 @@ public class SCNGameCoinController {
     public ResponseEntity<?> transferItem(@RequestParam Map<String, Object> map
             , @RequestHeader("admin_token") String admin_token
             , @RequestHeader("token") String token) {
-        if (map.get("admin_token") == null || map.get("admin_token").toString().length() == 0) {
+        if (admin_token == null || admin_token.length() == 0) {
             return new ResponseEntity(400, "admin_token不能为空！");
         }
         if (map.get("token") == null || map.get("token").toString().length() == 0) {
