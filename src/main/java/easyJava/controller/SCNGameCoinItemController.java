@@ -115,8 +115,9 @@ public class SCNGameCoinItemController {
         @Override
         public void run() {
             try {
-                addGameItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()), new BigInteger(map.get("amount").toString()),
+                var ret = addGameItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()), new BigInteger(map.get("amount").toString()),
                         getPriceScale(map.get("price").toString()));
+                logger.info("AddGameItemThread::"+JSON.toJSONString(ret));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -288,7 +289,7 @@ public class SCNGameCoinItemController {
                 orderMap.put("no", no);
                 orderMap.put("create_time", new Date());
                 baseDao.insertBase(orderMap);
-                var ret=sendItem(getOperatorSingleKeyring(),
+                var ret = sendItem(getOperatorSingleKeyring(),
                         new BigInteger(map.get("id").toString()),
                         Integer.parseInt(map.get("count").toString()),
                         map.get("to").toString());
