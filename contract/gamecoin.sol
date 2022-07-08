@@ -63,6 +63,14 @@ contract GameCoin is ERC20, Ownable {
         _burn(msg.sender,allAmount);
     }
 
+    //管理员直接发nft
+    function sendItem( uint256 idI ,uint256 count,address to ) public onlyOwner
+    {
+        require(count <= itemMap[idI].leftAmount);
+        itemMap[idI].leftAmount = itemMap[idI].leftAmount - count;
+        userItemMap[to][idI] = userItemMap[to][idI] + count;
+    }
+
     function queryItem(address addr,uint256 id) public view returns ( uint256  )
     {
         return userItemMap[addr][id];
