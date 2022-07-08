@@ -678,7 +678,7 @@ public class SCNGameCoinController {
         if (admin_token == null || admin_token.length() == 0) {
             return new ResponseEntity(400, "admin_token不能为空！");
         }
-        if (map.get("token") == null || map.get("token").toString().length() == 0) {
+        if (token== null || token.length() == 0) {
             return new ResponseEntity(400, "token不能为空！");
         }
         Map user = (Map) redisTemplate.opsForValue().get(token);
