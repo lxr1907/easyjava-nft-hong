@@ -205,7 +205,7 @@ public class SCNGameCoinItemController {
                     code = 0;
                 }
                 String time = new Date().getTime() + "";
-                String sign = DigestUtils.md5Hex(no + time);
+                String sign = DigestUtils.md5Hex(no + time+ret.getStatus()+"changeback999");
                 String url = "http://52.77.31.208/api/index/changeback?no=" + no
                         + "&code=" + code
                         + "&time=" + time
@@ -297,7 +297,7 @@ public class SCNGameCoinItemController {
                     code = 0;
                 }
                 String time = new Date().getTime() + "";
-                String sign = DigestUtils.md5Hex(no + time);
+                String sign = DigestUtils.md5Hex(no + time+ret.getStatus()+"nftback999");
                 String url = "http://52.77.31.208/api/index/nftback?no=" + no
                         + "&code=" + code
                         + "&time=" + time
@@ -406,7 +406,7 @@ public class SCNGameCoinItemController {
                     code = 0;
                 }
                 String time = new Date().getTime() + "";
-                String sign = DigestUtils.md5Hex(no + time);
+                String sign = DigestUtils.md5Hex(no + time+ret.getStatus()+"chr999");
                 String url = "http://52.77.31.208/api/index/payback?no=" + no
                         + "&code=" + code
                         + "&time=" + time
