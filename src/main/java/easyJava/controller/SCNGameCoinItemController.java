@@ -117,9 +117,8 @@ public class SCNGameCoinItemController {
             try {
                 var ret = addGameItem(getOperatorSingleKeyring(), new BigInteger(map.get("id").toString()), new BigInteger(map.get("amount").toString()),
                         getPriceScale(map.get("price").toString()));
-                logger.info("AddGameItemThread::"+JSON.toJSONString(ret));
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                logger.error("AddGameItemThread error!", e);
             }
         }
     }
@@ -219,7 +218,7 @@ public class SCNGameCoinItemController {
                 orderMap.put("update_time", new Date());
                 baseDao.updateBaseByPrimaryKey(orderMap);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                logger.error("TransferItemThread error!", e);
             }
         }
     }
@@ -283,7 +282,7 @@ public class SCNGameCoinItemController {
                 //插入订单
                 orderMap.put("tableName", ITEM_LOG_TABLE);
                 orderMap.put("user_id", user.get("id"));
-                orderMap.put("address", map.get("from").toString() + "," + map.get("to").toString());
+                orderMap.put("address", map.get("to").toString());
                 orderMap.put("item_ids", map.get("id").toString());
                 orderMap.put("item_counts", map.get("count").toString());
                 orderMap.put("no", no);
@@ -311,7 +310,7 @@ public class SCNGameCoinItemController {
                 orderMap.put("update_time", new Date());
                 baseDao.updateBaseByPrimaryKey(orderMap);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+               logger.error("SendItemThread",e);
             }
         }
     }
