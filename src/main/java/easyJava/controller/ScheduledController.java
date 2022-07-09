@@ -27,14 +27,14 @@ public class ScheduledController {
     //开启EnableScheduling注解，设置定时任务
     @Scheduled(cron = "0/10 * * * * ?")
     public void matchOrders() {
-        executor.execute(new matchOrders());
+        executor.execute(new MatchBuyOrders());
+        executor.execute(new MatchSaleOrders());
     }
 
-    class matchOrders extends Thread {
+    class MatchBuyOrders extends Thread {
         @Override
         public void run() {
             long begin = new Date().getTime();
-
             try {
                 SCNGameCoinController.matchBuyOrder();
             } catch (Exception e) {
@@ -42,13 +42,20 @@ public class ScheduledController {
             }
             long step1End = new Date().getTime();
             logger.info("matchBuyOrder end, time:" + (step1End - begin));
+        }
+    }
+
+    class MatchSaleOrders extends Thread {
+        @Override
+        public void run() {
+            long begin = new Date().getTime();
             try {
                 SCNGameCoinController.matchSaleOrder();
             } catch (Exception e) {
                 logger.error("matchSaleOrder thread error", e);
             }
-            long step2End = new Date().getTime();
-            logger.info("matchSaleOrder end, time:" + (step2End - step1End));
+            long end = new Date().getTime();
+            logger.info("matchSaleOrder end, time:" + (begin - end));
         }
     }
 }
