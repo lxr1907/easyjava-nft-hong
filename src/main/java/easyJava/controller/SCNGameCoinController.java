@@ -726,7 +726,7 @@ public class SCNGameCoinController {
             sendOptions.setFeePayer(systemKeyring.getAddress());
         }
         ContractMethod method = caver.contract.create(SCNContractController.ABI, SCNContractController.GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
-        PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 2, 30);
+        PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 3, 30);
         logger.info("addOrder method:" + methodName + ",step1:" + (new Date().getTime() - begin));
         var ret = method.send(params, sendOptions, processor);
         logger.info("addOrder method:" + methodName + ",step2:" + (new Date().getTime() - begin));
