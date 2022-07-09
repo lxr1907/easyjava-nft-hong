@@ -330,6 +330,7 @@ public class SCNExploreController {
             if(map.get("input").toString().equals("0x2382a359")
                     ||map.get("input").toString().equals("0x362ad940")){
                 //如果是matchOrder的买卖类型，则不记录入库
+                logger.info("doScanSCN not insert :" + map.get("input").toString());
                 return;
             }
             map.put("tableName", SNC_TX_TABLE);
@@ -359,7 +360,7 @@ public class SCNExploreController {
                         break;
                     }
                     String json = JSON.toJSONString(data);
-                    logger.info("doScanSCN add row :" + json);
+//                    logger.info("doScanSCN add row :" + json);
                     Map<String, Object> row = JSON.parseObject(json, HashMap.class);
                     row.remove("feePayerSignatures");
                     row.remove("maxPriorityFeePerGas");
