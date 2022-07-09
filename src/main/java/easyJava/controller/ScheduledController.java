@@ -1,5 +1,6 @@
 package easyJava.controller;
 
+import easyJava.utils.SpringContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -21,11 +22,6 @@ public class ScheduledController {
     BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(5000);
     ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit,
             workQueue);
-    SCNGameCoinController sCNGameCoinController;
-
-    public ScheduledController(SCNGameCoinController sCNGameCoinController) {
-        this.sCNGameCoinController = sCNGameCoinController;
-    }
 
     //开启EnableScheduling注解，设置定时任务
     @Scheduled(cron = "0/10 * * * * ?")
@@ -39,7 +35,7 @@ public class ScheduledController {
             long begin = new Date().getTime();
 
             try {
-                sCNGameCoinController.matchOrder();
+                SpringContextUtil.getBean(SCNGameCoinController.class).matchOrder();
             } catch (Exception e) {
                 logger.error("matchBuyOrder thread error", e);
             }

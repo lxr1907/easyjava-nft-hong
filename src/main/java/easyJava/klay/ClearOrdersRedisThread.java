@@ -4,29 +4,24 @@ import com.alibaba.fastjson.JSON;
 import easyJava.controller.SCNGameCoinController;
 import easyJava.controller.websocket.TexasWS;
 import easyJava.entity.BaseEntity;
+import easyJava.utils.SpringContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
+@Service
 public class ClearOrdersRedisThread extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(ClearOrdersRedisThread.class);
     int type;
-    RedisTemplate<String, Object> redisTemplate;
-    SCNGameCoinController sCNGameCoinController;
 
-    public ClearOrdersRedisThread(int type, SCNGameCoinController sCNGameCoinController) {
+    public ClearOrdersRedisThread(int type) {
         this.type = type;
-        this.sCNGameCoinController = sCNGameCoinController;
-        this.redisTemplate = sCNGameCoinController.redisTemplate;
     }
 
 
     public void sendNotification(String methodName, String secondIntervalStr, int pageSize, int order) {
-        var ordersRedis = sCNGameCoinController.getOrdersList(methodName, null, secondIntervalStr, pageSize, order,false);
+        var ordersRedis = SpringContextUtil.getBean(SCNGameCoinController.class)
+                .getOrdersList(methodName, null, secondIntervalStr, pageSize, order, false);
         BaseEntity entity = new BaseEntity();
         entity.setType(methodName);
         entity.setList(ordersRedis);
@@ -49,25 +44,4 @@ public class ClearOrdersRedisThread extends Thread {
     }
 
 
-
-    /**
-     *
-     * @param type
-     */
-    public void clearOrdersRedis(int type) {
-        String key = "getOrders:getSaleOrders";
-        if (type == 0 || type == 1) {
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
-        }
-        if (type == 0 || type == 2) {
-            key = "getOrders:getBuyOrders";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
-        }
-        if (type == 0 || type == 3) {
-            key = "getOrders:getHistoryOrders";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
-            key = "getOrders:getKline";
-            redisTemplate.opsForValue().set(key, new ArrayList<>());
-        }
-    }
 }
