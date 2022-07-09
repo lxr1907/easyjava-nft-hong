@@ -24,13 +24,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * chrToken和gamecoin挂单交易相关
@@ -54,22 +54,28 @@ public class SCNGameCoinController {
     public static final int priceScale = 4;
 
     public static ObjectMapper mapper = new ObjectMapper();
+    public static ConcurrentHashMap<String, String> privateKeyFromJsonMap = new ConcurrentHashMap<>();
 
     public static String getPrivateKeyFromJson(String keyStoreJSON, String pwd) {
         String fromPrivateKey = "";
+        String key = keyStoreJSON + "_" + pwd;
         try {
-            logger.info(keyStoreJSON);
+            if (privateKeyFromJsonMap.containsKey(key)) {
+                return privateKeyFromJsonMap.get(key);
+            }
+//            logger.info(keyStoreJSON);
             KeyStore keyStore = JSON.parseObject(keyStoreJSON, KeyStore.class);
-            logger.info(keyStore.getKeyring().get(0).toString());
+//            logger.info(keyStore.getKeyring().get(0).toString());
             List<KeyStore.Crypto> crypto = mapper.readValue(keyStore.getKeyring().get(0).toString(), new TypeReference<List<KeyStore.Crypto>>() {
             });
             fromPrivateKey = KeyStore.Crypto.decryptCrypto(crypto.get(0), pwd);
-            logger.info(fromPrivateKey);
+//            logger.info(fromPrivateKey);
         } catch (Exception e) {
             logger.error("sendingSCN 失败 KeyStore.Crypto.decryptCrypto:" + e.getMessage() + ",p:" + fromPrivateKey);
             e.printStackTrace();
             return null;
         }
+        privateKeyFromJsonMap.put(key, fromPrivateKey);
         return fromPrivateKey;
     }
 
