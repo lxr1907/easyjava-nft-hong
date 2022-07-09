@@ -732,6 +732,7 @@ public class SCNGameCoinController {
             logger.info(methodName + " :" + JSON.toJSONString(ret));
         }
         if (ret.getTxError() != null && ret.getTxError().length() != 0) {
+            logger.error("addOrder method:" + methodName + ",ret:" + JSON.toJSONString(ret));
             throw new Exception("链上交易失败，错误码：" + ret.getTxError());
         }
         return ret;
