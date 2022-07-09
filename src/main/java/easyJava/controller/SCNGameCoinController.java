@@ -10,16 +10,15 @@ import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.ContractMethod;
 import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.methods.response.TransactionReceipt;
-import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
 import com.klaytn.caver.transaction.response.QueuingTransactionReceiptProcessor;
 import com.klaytn.caver.wallet.keyring.KeyStore;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
-import easyJava.controller.websocket.TexasWS;
 import easyJava.dao.master.BaseDao;
-import easyJava.entity.BaseEntity;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
+import easyJava.klay.AddOrderCallback;
+import easyJava.klay.ClearOrdersRedisThread;
 import easyJava.utils.DESUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public class SCNGameCoinController {
     UserController userController;
 
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    public RedisTemplate<String, Object> redisTemplate;
 
     public static final String MY_SCN_HOST = "http://13.213.135.231:7551";
     public static volatile BigInteger gas = BigInteger.valueOf(8000000);
@@ -138,7 +137,6 @@ public class SCNGameCoinController {
                     //数量也保留4位小数
                     getPriceScale(map.get("amount").toString()),
                     getPriceScale(map.get("price").toString()));
-            new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addSaleOrder error!", e);
@@ -183,7 +181,6 @@ public class SCNGameCoinController {
                     //数量也保留4位小数
                     getPriceScale(map.get("amount").toString()),
                     getPriceScale(map.get("price").toString()));
-            new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("addBuyOrder error!", e);
@@ -227,7 +224,6 @@ public class SCNGameCoinController {
         }
         try {
             var result = cancelBuyOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
-            new ClearOrdersRedisThread(2).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("cancelBuyOrder error!", e);
@@ -258,63 +254,10 @@ public class SCNGameCoinController {
         }
         try {
             var result = cancelSaleOrder(getSingleKeyring(useWallet), new BigInteger(map.get("time").toString()));
-            new ClearOrdersRedisThread(1).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
             logger.error("cancelSaleOrder error!", e);
             return new ResponseEntity(400, "cancelSaleOrder失败:" + e.getMessage());
-        }
-    }
-
-
-    class ClearOrdersRedisThread extends Thread {
-        int type;
-
-        public ClearOrdersRedisThread(int type) {
-            this.type = type;
-        }
-
-        /**
-         * 类型0全部，1sale，2buy，3history
-         *
-         * @param type
-         */
-        public void clearOrdersRedis(int type) {
-            String key = "getOrders:getSaleOrders";
-            if (type == 0 || type == 1) {
-                redisTemplate.opsForValue().set(key, new ArrayList<>());
-            }
-            if (type == 0 || type == 2) {
-                key = "getOrders:getBuyOrders";
-                redisTemplate.opsForValue().set(key, new ArrayList<>());
-            }
-            if (type == 0 || type == 3) {
-                key = "getOrders:getHistoryOrders";
-                redisTemplate.opsForValue().set(key, new ArrayList<>());
-            }
-        }
-
-        public void sendNotification(String methodName, String secondIntervalStr, int pageSize, int order) {
-            var ordersRedis = getOrdersList(methodName, null, secondIntervalStr, pageSize, order);
-            BaseEntity entity = new BaseEntity();
-            entity.setType(methodName);
-            entity.setList(ordersRedis);
-            TexasWS.sendToAllText(JSON.toJSONString(entity));
-        }
-
-        @Override
-        public void run() {
-            clearOrdersRedis(type);
-            if (type == 0) {
-                sendNotification("getHistoryOrders", "1", 15, 2);
-                sendNotification("getKline", "21600", 100, 1);
-            }
-            if (type == 0 || type == 2) {
-                sendNotification("getBuyOrders", "1", 5, 1);
-            }
-            if (type == 0 || type == 1) {
-                sendNotification("getSaleOrders", "1", 5, 1);
-            }
         }
     }
 
@@ -377,7 +320,7 @@ public class SCNGameCoinController {
         });
     }
 
-    private List<List> getOrdersList(String methodName, Object address, Object secondIntervalStr, int pageSize, int order) {
+    public List<List> getOrdersList(String methodName, Object address, Object secondIntervalStr, int pageSize, int order) {
         String key = "getOrders:" + methodName;
         List<List> ordersRedis = null;
         try {
@@ -685,32 +628,32 @@ public class SCNGameCoinController {
         return keyring;
     }
 
-    public static TransactionReceipt.TransactionReceiptData addSaleOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) throws Exception {
+    public TransactionReceipt.TransactionReceiptData addSaleOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(amount);
         params.add(price);
         return addOrder(keyring, params, new BigInteger("0"), "addSaleOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData addBuyOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) throws Exception {
+    public TransactionReceipt.TransactionReceiptData addBuyOrder(SingleKeyring keyring, BigInteger amount, BigInteger price) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(price);
         return addOrder(keyring, params, amount, "addBuyOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData cancelSaleOrder(SingleKeyring keyring, BigInteger time) throws Exception {
+    public TransactionReceipt.TransactionReceiptData cancelSaleOrder(SingleKeyring keyring, BigInteger time) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(time);
         return addOrder(keyring, params, new BigInteger("0"), "cancelSaleOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData cancelBuyOrder(SingleKeyring keyring, BigInteger time) throws Exception {
+    public TransactionReceipt.TransactionReceiptData cancelBuyOrder(SingleKeyring keyring, BigInteger time) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(time);
         return addOrder(keyring, params, new BigInteger("0"), "cancelBuyOrder");
     }
 
-    public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params, BigInteger amount, String methodName) throws Exception {
+    public TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params, BigInteger amount, String methodName) throws Exception {
         long begin = new Date().getTime();
         Caver caver = new Caver(MY_SCN_HOST);
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
@@ -727,7 +670,8 @@ public class SCNGameCoinController {
             sendOptions.setFeePayer(systemKeyring.getAddress());
         }
         ContractMethod method = caver.contract.create(SCNContractController.ABI, SCNContractController.GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
-        QueuingTransactionReceiptProcessor processor = new QueuingTransactionReceiptProcessor(caver, null);
+        QueuingTransactionReceiptProcessor processor = new QueuingTransactionReceiptProcessor(caver, new AddOrderCallback(methodName,
+                new ClearOrdersRedisThread(0, this)));
         logger.info("addOrder method:" + methodName + ",step1:" + (new Date().getTime() - begin));
         var ret = method.send(params, sendOptions, processor);
         logger.info("addOrder method:" + methodName + ",step2:" + (new Date().getTime() - begin));
@@ -744,6 +688,7 @@ public class SCNGameCoinController {
         return ret;
     }
 
+
     public static List<Type> queryItem(SingleKeyring keyring, List<Object> params, String methodName) throws Exception {
         Caver caver = new Caver(MY_SCN_HOST);
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
@@ -759,7 +704,7 @@ public class SCNGameCoinController {
         return ret;
     }
 
-    public static void testTransfer(String address, String amount) throws Exception {
+    public void testTransfer(String address, String amount) throws Exception {
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         List<Object> params = new ArrayList<>();
         params.add(address);
@@ -821,7 +766,7 @@ public class SCNGameCoinController {
         return getPriceScaleDecimal(result);
     }
 
-    public static TransactionReceipt.TransactionReceiptData matchOrder() throws Exception {
+    public TransactionReceipt.TransactionReceiptData matchOrder() throws Exception {
         List<Object> params = new ArrayList<>();
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         return addOrder(systemKeyring, params, new BigInteger("0"), "matchOrder");

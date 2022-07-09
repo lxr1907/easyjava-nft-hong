@@ -2,6 +2,7 @@ package easyJava.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,8 @@ public class ScheduledController {
     BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(5000);
     ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit,
             workQueue);
+    @Autowired
+    SCNGameCoinController sCNGameCoinController;
 
     //开启EnableScheduling注解，设置定时任务
     @Scheduled(cron = "0/10 * * * * ?")
@@ -36,7 +39,7 @@ public class ScheduledController {
             long begin = new Date().getTime();
 
             try {
-                SCNGameCoinController.matchOrder();
+                sCNGameCoinController.matchOrder();
             } catch (Exception e) {
                 logger.error("matchBuyOrder thread error", e);
             }

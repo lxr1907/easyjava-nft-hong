@@ -4,19 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
-import com.klaytn.caver.abi.datatypes.StaticStruct;
 import com.klaytn.caver.abi.datatypes.Type;
-import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.ContractMethod;
-import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.methods.response.TransactionReceipt;
-import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
 import com.klaytn.caver.wallet.keyring.KeyStore;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
-import easyJava.controller.websocket.TexasWS;
 import easyJava.dao.master.BaseDao;
-import easyJava.entity.BaseEntity;
 import easyJava.entity.BaseModel;
 import easyJava.entity.ResponseEntity;
 import easyJava.utils.DESUtils;
@@ -26,7 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -44,6 +41,8 @@ public class SCNGameCoinItemController {
     BaseDao baseDao;
     @Autowired
     UserController userController;
+    @Autowired
+    SCNGameCoinController sCNGameCoinController;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -205,7 +204,7 @@ public class SCNGameCoinItemController {
                     code = 0;
                 }
                 String time = new Date().getTime() + "";
-                String sign = DigestUtils.md5Hex(no + time+ret.getStatus()+"changeback999");
+                String sign = DigestUtils.md5Hex(no + time + ret.getStatus() + "changeback999");
                 String url = "http://52.77.31.208/api/index/changeback?no=" + no
                         + "&code=" + code
                         + "&time=" + time
@@ -297,7 +296,7 @@ public class SCNGameCoinItemController {
                     code = 0;
                 }
                 String time = new Date().getTime() + "";
-                String sign = DigestUtils.md5Hex(no + time+ret.getStatus()+"nftback999");
+                String sign = DigestUtils.md5Hex(no + time + ret.getStatus() + "nftback999");
                 String url = "http://52.77.31.208/api/index/nftback?no=" + no
                         + "&code=" + code
                         + "&time=" + time
@@ -310,7 +309,7 @@ public class SCNGameCoinItemController {
                 orderMap.put("update_time", new Date());
                 baseDao.updateBaseByPrimaryKey(orderMap);
             } catch (Exception e) {
-               logger.error("SendItemThread",e);
+                logger.error("SendItemThread", e);
             }
         }
     }
@@ -406,7 +405,7 @@ public class SCNGameCoinItemController {
                     code = 0;
                 }
                 String time = new Date().getTime() + "";
-                String sign = DigestUtils.md5Hex(no + time+ret.getStatus()+"chr999");
+                String sign = DigestUtils.md5Hex(no + time + ret.getStatus() + "chr999");
                 String url = "http://52.77.31.208/api/index/payback?no=" + no
                         + "&code=" + code
                         + "&time=" + time
@@ -491,38 +490,38 @@ public class SCNGameCoinItemController {
         return keyring;
     }
 
-    public static TransactionReceipt.TransactionReceiptData addGameItem(SingleKeyring keyring, BigInteger id, BigInteger amount, BigInteger price) throws Exception {
+    public TransactionReceipt.TransactionReceiptData addGameItem(SingleKeyring keyring, BigInteger id, BigInteger amount, BigInteger price) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(id);
         params.add(price);
         params.add(amount);
-        return SCNGameCoinController.addOrder(keyring, params, new BigInteger("0"), "addItem");
+        return sCNGameCoinController.addOrder(keyring, params, new BigInteger("0"), "addItem");
     }
 
-    public static TransactionReceipt.TransactionReceiptData transferItem(SingleKeyring keyring, BigInteger id, String from, String to, BigInteger price, int count) throws Exception {
+    public TransactionReceipt.TransactionReceiptData transferItem(SingleKeyring keyring, BigInteger id, String from, String to, BigInteger price, int count) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(id);
         params.add(from);
         params.add(to);
         params.add(price);
         params.add(count);
-        return SCNGameCoinController.addOrder(keyring, params, new BigInteger("0"), "transferItem");
+        return sCNGameCoinController.addOrder(keyring, params, new BigInteger("0"), "transferItem");
     }
 
-    public static TransactionReceipt.TransactionReceiptData sendItem(SingleKeyring keyring, BigInteger id, int count, String to) throws Exception {
+    public TransactionReceipt.TransactionReceiptData sendItem(SingleKeyring keyring, BigInteger id, int count, String to) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(id);
         params.add(count);
         params.add(to);
-        return SCNGameCoinController.addOrder(keyring, params, new BigInteger("0"), "sendItem");
+        return sCNGameCoinController.addOrder(keyring, params, new BigInteger("0"), "sendItem");
     }
 
 
-    public static TransactionReceipt.TransactionReceiptData buyGameItems(SingleKeyring keyring, int[] ids, int[] counts) throws Exception {
+    public TransactionReceipt.TransactionReceiptData buyGameItems(SingleKeyring keyring, int[] ids, int[] counts) throws Exception {
         List<Object> params = new ArrayList<>();
         params.add(ids);
         params.add(counts);
-        return SCNGameCoinController.addOrder(keyring, params, new BigInteger("0"), "buyItems");
+        return sCNGameCoinController.addOrder(keyring, params, new BigInteger("0"), "buyItems");
     }
 
 
