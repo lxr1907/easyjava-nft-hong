@@ -327,6 +327,11 @@ public class SCNExploreController {
         List<Map> retList = doScanSCN(blockNum, endBlock);
         logger.info("retList size: " + retList.size());
         retList.forEach(map -> {
+            if(map.get("input").toString().equals("0x2382a359")
+                    ||map.get("input").toString().equals("0x362ad940")){
+                //如果是matchOrder的买卖类型，则不记录入库
+                return;
+            }
             map.put("tableName", SNC_TX_TABLE);
             baseDao.insertIgnoreBase(map);
         });
