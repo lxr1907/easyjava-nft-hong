@@ -185,8 +185,8 @@ public class SCNGameCoinController {
             new ClearOrdersRedisThread(0).start();
             return new ResponseEntity(result);
         } catch (Exception e) {
-            logger.error("addSaleOrder error!", e);
-            return new ResponseEntity(400, "addSaleOrder失败:" + e.getMessage());
+            logger.error("addBuyOrder error!", e);
+            return new ResponseEntity(400, "addBuyOrder 失败:" + e.getMessage());
         }
     }
 
@@ -710,6 +710,7 @@ public class SCNGameCoinController {
     }
 
     public static TransactionReceipt.TransactionReceiptData addOrder(SingleKeyring keyring, List<Object> params, BigInteger amount, String methodName) throws Exception {
+        long begin = new Date().getTime();
         Caver caver = new Caver(MY_SCN_HOST);
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
         //设置操作人，gas费默认由操作人付款
@@ -725,8 +726,10 @@ public class SCNGameCoinController {
             sendOptions.setFeePayer(systemKeyring.getAddress());
         }
         ContractMethod method = caver.contract.create(SCNContractController.ABI, SCNContractController.GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
-        PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
+        PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 2, 30);
+        logger.info("addOrder method:" + methodName + ",step1:" + (new Date().getTime() - begin));
         var ret = method.send(params, sendOptions, processor);
+        logger.info("addOrder method:" + methodName + ",step2:" + (new Date().getTime() - begin));
         if (!methodName.startsWith("match")) {
             //暂不打印matchOrder相关
             logger.info(methodName + " :" + JSON.toJSONString(ret));
@@ -735,6 +738,8 @@ public class SCNGameCoinController {
             logger.error("addOrder method:" + methodName + ",ret:" + JSON.toJSONString(ret));
             throw new Exception("链上交易失败，错误码：" + ret.getTxError());
         }
+        long end = new Date().getTime();
+        logger.info("addOrder method:" + methodName + ",step3 time:" + (end - begin));
         return ret;
     }
 
