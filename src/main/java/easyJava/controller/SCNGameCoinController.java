@@ -11,6 +11,7 @@ import com.klaytn.caver.contract.ContractMethod;
 import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
+import com.klaytn.caver.transaction.response.QueuingTransactionReceiptProcessor;
 import com.klaytn.caver.wallet.keyring.KeyStore;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
@@ -726,7 +727,7 @@ public class SCNGameCoinController {
             sendOptions.setFeePayer(systemKeyring.getAddress());
         }
         ContractMethod method = caver.contract.create(SCNContractController.ABI, SCNContractController.GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
-        PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 3, 30);
+        QueuingTransactionReceiptProcessor processor = new QueuingTransactionReceiptProcessor(caver, null);
         logger.info("addOrder method:" + methodName + ",step1:" + (new Date().getTime() - begin));
         var ret = method.send(params, sendOptions, processor);
         logger.info("addOrder method:" + methodName + ",step2:" + (new Date().getTime() - begin));
