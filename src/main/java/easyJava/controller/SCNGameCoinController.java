@@ -721,7 +721,10 @@ public class SCNGameCoinController {
         ContractMethod method = caver.contract.create(SCNContractController.ABI, SCNContractController.GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
         PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(caver, 5000, 10);
         var ret = method.send(params, sendOptions, processor);
-        logger.info(methodName + " :" + JSON.toJSONString(ret));
+        if (!methodName.startsWith("match")) {
+            //暂不打印matchOrder相关
+            logger.info(methodName + " :" + JSON.toJSONString(ret));
+        }
         if (ret.getTxError() != null && ret.getTxError().length() != 0) {
             throw new Exception("链上交易失败，错误码：" + ret.getTxError());
         }

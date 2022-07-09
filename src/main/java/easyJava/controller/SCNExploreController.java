@@ -330,7 +330,7 @@ public class SCNExploreController {
             if(map.get("input").toString().equals("0x2382a359")
                     ||map.get("input").toString().equals("0x362ad940")){
                 //如果是matchOrder的买卖类型，则不记录入库
-                logger.info("doScanSCN not insert :" + map.get("input").toString());
+//                logger.info("doScanSCN not insert :" + map.get("input").toString());
                 return;
             }
             map.put("tableName", SNC_TX_TABLE);
