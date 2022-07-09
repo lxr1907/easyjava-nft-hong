@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@EnableScheduling
+//@EnableScheduling
 public class ScheduledController {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledController.class);
     int corePoolSize = 20;
@@ -28,7 +28,7 @@ public class ScheduledController {
     SCNGameCoinController sCNGameCoinController;
 
     //开启EnableScheduling注解，设置定时任务
-    @Scheduled(cron = "0/10 * * * * ?")
+//    @Scheduled(cron = "0/10 * * * * ?")
     public void matchOrders() {
         executor.execute(new MatchOrders());
     }
