@@ -21,7 +21,7 @@ public class AddOrderCallback implements Callback {
 
     @Override
     public void accept(Object result) {
-        logger.info("AddOrderCallback::" + JSON.toJSONString(result));
+        logger.info("AddOrderCallback:method:" + method + ",ret:" + JSON.toJSONString(result));
         cache.start();
         if (method.equals("addBuyOrder") || method.equals("addSaleOrder")) {
             new ScheduledController(sCNGameCoinController).matchOrders();
