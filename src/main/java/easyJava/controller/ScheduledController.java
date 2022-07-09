@@ -7,16 +7,27 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @EnableScheduling
 public class ScheduledController {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledController.class);
+    int corePoolSize = 20;
+    int maximumPoolSize = 40;
+    long keepAliveTime = 20;
+    TimeUnit unit = TimeUnit.SECONDS;
+    BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(5000);
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit,
+            workQueue);
 
     //开启EnableScheduling注解，设置定时任务
     @Scheduled(cron = "* * * * * ?")
     public void matchOrders() {
-        new matchOrders().start();
+        executor.execute(new matchOrders());
     }
 
     class matchOrders extends Thread {
