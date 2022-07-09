@@ -213,16 +213,21 @@ contract GameCoin is ERC20, Ownable {
         if(buyOrdersArray.length==0||saleOrdersArray.length==0){
             return;
         }
-        if(buyOrdersArray[0].time>saleOrdersArray[0].time){
+        if(buyOrdersArray[0].time<saleOrdersArray[0].time){
             matchBuyOrder();
+            matchSaleOrder();
         }else{
             matchSaleOrder();
+            matchBuyOrder();
         }
     }
 
     //撮合出售gamecoin挂单
     function matchSaleOrder()  public  payable
     {
+        if(buyOrdersArray.length==0||saleOrdersArray.length==0){
+            return;
+        }
         uint256 gamecoinPayed = saleOrdersArray[0].amount;
         uint256 price = saleOrdersArray[0].price;
         uint256 chrGet = 0;
@@ -302,6 +307,9 @@ contract GameCoin is ERC20, Ownable {
     //撮合购买gamecoin挂单
     function matchBuyOrder()   public  payable
     {
+        if(buyOrdersArray.length==0||saleOrdersArray.length==0){
+            return;
+        }
         uint256 chrPayed = buyOrdersArray[0].chr;
         uint256 price = buyOrdersArray[0].price;
         uint256 gamecoinGet = 0;
