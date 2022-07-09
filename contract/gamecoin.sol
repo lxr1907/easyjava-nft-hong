@@ -106,6 +106,8 @@ contract GameCoin is ERC20, Ownable {
     OrderEntity [] public   saleOrdersArray;
     //购买gamecoin数组
     OrderEntity [] public   buyOrdersArray;
+    OrderEntity [] public   saleOrdersArrayCache;
+    OrderEntity [] public   buyOrdersArrayCache;
     OrderEntity [] public   historyOrders;
 
     function getSaleOrders() public view returns (OrderEntity [] memory ){
@@ -137,27 +139,8 @@ contract GameCoin is ERC20, Ownable {
         to:msg.sender,
         taxFee:0
         });
-        if(saleOrdersArray.length==0){
-            saleOrdersArray.push(newOrder);
-        }else{
-            uint index=saleOrdersArray.length;
-            for (uint i = 0; i < saleOrdersArray.length; i++) {
-                //找到价格合适的位置
-                if( myprice > saleOrdersArray[i].price){
-                    index=i;
-                    break;
-                }
-            }
-            //复制最后一条并加到结尾
-            saleOrdersArray.push(saleOrdersArray[saleOrdersArray.length-1]);
-            //把i后面的后移一位
-            for (uint i = saleOrdersArray.length-1; i > index; i--) {
-                saleOrdersArray[i]=saleOrdersArray[i-1];
-            }
-            //新挂单插入合适的位置
-            saleOrdersArray[index]=newOrder;
-        }
-        matchSaleOrder();
+        saleOrdersArrayCache.push(newOrder);
+
     }
     //取消挂单，出售gamecoin
     function cancelSaleOrder(uint256 time)  public
@@ -194,27 +177,7 @@ contract GameCoin is ERC20, Ownable {
         to:msg.sender,
         taxFee:0
         });
-        if(buyOrdersArray.length==0){
-            buyOrdersArray.push(newOrder);
-        }else{
-            uint index = buyOrdersArray.length;
-            for (uint i = 0; i < buyOrdersArray.length; i++) {
-                //找到价格合适的位置
-                if( myprice < buyOrdersArray[i].price){
-                    index=i;
-                    break;
-                }
-            }
-            //复制最后一条并加到结尾
-            buyOrdersArray.push(buyOrdersArray[buyOrdersArray.length-1]);
-            //把i后面的后移一位
-            for (uint i = buyOrdersArray.length-1; i > index; i--) {
-                buyOrdersArray[i]=buyOrdersArray[i-1];
-            }
-            //插入新订单到合适位置
-            buyOrdersArray[index]=newOrder;
-        }
-        matchBuyOrder();
+        buyOrdersArrayCache.push(newOrder);
     }
 
     //取消挂单，购买gamecoin
@@ -239,12 +202,19 @@ contract GameCoin is ERC20, Ownable {
     //撮合出售gamecoin挂单
     function matchSaleOrder()  public  payable
     {
+        if(saleOrdersArrayCache.length!=0){
+            insertOne(saleOrdersArray,saleOrdersArrayCache[0],2);
+            deleteOne(buyOrdersArrayCache,0);
+        }
+        if(buyOrdersArray.length==0||saleOrdersArray.length==0){
+            return;
+        }
         uint256 gamecoinPayed = saleOrdersArray[0].amount;
         uint256 price = saleOrdersArray[0].price;
         uint256 chrGet = 0;
         //由于i=0位置的订单如果匹配上了价格和数量则会删除
         //出价小于订单价则无法成交
-        while (buyOrdersArray.length > 0
+        while (buyOrdersArray.length>0
         && price >= buyOrdersArray[0].price
             && gamecoinPayed !=0 ) {
             //当前订单对应的gamecoin总数
@@ -300,6 +270,9 @@ contract GameCoin is ERC20, Ownable {
                 gamecoinPayed = gamecoinPayed.sub(gamecoinAmount);
             }
         }
+        if(chrGet==0){
+            return;
+        }
         //千分之2手续费
         uint256 taxFee = chrGet.div(taxRate);
         //加chr
@@ -315,12 +288,19 @@ contract GameCoin is ERC20, Ownable {
     //撮合购买gamecoin挂单
     function matchBuyOrder()   public  payable
     {
+        if(buyOrdersArrayCache.length!=0){
+            insertOne(buyOrdersArray,buyOrdersArrayCache[0],1);
+            deleteOne(buyOrdersArrayCache,0);
+        }
+        if(buyOrdersArray.length==0||saleOrdersArray.length==0){
+            return;
+        }
         uint256 chrPayed = buyOrdersArray[0].chr;
         uint256 price = buyOrdersArray[0].price;
         uint256 gamecoinGet = 0;
         //由于i=0位置的订单如果匹配上了价格和数量则会删除，
         //出价大于订单价则无法成交
-        while (saleOrdersArray.length > 0
+        while (saleOrdersArray.length>0
         && price <= saleOrdersArray[0].price
             && chrPayed != 0) {
             //当前订单对应的chr总数
@@ -375,16 +355,18 @@ contract GameCoin is ERC20, Ownable {
                 chrPayed = chrPayed.sub(chrAmount);
             }
         }
-        //手续费千分之二
-        uint256 taxFee=gamecoinGet.div(taxRate);
-        //加gamecoin
-        _mint(msg.sender,gamecoinGet.sub(taxFee));
-        if(chrPayed != 0){
-            //剩余的金额不为0，则部分未成交
-            buyOrdersArray[0].chr = chrPayed;
-        }else{
-            //剩余的金额为0，则删除
-            deleteOne(buyOrdersArray,0);
+        if(gamecoinGet!=0){
+            //手续费千分之二
+            uint256 taxFee=gamecoinGet.div(taxRate);
+            //加gamecoin
+            _mint(msg.sender,gamecoinGet.sub(taxFee));
+            if(chrPayed != 0){
+                //剩余的金额不为0，则部分未成交
+                buyOrdersArray[0].chr = chrPayed;
+            }else{
+                //剩余的金额为0，则删除
+                deleteOne(buyOrdersArray,0);
+            }
         }
     }
 
@@ -399,6 +381,36 @@ contract GameCoin is ERC20, Ownable {
             arr[i].sender = arr[i+1].sender;
         }
         arr.pop();
+    }
+    function insertOne(OrderEntity [] storage arr,OrderEntity memory newOrder,uint buyOrSale) private
+    {
+        if(arr.length==0){
+            arr.push(newOrder);
+        }else{
+            uint index = arr.length;
+            for (uint i = 0; i < arr.length; i++) {
+                //找到价格合适的位置
+                if(buyOrSale==1){
+                    if( newOrder.price < arr[i].price){
+                        index=i;
+                        break;
+                    }
+                }else{
+                    if( newOrder.price > arr[i].price){
+                        index=i;
+                        break;
+                    }
+                }
+            }
+            //复制最后一条并加到结尾
+            arr.push(arr[arr.length-1]);
+            //把i后面的后移一位
+            for (uint i = arr.length-1; i > index; i--) {
+                arr[i]=arr[i-1];
+            }
+            //插入新订单到合适位置
+            arr[index]=newOrder;
+        }
     }
 
     //消耗掉gamecoin

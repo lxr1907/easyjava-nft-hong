@@ -25,7 +25,7 @@ public class ScheduledController {
             workQueue);
 
     //开启EnableScheduling注解，设置定时任务
-    @Scheduled(cron = "0/2 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void matchOrders() {
         executor.execute(new matchOrders());
     }
