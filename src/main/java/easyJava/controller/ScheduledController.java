@@ -36,19 +36,13 @@ public class ScheduledController {
             long begin = new Date().getTime();
 
             try {
-                SCNGameCoinController.matchBuyOrder();
+                SCNGameCoinController.matchOrder();
             } catch (Exception e) {
                 logger.error("matchBuyOrder thread error", e);
             }
             long step1End = new Date().getTime();
             logger.info("matchBuyOrder end, time:" + (step1End - begin));
-            try {
-                SCNGameCoinController.matchSaleOrder();
-            } catch (Exception e) {
-                logger.error("matchSaleOrder thread error", e);
-            }
-            long step2End = new Date().getTime();
-            logger.info("matchSaleOrder end, time:" + (step2End - step1End));
+
         }
     }
 }

@@ -815,16 +815,10 @@ public class SCNGameCoinController {
         return getPriceScaleDecimal(result);
     }
 
-    public static TransactionReceipt.TransactionReceiptData matchSaleOrder() throws Exception {
+    public static TransactionReceipt.TransactionReceiptData matchOrder() throws Exception {
         List<Object> params = new ArrayList<>();
         SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-        return addOrder(systemKeyring, params, new BigInteger("0"), "matchSaleOrder");
-    }
-
-    public static TransactionReceipt.TransactionReceiptData matchBuyOrder() throws Exception {
-        List<Object> params = new ArrayList<>();
-        SingleKeyring systemKeyring = KeyringFactory.createFromPrivateKey(getPrivateKeyFromJson(SCN_CHILD_OPERATOR, SCN_CHILD_OPERATOR_PASSWORD));
-        return addOrder(systemKeyring, params, new BigInteger("0"), "matchBuyOrder");
+        return addOrder(systemKeyring, params, new BigInteger("0"), "matchOrder");
     }
 
     public static void main(String[] args) {
