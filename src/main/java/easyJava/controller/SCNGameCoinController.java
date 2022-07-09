@@ -293,7 +293,7 @@ public class SCNGameCoinController {
         if (map.get("order") != null && map.get("order").toString().length() != 0) {
             order = Integer.parseInt(map.get("order").toString());
         }
-        var ordersRedis = getOrdersList(methodName, map.get("address"), map.get("secondInterval"), pageSize, order);
+        var ordersRedis = getOrdersList(methodName, map.get("address"), map.get("secondInterval"), pageSize, order, true);
         //价格翻转为chrToken计价
         priceTypeTransfer(ordersRedis);
         return new ResponseEntity(ordersRedis);
@@ -320,11 +320,13 @@ public class SCNGameCoinController {
         });
     }
 
-    public List<List> getOrdersList(String methodName, Object address, Object secondIntervalStr, int pageSize, int order) {
+    public List<List> getOrdersList(String methodName, Object address, Object secondIntervalStr, int pageSize, int order, boolean fromCache) {
         String key = "getOrders:" + methodName;
         List<List> ordersRedis = null;
         try {
-            ordersRedis = (List<List>) redisTemplate.opsForValue().get(key);
+            if (fromCache) {
+                ordersRedis = (List<List>) redisTemplate.opsForValue().get(key);
+            }
         } catch (Exception e) {
             logger.error("error:", e);
         }
@@ -670,7 +672,7 @@ public class SCNGameCoinController {
             sendOptions.setFeePayer(systemKeyring.getAddress());
         }
         ContractMethod method = caver.contract.create(SCNContractController.ABI, SCNContractController.GAME_COIN_CONTRACT_ADDRESS).getMethod(methodName);
-        QueuingTransactionReceiptProcessor processor = new QueuingTransactionReceiptProcessor(caver, new AddOrderCallback(methodName,this));
+        QueuingTransactionReceiptProcessor processor = new QueuingTransactionReceiptProcessor(caver, new AddOrderCallback(methodName, this));
         logger.info("addOrder method:" + methodName + ",step1:" + (new Date().getTime() - begin));
         var ret = method.send(params, sendOptions, processor);
         logger.info("addOrder method:" + methodName + ",step2:" + (new Date().getTime() - begin));
