@@ -40,6 +40,8 @@ public class ClearOrdersRedisThread extends Thread {
         if (type == 0 || type == 3) {
             key = "getOrders:getHistoryOrders";
             redisTemplate.opsForValue().set(key, new ArrayList<>());
+            key = "getOrders:getKline";
+            redisTemplate.opsForValue().set(key, new ArrayList<>());
         }
     }
 
