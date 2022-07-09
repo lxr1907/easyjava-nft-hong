@@ -29,7 +29,7 @@ public class AddOrderCallback implements Callback {
     }
 
     @Override
-    public void exception(Exception exception) {
-
+    public void exception(Exception e) {
+        logger.error("AddOrderCallback:method:" + method, e);
     }
 }
